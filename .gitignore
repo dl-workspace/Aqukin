@@ -5,3 +5,4 @@
 .env
 application.yml
 package-lock.json
+/dist
