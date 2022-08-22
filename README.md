@@ -13,5 +13,5 @@ For the list of commands or more info on setting Aqukin up, please refer to the 
 # [License](https://github.com/DeaLoux/Aqukin/blob/master/LICENSE)
 - `Character Copyright` (c) 2017-2021 [COVER Corp.](https://cover-corp.com/)
 - `Background Copyright` (c) [Gaou-sensei](https://twitter.com/umaiyo_puyoman)
-- `Software Copyright` (c) 2020 Minh Duc Le / DeaLoux
+- `Software Copyright` (c) 2020 [DeaLoux](https://github.com/dealoux)
 - `Aqukin` is licensed under the [MIT License](https://github.com/dealoux/Aqukin/blob/master/LICENSE)

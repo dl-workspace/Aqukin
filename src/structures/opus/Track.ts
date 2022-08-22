@@ -18,9 +18,6 @@ export class Track {
         this.title = title;
         this.duration = duration;
         this.requester = requester;
-        // this.onError = (err, botName) => {
-        //     return `**${this.requester.username}**-sama, \`${err}\` has occured when ${botName} was trying to play track \`${this.title}\` 。 ゜ ゜ (´Ｏ\`) ゜ ゜`;
-        // }
     }
 
     async createAudioResource(): Promise<AudioResource> {
@@ -46,12 +43,20 @@ export class Track {
             .setImage(`https://i.ytimg.com/vi/${this.id}/hqdefault.jpg`)
             .setDescription(`[${this.title}](${this.url})`)
             .addFields(
-                { name: 'Lenght', value: `${formatDuration(this.duration)}`, inline: true },
                 { name: 'Requested By', value: `${this.requester.username}-sama`, inline: true },
+                { name: 'Lenght', value: `${formatDuration(this.duration)}`, inline: true },
             )
     }
 
     remainingTime(){
         return this.resource.playbackDuration - this.resource.silenceRemaining;
+    }
+
+    getVolume(){
+        return this.resource?.volume.volume;
+    }
+
+    setVolume(value: number){
+        this.resource?.volume.setVolume(value);
     }
 }

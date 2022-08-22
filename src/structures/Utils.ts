@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, InteractionReplyOptions, User } from "discord.js";
 import { client } from "..";
 
 export function BaseEmbed(){
@@ -30,4 +30,17 @@ export function formatDuration(value: number){
     
     // Zero-pad
     return parts.map(s => String(s).padStart(2,'0')).join(':');
+}
+
+export function replyTemplate(author: User, replyContent: string, { embeds, components, files, ephemeral }: InteractionReplyOptions) : InteractionReplyOptions{
+    return { 
+        content: `**${author.username}**-sama, ${client.user.username} ${replyContent}`,
+        embeds, components, files, ephemeral
+    }
+}
+
+export function errorReplyTemplate(author: User, replyContent: string, { embeds, components, ephemeral }: InteractionReplyOptions) : InteractionReplyOptions{
+    const temp = replyTemplate(author, replyContent, { embeds, components, ephemeral, files: client.media.ridingAqua.files });
+    temp.content = `I'm sorry ` + temp.content;
+    return temp;
 }

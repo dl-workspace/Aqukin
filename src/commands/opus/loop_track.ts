@@ -44,17 +44,21 @@ export default new Command({
             }
             else{
                 loopTrack(client, interaction);
-            }     
+            }
         }
     }
 });
 
 export async function stopLoopTrack(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    client.music.get(interaction.guildId).disableTrackRepeat();
+    const mPlayer = client.music.get(interaction.guildId);
+    mPlayer.disableTrackRepeat();
+    mPlayer.updatePlayingStatusMsg();
     await interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} will now \`stop looping\` the current \`track\`` });
 }
 
 export async function loopTrack(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    client.music.get(interaction.guildId).enableTrackRepeat();
+    const mPlayer = client.music.get(interaction.guildId);
+    mPlayer.enableTrackRepeat();
+    mPlayer.updatePlayingStatusMsg();
     await interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} will now \`loop\` the current \`track\`` });
 }

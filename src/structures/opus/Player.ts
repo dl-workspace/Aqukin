@@ -1,34 +1,17 @@
-import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnection, VoiceConnectionStatus, entersState, AudioPlayerStatus, AudioResource } from "@discordjs/voice";
+import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus } from "@discordjs/voice";
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
 import { formatBool } from "../Utils";
 import { Track } from "./Track";
 
-export enum OPUS_PLAYER_EVENTS{
-    track_start = 'track_start',
-    track_end = 'track_end',
-    queue_end = 'queue_end',
-}
-
 class ExtendedAudioPlayer extends AudioPlayer{
-    resource: AudioResource;
-
     constructor(options?: CreateAudioPlayerOptions){
         super(options);
         
         this.on('error', (err) => {
             console.error(err);
         });
-
-        // this.once(OPUS_PLAYER_EVENTS.track_start, async (opusPlayer: OpusPlayer, client: ExtendedClient) => {
-        //     opusPlayer.statusMsg = await opusPlayer.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [opusPlayer.queue[0].createEmbed()] });
-        // });
-    }
-
-    play(resource: AudioResource){
-        this.resource = resource;
-        super.play(resource);
     }
 }
 
@@ -62,10 +45,6 @@ export class OpusPlayer{
                 console.log('connection Connecting');
             })
             .on(VoiceConnectionStatus.Ready, async (oldState, newState) => {
-                // const player = new ExtendedAudioPlayer(playerOptions);
-                // this.subscription = connection.subscribe(player);
-
-                // client.music.set(this.id, this);
                 console.log('connection Ready');
             })
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
@@ -92,20 +71,15 @@ export class OpusPlayer{
             });
 
         const player = new ExtendedAudioPlayer(playerOptions)
-            .once(AudioPlayerStatus.Playing, async () => {
-                const nowPlaying = this.queue[0].createEmbed()
-                    .addFields(
-                        { name: 'Volume', value: `${this.queue[0].resource?.volume.volume}`, inline: true },
-                        { name: 'Track Loop', value: `${formatBool(this.trackRepeat)}`, inline: true },
-                        { name: 'Queue Loop', value: `${formatBool(this.queueRepeat)}`, inline: true },
-                    );
-                this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [nowPlaying] });
+            .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
+                if(oldState.status !== AudioPlayerStatus.Paused)
+                    this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
             })
-            .once(AudioPlayerStatus.Idle, async () => { 
+            .on(AudioPlayerStatus.Idle, async (oldState, newState) => { 
                 if(this.trackRepeat) { this.queue.splice(1, 0, this.queue[0]); }
                 else if(this.queueRepeat) { this.loopQueue.push(this.queue[0]); }
 
-                if(this.statusMsg.deletable){ this.statusMsg.delete(); }
+                if(this.statusMsg?.deletable){ this.statusMsg.delete(); }
 
                 this.queue.shift();
                 await this.processQueue(client);
@@ -142,14 +116,17 @@ export class OpusPlayer{
         }
 
         this.playCurrTrack(client);
-        // this.processQueue(client);
     }
 
     async playCurrTrack(client: ExtendedClient){
         if(this.subscription.player.state.status != AudioPlayerStatus.Playing && this.queue.length > 0){
-            this.queue[0].resource = await this.queue[0].createAudioResource();
-            this.subscription.player.play(this.queue[0].resource);
-            // client.emit(OPUS_PLAYER_EVENTS.track_start, [this, client]);
+            try{
+                this.queue[0].resource = await this.queue[0].createAudioResource();
+                this.subscription.player.play(this.queue[0].resource);
+            }
+            catch(err){
+                this.textChannel.send(err);
+            }
         }
     }
 
@@ -171,18 +148,19 @@ export class OpusPlayer{
         this.disableQueueRepeat();
         this.trackRepeat = true;
     }
+
+    async playingStatusEmbed(){
+        return this.queue[0].createEmbed()
+            .addFields(
+                { name: 'Queue', value: `${this.queue.length}`, inline: true },
+                { name: 'Paused', value: `${formatBool(this.subscription.player.state.status == AudioPlayerStatus.Paused)}`, inline: true },
+                { name: 'Track Loop', value: `${formatBool(this.trackRepeat)}`, inline: true },
+                { name: 'Queue Loop', value: `${formatBool(this.queueRepeat)}`, inline: true },
+                { name: 'Volume', value: `${this.queue[0].getVolume()}`, inline: true },
+        );
+    }
+
+    async updatePlayingStatusMsg(){
+        this.statusMsg?.edit({ embeds: [await this.playingStatusEmbed()] });
+    }
 }
-
-// export interface ExtendedJoinConfig extends JoinConfig{
-//     textChannel?: GuildTextBasedChannel;
-// }
-
-// export class ExtendedVoiceConnection extends VoiceConnection {
-//     audioPlayer: ExtendedAudioPlayer;
-//     textChannel: GuildTextBasedChannel;
-
-//     constructor(joinConfigExtra: ExtendedJoinConfig & CreateVoiceConnectionOptions){
-//         super(joinConfigExtra, joinConfigExtra);
-//         this.textChannel = joinConfigExtra.textChannel;
-//     }
-// }

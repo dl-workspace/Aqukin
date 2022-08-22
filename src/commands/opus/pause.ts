@@ -19,6 +19,7 @@ export default new Command({
         else if(mPlayer.subscription.player.state.status === AudioPlayerStatus.Playing){
             mPlayer.subscription.player.pause();
             reply += `${client.user.username} has paused audio streaming at \`${formatDuration(mPlayer.queue[0].remainingTime())}\` o (> ω <) o`;
+            mPlayer.updatePlayingStatusMsg();
         }
         
         interaction.followUp({ content: reply }); 

@@ -32,7 +32,7 @@ export default new Command({
         else{
             const trackName = mPlayer.queue[value].title;
             mPlayer.queue.splice(value, 1);
-
+            mPlayer.updatePlayingStatusMsg();
             interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has has removed removed track \`${trackName}\` from the queue (っ ˘ω˘ς)` });
         }
     }

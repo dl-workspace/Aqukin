@@ -1,4 +1,4 @@
-import { CommandInteraction, CommandInteractionOptionResolver, GuildMember, Interaction } from "discord.js";
+import { CommandInteractionOptionResolver, GuildMember, Interaction } from "discord.js";
 import { client } from "..";
 import { getVoiceConnection } from "@discordjs/voice";
 import { COMMAND_TAGS } from "../structures/Command";
@@ -9,6 +9,7 @@ import { ExtendedClient } from "../structures/Client";
 import { BUTTON_DISABLE_LOOP_QUEUE, loopTrack, stopLoopTrack } from "../commands/opus/loop_track";
 import { BUTTON_DISABLE_LOOP_TRACK, loopQueue, stopLoopQueue } from "../commands/opus/loop_queue";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
+import { errorReplyTemplate } from "../structures/Utils";
 
 export default new Event('interactionCreate', async (interaction) => {
     if(interaction.isChatInputCommand()){
@@ -21,11 +22,9 @@ export default new Event('interactionCreate', async (interaction) => {
 
         // user permission check
         if(!interaction.memberPermissions.has(command.userPermissions) && !isAppOwner(interaction)){
-            errorReplyTemplate(interaction, `but it seems like you don't have the permission to use this command`);
+            interaction.editReply(errorReplyTemplate(interaction.user, `sees that you don't have the permission to execute this command`, {}));
             return;
         }
-
-        // command usage (args) checks?
 
         // command type check
         switch(command.tag){
@@ -34,18 +33,18 @@ export default new Event('interactionCreate', async (interaction) => {
                 const { channel } = (interaction.member as GuildMember).voice;
 
                 if(!channel){
-                    errorReplyTemplate(interaction, `you need to be in a voice channel to use this command`);
+                    interaction.editReply(errorReplyTemplate(interaction.user, `need you to be in a voice channel to execute this command`, {}));
                     return;
                 }
 
                 if(connection){
                     if(connection.joinConfig.channelId !== channel.id){
-                        errorReplyTemplate(interaction, `you need to be in the same voice channel with ${client.user.username} to use this command`);
+                        interaction.editReply(errorReplyTemplate(interaction.user, `need you to be in the \`same\` voice channel to execute this command`, {}));
                         return;
                     }
                 }
                 else if(command.name != "play"){
-                    errorReplyTemplate(interaction, `${client.user.username} is not currently streaming any audio`);
+                    interaction.editReply(errorReplyTemplate(interaction.user, `is not currently streaming any audio`, {}));
                     return;
                 }
                 break;
@@ -60,6 +59,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
+            interaction.editReply(errorReplyTemplate(interaction.user, `has encounted an error\n${err}`, {}));
         }
     }
 
@@ -164,11 +164,4 @@ export default new Event('interactionCreate', async (interaction) => {
 
 function isAppOwner(interaction: Interaction) : boolean {
     return interaction.user.id == interaction.client.application.owner.id
-}
-
-function errorReplyTemplate(interaction: CommandInteraction, replyContent: string){
-    interaction.followUp({ 
-        content: `I'm sorry **${interaction.user.username}**-sama, ${replyContent}`,
-        files:  client.media.ridingAqua.files
-    });
 }

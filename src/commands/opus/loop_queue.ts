@@ -50,11 +50,15 @@ export default new Command({
 });
 
 export async function stopLoopQueue(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    client.music.get(interaction.guildId).disableQueueRepeat();
+    const mPlayer = client.music.get(interaction.guildId);
+    mPlayer.disableQueueRepeat();
+    mPlayer.updatePlayingStatusMsg();
     await interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} will now \`stop looping\` the current \`queue\`` });
 }
 
 export async function loopQueue(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    client.music.get(interaction.guildId).enableQueueRepeat();
+    const mPlayer = client.music.get(interaction.guildId);
+    mPlayer.enableQueueRepeat();
+    mPlayer.updatePlayingStatusMsg();
     await interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} will now \`loop\` the current \`queue\`` });
 }

@@ -20,8 +20,9 @@ export default new Command({
 
         const value = args.get('value')?.value as number || 1;
 
-        mPlayer.queue[0].resource.volume.setVolume(value);
+        mPlayer.queue[0].setVolume(value);
 
-        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has set the volume to \`${mPlayer.queue[0].resource.volume.volume}\`` }); 
+        mPlayer.updatePlayingStatusMsg();
+        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has set the volume to \`${mPlayer.queue[0].getVolume()}\`` }); 
     }
 });

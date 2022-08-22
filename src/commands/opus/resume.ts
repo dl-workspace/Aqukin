@@ -14,6 +14,7 @@ export default new Command({
 
         if(mPlayer.subscription.player.state.status === AudioPlayerStatus.Paused){
             mPlayer.subscription.player.unpause();
+            mPlayer.updatePlayingStatusMsg();
             reply += `${client.user.username} has resume has resumed audio streaming \\ (★ ω ★) /`;
         }
         else{

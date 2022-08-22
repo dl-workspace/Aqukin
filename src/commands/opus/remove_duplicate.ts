@@ -13,6 +13,7 @@ export default new Command({
 
         mPlayer.queue = await removeDuplicate(mPlayer.queue);
 
+        mPlayer.updatePlayingStatusMsg();
         interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has has removed duplicated tracks from the queue 乁 (• ω • 乁)` });
     }
 });
