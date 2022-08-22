@@ -1,6 +1,6 @@
 [![License](https://badgen.net/github/license/DeaLoux/Aqukin)](https://github.com/dealoux/Aqukin-v2/blob/master/LICENSE)
 
-# [Invite Aqukin](https://discordapp.com/api/oauth2/authorize?client_id=702620458130079750&permissions=813165680&scope=bot)
+# [Invite Aqukin](https://discord.com/api/oauth2/authorize?client_id=702620458130079750&permissions=8&scope=bot%20applications.commands)
 Your (un)reliable Super Idol Master Gamer Maid♥, a bot that was created based on a Virtual Youtuber known as [Minato Aqua](https://www.youtube.com/channel/UC1opHUrw8rvnsadT-iGp7Cg)
 
 <p align="center">
