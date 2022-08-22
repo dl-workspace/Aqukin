@@ -1,0 +1,7 @@
+/logs
+/.vscode
+/node_modules
+/.git
+.env
+application.yml
+package-lock.json

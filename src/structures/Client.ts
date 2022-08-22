@@ -1,0 +1,84 @@
+import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection } from "discord.js";
+import { CommandType } from "../typings/command";
+import { glob } from "glob";
+import { promisify } from "util";
+import { RegisterCommandsOptions } from "../typings/client";
+import { Event } from "./Events";
+import { OpusPlayer } from "./opus/Player";
+
+const globPromise = promisify(glob);
+
+export class ExtendedClient extends Client{
+    commands: Collection<string, CommandType>;
+    music: Collection<string, OpusPlayer>;
+
+    media = { 
+        embedColour: [ 0xBC06C4, 0x1DE2FE ],
+        slappingAqua : { files: ["https://media1.tenor.com/images/9d81ec7c2abd005d8da208d2f56e89df/tenor.gif?itemid=17267165"] },
+        ridingAqua : { files: ["https://media1.tenor.com/images/e6578328df71dbd6b44318553e06eda8/tenor.gif?itemid=17267168"] },
+        kaomoji: {
+            error: ['(－‸ლ)', '(╯ ° □ °) ╯ ┻━━┻', '(oT-T) 尸', '(｡ • ́︿ • ̀｡)', '(＃ ￣ω￣)', '(っ ´ω\`) ﾉ (╥ω╥)', '( •́ㅿ•̀ )'],
+            happy: ['(^)o(^)b', '₍ᵔ˶- ̫-˶ᵔ₎', 'ᐡ ̳ᴗ  ̫ ᴗ ̳ᐡ♡', '߹ 𖥦 ߹', '(*ฅ•̀ω•́ฅ*)', '֊  ̫ ֊𓈒𓂂𓏸',  'ฅ•̀ω•́ฅ', 'ฅ^.  ̫ .^ฅ', '꒰ᐡ⸝⸝ᴗ ·̫ ฅ⸝⸝ᐡ꒱', 
+            'ヾ(⸝⸝ᐡ.  ̫ .ᐡ⸝⸝)', '(՞  ܸ. .ܸ՞)"', '(  ¯꒳​¯ )ᐝ', '(・ε・´  )']
+        }
+    };
+    
+    constructor(){
+        super({ intents: 32767 });
+        this.music = new Collection();
+        this.commands = new Collection();
+    }
+
+    start(){
+        this.registerEvents();
+        this.registerCommands();
+        this.login(process.env.BOT_TOKEN);
+        
+        process.on("warning", e => console.warn(e.stack)) // debug
+    }
+
+    async importFile(filePath: string){
+        return (await import(filePath))?.default;
+    }
+
+    async registerEvents(){
+        const eventFiles = await globPromise(`${__dirname}/../events/*{.ts,.js}`);
+        eventFiles.forEach(async filePath => {
+            const event: Event<keyof ClientEvents> = await this.importFile(filePath);
+            this.on(event.event, event.execute);
+        });
+    }
+
+    async registerCommandsHelper({ guildId, commands }: RegisterCommandsOptions){
+        if(guildId){
+            this.guilds.cache.get(guildId)?.commands.set(commands);
+            console.log(`Registering commands to ${guildId}`);
+        }
+        else{
+            this.application?.commands.set(commands);
+            console.log(`Registering global commands`);
+        }
+    }
+
+    async registerCommands(){
+        const slashCommands: ApplicationCommandDataResolvable[] = [];
+        const commandFiles = await globPromise(`${__dirname}/../commands/*/*{.ts,.js}`);
+
+        // console.log({ commandFiles });
+
+        commandFiles.forEach(async filePath => {
+            const command: CommandType = await this.importFile(filePath);
+            if(!command.name) { return; }
+
+            this.commands.set(command.name, command);
+            slashCommands.push(command);
+        });
+
+        this.on('ready', () => {
+            this.registerCommandsHelper({
+                commands: slashCommands,
+                // guildId: process.env.GUILD_ID
+            });
+        });
+    }
+}
