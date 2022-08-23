@@ -4,6 +4,7 @@ import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
 import { formatBool } from "../Utils";
 import { Track } from "./Track";
+import fluentFfmpeg from 'fluent-ffmpeg';
 
 class ExtendedAudioPlayer extends AudioPlayer{
     constructor(options?: CreateAudioPlayerOptions){
@@ -67,19 +68,21 @@ export class OpusPlayer{
                 this.loopQueue.splice(0);
                 this.currQueuePage.clear();
 
+                if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
+
                 client.music.delete(this.id);
             });
 
         const player = new ExtendedAudioPlayer(playerOptions)
             .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
-                if(oldState.status !== AudioPlayerStatus.Paused)
+                if(oldState.status === AudioPlayerStatus.Buffering)
                     this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
             })
-            .on(AudioPlayerStatus.Idle, async (oldState, newState) => { 
+            .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
                 if(this.trackRepeat) { this.queue.splice(1, 0, this.queue[0]); }
                 else if(this.queueRepeat) { this.loopQueue.push(this.queue[0]); }
 
-                if(this.statusMsg?.deletable){ this.statusMsg.delete(); }
+                if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
 
                 this.queue.shift();
                 await this.processQueue(client);
@@ -125,7 +128,7 @@ export class OpusPlayer{
                 this.subscription.player.play(this.queue[0].resource);
             }
             catch(err){
-                this.textChannel.send(err);
+                this.textChannel.send({ content: `${err}` });
             }
         }
     }

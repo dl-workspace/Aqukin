@@ -44,3 +44,39 @@ export function errorReplyTemplate(author: User, replyContent: string, { embeds,
     temp.content = `I'm sorry ` + temp.content;
     return temp;
 }
+
+/**
+ * Convert given string date input (hh:mm:ss) to milliseconds
+ * @param value string input format hh:mm:ss
+ * @returns converted number in millisecs or 0
+ */
+export function convertInput(value: string){
+    let total: number;
+    let hours = 0;
+    let minutes = 0;
+    let seconds = 0;
+
+    if(value){
+        let token = value.trim().split(":");
+        
+        switch(token.length){
+            case 3:
+                hours = Number(token[0])*3600;
+                minutes = Number(token[1])*60;
+                seconds = Number(token[2]);
+                break;
+            case 2:
+                minutes = Number(token[0])*60;
+                seconds = Number(token[1]);
+                break;
+            case 1:
+                seconds = Number(token[0]);
+                break;
+        }
+    }
+    
+    total = (hours + minutes + seconds)*1000;
+    total = (total < 0 || isNaN(total)) ? 0 : total;
+    console.log(total);
+    return total;
+}

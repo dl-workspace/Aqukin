@@ -54,7 +54,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                 result.push(track);
 
                 interaction.followUp(replyTemplate(user, `has enqueued`, { embeds: [track.createEmbed()] }));
-            });
+            }).catch(err => {});
         } // video link
                 
         // if the queury is a youtube playlist link
@@ -83,7 +83,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                         { name: 'Requested By', value: `${interaction.user.username}-sama`, inline: true },
                     );
                     interaction.followUp(replyTemplate(user, `has enqueued`, { embeds: [embed] }));
-            });
+            }).catch(err => {});
         } // playlist link
     }
     // else try searching youtube with the given argument
@@ -121,7 +121,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
 
             await interaction.followUp(replyTemplate(user, 'found some results', {embeds: [embed], components: [actionRow]}));
 
-        });
+        }).catch(err => {});
     } // end of else the given is keyword
 
     return result;

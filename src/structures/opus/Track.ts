@@ -9,7 +9,7 @@ export class Track {
     title: string;
     duration: number;
     requester: User;
-    seek?: number;
+    seek?: string | number;
     resource?: AudioResource;
 
 	constructor (id: string, url: string, title: string, duration: number, requester: User){
@@ -22,7 +22,14 @@ export class Track {
 
     async createAudioResource(): Promise<AudioResource> {
         return new Promise((resolve, reject) => {
-            const ytdlOptions: ytdl.downloadOptions = { filter: 'audio', quality: 'highestaudio', highWaterMark: 1 << 32, begin: this.seek || 0 };
+            const ytdlOptions: ytdl.downloadOptions = { 
+                filter: 'audio', 
+                quality: 'highestaudio', 
+                highWaterMark: 1 << 62,
+                liveBuffer: 1 << 62,
+                dlChunkSize: 0,
+                begin: this.seek,
+            };
 
             const stream = ytdl( this.url, ytdlOptions );
 
