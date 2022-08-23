@@ -1,4 +1,4 @@
-import { CommandInteractionOptionResolver, GuildMember, Interaction, PermissionFlagsBits } from "discord.js";
+import { CommandInteractionOptionResolver, GuildMember, Interaction, PermissionFlagsBits, User } from "discord.js";
 import { client } from "..";
 import { getVoiceConnection } from "@discordjs/voice";
 import { COMMAND_TAGS } from "../structures/Command";
@@ -17,8 +17,13 @@ export default new Event('interactionCreate', async (interaction) => {
         // if(COMMAND_TAGS.owner && isAppOwner(interaction)) { return; }
 
         // user permission check
-        if(!interaction.memberPermissions.has(command.userPermissions) && !isAppOwner(interaction)){
-            return interaction.reply({ content: `**${interaction.user.username}**-sama, sees that you don't have the permission to process this command`, ephemeral: true });
+        if(!interaction.memberPermissions.has(command.userPermissions)){
+            // app owner check
+            await interaction.client.application.fetch();
+
+            if(interaction.user!.id !== interaction.client.application.owner.id){
+                return interaction.reply({ content: `**${interaction.user.username}**-sama, sees that you don't have the permission to use this command`, ephemeral: true });
+            }
         }
 
         // command type check
@@ -171,7 +176,3 @@ export default new Event('interactionCreate', async (interaction) => {
         }
     }
 });
-
-function isAppOwner(interaction: Interaction) : boolean {
-    return interaction.user.id == interaction.client.application.owner.id
-}
