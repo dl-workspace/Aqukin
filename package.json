@@ -1,7 +1,7 @@
 {
   "name": "aqukin",
   "version": "1.12.2",
-  "description": "",
+  "description": "Your (un)reliable Super Idol Gamer Maid♥, a bot that was created based on a Virtual Youtuber known as **Minato Aqua**",
   "main": "index.js",
   "scripts": {
     "start": "ts-node src/index.ts",
