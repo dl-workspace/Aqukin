@@ -17,4 +17,5 @@ export type CommandType = {
     tag?: string,
     execute: Execute;
     userPermissions?: PermissionResolvable[];
+    ephemeral?: boolean;
 } & ChatInputApplicationCommandData

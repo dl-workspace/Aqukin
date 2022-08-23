@@ -1,6 +1,5 @@
-import { CommandInteractionOptionResolver, GuildMember, Interaction, PermissionFlagsBits, User } from "discord.js";
+import { CommandInteractionOptionResolver, GuildMember, PermissionFlagsBits } from "discord.js";
 import { client } from "..";
-import { getVoiceConnection } from "@discordjs/voice";
 import { COMMAND_TAGS } from "../structures/Command";
 import { Event } from "../structures/Events";
 import { ExtendedInteraction } from "../typings/command";
@@ -55,7 +54,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
 
         try{
-            await interaction.deferReply();
+            await interaction.deferReply({ ephemeral: command.ephemeral });
 
             command.execute({
                 client,
