@@ -15,7 +15,6 @@ type Execute = (options: ExecuteOptions) => any;
 
 export type CommandType = {
     tag?: string,
-    usage?: string,
     execute: Execute;
     userPermissions?: PermissionResolvable[];
 } & ChatInputApplicationCommandData

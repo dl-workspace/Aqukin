@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, MessageActionRowComponentBuilder, PermissionFlagsBits, SelectMenuBuilder, SelectMenuInteraction, SelectMenuOptionBuilder } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, CommandInteraction, MessageActionRowComponentBuilder, PermissionFlagsBits, SelectMenuBuilder, SelectMenuInteraction, SelectMenuOptionBuilder, User } from "discord.js";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
@@ -11,27 +11,53 @@ import { ExecuteOptions } from "../../typings/command";
 
 export enum PLAY_OPTIONS{
     query = 'query',
+    next = 'next',
+    queue = 'queue',
     track_select = 'track_select'
 }
 
 export default new Command({
     name: 'play',
     tag: COMMAND_TAGS.music,
-    description: 'Enqueue Youtube Video/Playlist/Track from given URL search results',
-    usage: 'https://youtu.be/6bnaBnd4kyU -- will enqueue the song \`#Aqua Iro Palette - Minato Aqua\`',
+    description: 'Enqueue/Insert a Youtube track/playlist/search result from the given url or query',
     userPermissions: [PermissionFlagsBits.SendMessages],
 
-    options: [{
-        type: ApplicationCommandOptionType.String,
-        name: PLAY_OPTIONS.query,
-        description: 'Please provide an url or query for playback',
-        required: true,
-    }],
+    options: [
+    {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: PLAY_OPTIONS.queue,
+        description: 'Enqueue to next a Youtube track/playlist/search result from the given url or query',
+        options: [{
+            type: ApplicationCommandOptionType.String,
+            name: PLAY_OPTIONS.query,
+            description: 'Please provide an url or query for playback',
+            required: true,
+        }],
+    },
+    {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: PLAY_OPTIONS.next,
+        description: 'Insert to next a Youtube track/playlist/search result from the given url or query',
+        options: [{
+            type: ApplicationCommandOptionType.String,
+            name: PLAY_OPTIONS.query,
+            description: 'Please provide an url or query for playback',
+            required: true,
+        }],
+    },
+    ],
     
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId) || new OpusPlayer({ client, interaction, args });
-    
-        mPlayer.queue.push(...await processQuery({ client, interaction, args }));
+
+        const result = await processQuery({ client, interaction, args });
+
+        if(args.getSubcommand() == PLAY_OPTIONS.next){
+            mPlayer.queue.splice(1, 0, ...result);
+        }
+        else if(args.getSubcommand() == PLAY_OPTIONS.queue){
+            mPlayer.queue.push(...result);
+        }
     
         mPlayer.playCurrTrack(client);
     }
@@ -119,6 +145,9 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                         .addOptions(menuOptBuilder)
                 );
 
+            
+            handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.next ? selectTrackInsert :  selectTrackPush;
+
             await interaction.followUp(replyTemplate(user, 'has found some results from the query', { embeds: [embed], components: [actionRow] }));
 
         }).catch(err => {});
@@ -127,20 +156,48 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
     return result;
 }
 
-export async function handleSelectTrackInteraction(client: ExtendedClient, interaction: SelectMenuInteraction) {
-    await ytdl.getBasicInfo(interaction.values[0]).then(async trackInfo => {
-        const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
-        const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, interaction.user);
+async function createTrack(url: string, author: User){
+    const trackInfo = await ytdl.getBasicInfo(url);
+    const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
+    return new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, author);
+}
 
+interface IHandlingSelectTrackInteractionDelegate{
+    (client: ExtendedClient, interaction: SelectMenuInteraction) : void;
+}
+
+export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegate = selectTrackPush;
+
+async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuInteraction) {
+    try{
+        const track = await createTrack(interaction.values[0], interaction.user);
         const mPlayer = client.music.get(interaction.guildId);
-        mPlayer.queue.push(track);
 
+        mPlayer.queue.push(track);
         interaction.message.delete();
         interaction.followUp(replyTemplate(interaction.user, 'has enqueued', { embeds: [track.createEmbedThumbnail()] }));
-
-        mPlayer.playCurrTrack(client);
-    }).catch(err => {
+    
+        mPlayer.playCurrTrack(client);    
+    }
+    catch(err){
         interaction.message.delete();
         interaction.deleteReply();
-    });
+    }
+}
+
+async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenuInteraction) {
+    try{
+        const track = await createTrack(interaction.values[0], interaction.user);
+        const mPlayer = client.music.get(interaction.guildId);
+
+        mPlayer.queue.splice(1, 0, track);
+        interaction.message.delete();
+        interaction.followUp(replyTemplate(interaction.user, 'has inserted', { embeds: [track.createEmbedThumbnail()] }));
+    
+        mPlayer.playCurrTrack(client);    
+    }
+    catch(err){
+        interaction.message.delete();
+        interaction.deleteReply();
+    }
 }
