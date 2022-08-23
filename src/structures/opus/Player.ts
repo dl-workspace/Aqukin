@@ -4,7 +4,6 @@ import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
 import { formatBool } from "../Utils";
 import { Track } from "./Track";
-import fluentFfmpeg from 'fluent-ffmpeg';
 
 class ExtendedAudioPlayer extends AudioPlayer{
     constructor(options?: CreateAudioPlayerOptions){
