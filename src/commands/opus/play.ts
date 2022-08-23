@@ -26,7 +26,7 @@ export default new Command({
     {
         type: ApplicationCommandOptionType.Subcommand,
         name: PLAY_OPTIONS.queue,
-        description: 'Enqueue to next a Youtube track/playlist/search result from the given url or query',
+        description: 'Enqueue a Youtube track/playlist/search result from the given url or query',
         options: [{
             type: ApplicationCommandOptionType.String,
             name: PLAY_OPTIONS.query,
