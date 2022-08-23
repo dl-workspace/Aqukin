@@ -6,8 +6,7 @@ import { Event } from "../structures/Events";
 import { ExtendedInteraction } from "../typings/command";
 import { handleSelectTrackInteraction, PLAY_OPTIONS } from "../commands/opus/play";
 import { ExtendedClient } from "../structures/Client";
-import { BUTTON_DISABLE_LOOP_QUEUE, loopTrack, stopLoopTrack } from "../commands/opus/loop_track";
-import { BUTTON_DISABLE_LOOP_TRACK, loopQueue, stopLoopQueue } from "../commands/opus/loop_queue";
+import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
 import { errorReplyTemplate } from "../structures/Utils";
 
@@ -84,20 +83,19 @@ export default new Event('interactionCreate', async (interaction) => {
 
         if(mPlayer){
             switch(true){
-                case interaction.customId.startsWith(BUTTON_DISABLE_LOOP_QUEUE.yes):
+                case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
                     await interaction.deferReply();
                     interaction.message.delete();
                     loopTrack(client, interaction);
                     break;
     
-                case interaction.customId.startsWith(BUTTON_DISABLE_LOOP_TRACK.yes):
+                case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopTrack_yes):
                     await interaction.deferReply();
                     interaction.message.delete();
                     loopQueue(client, interaction);
                     break;
     
-                case interaction.customId.startsWith(BUTTON_DISABLE_LOOP_QUEUE.no) 
-                  || interaction.customId.startsWith(BUTTON_DISABLE_LOOP_TRACK.no):
+                case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
                     await interaction.deferUpdate();
                     interaction.message.delete();
                     break;
