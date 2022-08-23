@@ -1,4 +1,4 @@
-import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection } from "discord.js";
+import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection, GuildVoiceChannelResolvable, VoiceChannel } from "discord.js";
 import { CommandType } from "../typings/command";
 import { glob } from "glob";
 import { promisify } from "util";
@@ -33,6 +33,7 @@ export class ExtendedClient extends Client{
         this.registerEvents();
         this.registerCommands();
         this.login(process.env.BOT_TOKEN);
+        this.alive(this);
         
         process.on("warning", e => console.warn(e.stack)) // debug
     }
@@ -80,5 +81,21 @@ export class ExtendedClient extends Client{
                 // guildId: process.env.GUILD_ID
             });
         });
+    }
+
+    async alive(client: ExtendedClient){
+        setInterval(() => { 
+            client.music.forEach(async mPlayer => {
+                const { connection } = mPlayer.subscription;
+                client.channels.fetch(connection.joinConfig.channelId).then(async (voiceChannel : VoiceChannel) => {
+                    const memberList = voiceChannel.members.filter(mem => !mem.user.bot);
+
+                    if(memberList.size === 0){
+                        mPlayer.textChannel.send({ content: `Dear masters, please don't leave ${client.user.username} alone in a voice chat room like that (｡╯︵╰｡)` });
+                        mPlayer.subscription.connection.disconnect();
+                    }
+                }).catch(err => console.log(err));
+            });
+        }, 560000);
     }
 }
