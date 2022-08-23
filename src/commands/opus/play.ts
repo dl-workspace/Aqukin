@@ -6,7 +6,7 @@ import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
 import { Track } from "../../structures/opus/Track";
-import { BaseEmbed, errorReplyTemplate, formatDuration, generateInteractionComponentId, replyTemplate } from "../../structures/Utils";
+import { BaseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
 import { ExecuteOptions } from "../../typings/command";
 
 export enum PLAY_OPTIONS{
@@ -79,7 +79,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                 const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, user);
                 result.push(track);
 
-                interaction.followUp(replyTemplate(user, `has enqueued`, { embeds: [track.createEmbedThumbnail()] }));
+                interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has enqueued`, embeds: [track.createEmbedThumbnail()] });
             }).catch(err => {});
         } // video link
                 
@@ -108,7 +108,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                         { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
                         { name: 'Size', value: `${result.length}`, inline: true },
                     );
-                    interaction.followUp(replyTemplate(user, `has enqueued`, { embeds: [embed] }));
+                    interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has enqueued`, embeds: [embed] });
             }).catch(err => {});
         } // playlist link
     }
@@ -118,7 +118,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
             const tracks = results.items.filter(i => i.type == "video") as ytsr.Video[];
 
             if(tracks.length === 0) {
-                interaction.followUp(errorReplyTemplate(user, `can't find any tracks with the given keywords (｡T ω T｡)`, { ephemeral : true }));
+                interaction.followUp({ content: `**${interaction.user.username}**-sama, but ${client.user.username} couldn't find any tracks with the given keywords (｡T ω T｡)` });
                 return; 
             }
 
@@ -148,8 +148,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
             
             handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.next ? selectTrackInsert :  selectTrackPush;
 
-            await interaction.followUp(replyTemplate(user, 'has found some results from the query', { embeds: [embed], components: [actionRow] }));
-
+            interaction.followUp({ content: `**${interaction.user.username}**-sama`, embeds: [embed], components: [actionRow] });
         }).catch(err => {});
     } // end of else the given is keyword
 
@@ -175,7 +174,7 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
 
         mPlayer.queue.push(track);
         interaction.message.delete();
-        interaction.followUp(replyTemplate(interaction.user, 'has enqueued', { embeds: [track.createEmbedThumbnail()] }));
+        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has enqueued`, embeds: [track.createEmbedThumbnail()] });
     
         mPlayer.playCurrTrack(client);    
     }
@@ -192,7 +191,7 @@ async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenu
 
         mPlayer.queue.splice(1, 0, track);
         interaction.message.delete();
-        interaction.followUp(replyTemplate(interaction.user, 'has inserted', { embeds: [track.createEmbedThumbnail()] }));
+        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has inserted`, embeds: [track.createEmbedThumbnail()] });
     
         mPlayer.playCurrTrack(client);    
     }

@@ -1,4 +1,4 @@
-import { CommandInteractionOptionResolver, GuildMember, Interaction } from "discord.js";
+import { CommandInteractionOptionResolver, GuildMember, Interaction, PermissionFlagsBits } from "discord.js";
 import { client } from "..";
 import { getVoiceConnection } from "@discordjs/voice";
 import { COMMAND_TAGS } from "../structures/Command";
@@ -8,7 +8,6 @@ import { handleSelectTrackInteraction, PLAY_OPTIONS } from "../commands/opus/pla
 import { ExtendedClient } from "../structures/Client";
 import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
-import { errorReplyTemplate } from "../structures/Utils";
 
 export default new Event('interactionCreate', async (interaction) => {
     if(interaction.isChatInputCommand()){
@@ -19,26 +18,33 @@ export default new Event('interactionCreate', async (interaction) => {
 
         // user permission check
         if(!interaction.memberPermissions.has(command.userPermissions) && !isAppOwner(interaction)){
-            return interaction.editReply(errorReplyTemplate(interaction.user, `sees that you don't have the permission to execute this command`, { ephemeral: true }));
+            return interaction.reply({ content: `**${interaction.user.username}**-sama, sees that you don't have the permission to process this command`, ephemeral: true });
         }
 
         // command type check
         switch(command.tag){
             case COMMAND_TAGS.music:
-                const connection = getVoiceConnection(interaction.guildId);
+                const mPlayer = client.music.get(interaction.guildId);
                 const { channel } = (interaction.member as GuildMember).voice;
 
                 if(!channel){
-                    return interaction.reply(errorReplyTemplate(interaction.user, `need you to be in a voice channel to execute this command`, {}));
+                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you need to be in a voice channel to use this command`, ephemeral: true });
                 }
 
-                if(connection){
-                    if(connection.joinConfig.channelId !== channel.id){
-                        return interaction.reply(errorReplyTemplate(interaction.user, `need you to be in the \`same\` voice channel to execute this command`, {}));
+                if(mPlayer){
+                    if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
+                        return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you need to be in the same voice channel with ${client.user.username} to use this command`, ephemeral: true });
+                    }
+                    else if(command.name != "play"){
+                        if(channel.members.size > 2){
+                            if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator) && mPlayer.queue[0]?.requester.id != interaction.user.id){
+                                return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you can only use this command on your own requested track`, ephemeral: true });
+                            }
+                        }
                     }
                 }
                 else if(command.name != "play"){
-                    return interaction.reply(errorReplyTemplate(interaction.user, `is not currently streaming any audio`, {}));
+                    return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but ${client.user.username} is not currently streaming any audio`, ephemeral: true });
                 }
                 break;
         }
@@ -54,14 +60,14 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            interaction.editReply(errorReplyTemplate(interaction.user, `has encounted an error\n${err}`, {}));
+            interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} has encounted an error\n${err}` });
         }
     }
 
     else if(interaction.isSelectMenu()){
         // check for userId
         if (!interaction.customId.endsWith(interaction.user.id)) {
-            return interaction.reply(errorReplyTemplate(interaction.user, `but this selection menu is not for you (⁎˃ᆺ˂)`, { ephemeral: true }));
+            return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but this select menu is not for you (⁎˃ᆺ˂)`, ephemeral: true });
         }
         
         await interaction.deferReply();
@@ -76,7 +82,7 @@ export default new Event('interactionCreate', async (interaction) => {
     else if(interaction.isButton()){
         // check for userId
         if (!interaction.customId.endsWith(interaction.user.id)) {
-            return interaction.reply(errorReplyTemplate(interaction.user, `but this button is not for you (⁎˃ᆺ˂)`, { ephemeral: true }));
+            return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but this button is not for you (⁎˃ᆺ˂)`, ephemeral: true });
         }
 
         const mPlayer = client.music.get(interaction.guildId);

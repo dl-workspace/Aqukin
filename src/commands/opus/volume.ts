@@ -1,6 +1,5 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
-import { replyTemplate } from "../../structures/Utils";
 
 export default new Command({
     name: 'volume',
@@ -40,6 +39,6 @@ export default new Command({
         mPlayer.queue[0].setVolume(value);
 
         mPlayer.updatePlayingStatusMsg();
-        interaction.followUp(replyTemplate(interaction.user, `has set the volume to \`${mPlayer.queue[0].getVolume()}\``, {})); 
+        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has set the volume to \`${mPlayer.queue[0].getVolume()}\`` });
     }
 });

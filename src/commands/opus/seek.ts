@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits, time } from "discord.js";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
-import { convertInput, formatDuration, replyTemplate } from "../../structures/Utils";
+import { convertInput, formatDuration } from "../../structures/Utils";
 
 export default new Command({
     name: 'seek',
@@ -35,7 +35,7 @@ export default new Command({
             mPlayer.queue[1].seek = timestamp;
             mPlayer.subscription.player.stop();
 
-            interaction.followUp(replyTemplate(interaction.user, `will now move the current track to position \`${formatDuration(timestamp)}\``, {})); 
+            interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} will now move the current track to position \`${formatDuration(timestamp)}\`` });
         }
     }
 });
