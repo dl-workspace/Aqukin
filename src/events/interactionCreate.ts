@@ -13,17 +13,14 @@ import { errorReplyTemplate } from "../structures/Utils";
 
 export default new Event('interactionCreate', async (interaction) => {
     if(interaction.isChatInputCommand()){
-        await interaction.deferReply();
         const command = client.commands.get(interaction.commandName);
-
         if(!command) { return; }
 
         // if(COMMAND_TAGS.owner && isAppOwner(interaction)) { return; }
 
         // user permission check
         if(!interaction.memberPermissions.has(command.userPermissions) && !isAppOwner(interaction)){
-            interaction.editReply(errorReplyTemplate(interaction.user, `sees that you don't have the permission to execute this command`, {}));
-            return;
+            return interaction.editReply(errorReplyTemplate(interaction.user, `sees that you don't have the permission to execute this command`, { ephemeral: true }));
         }
 
         // command type check
@@ -33,24 +30,23 @@ export default new Event('interactionCreate', async (interaction) => {
                 const { channel } = (interaction.member as GuildMember).voice;
 
                 if(!channel){
-                    interaction.editReply(errorReplyTemplate(interaction.user, `need you to be in a voice channel to execute this command`, {}));
-                    return;
+                    return interaction.reply(errorReplyTemplate(interaction.user, `need you to be in a voice channel to execute this command`, {}));
                 }
 
                 if(connection){
                     if(connection.joinConfig.channelId !== channel.id){
-                        interaction.editReply(errorReplyTemplate(interaction.user, `need you to be in the \`same\` voice channel to execute this command`, {}));
-                        return;
+                        return interaction.reply(errorReplyTemplate(interaction.user, `need you to be in the \`same\` voice channel to execute this command`, {}));
                     }
                 }
                 else if(command.name != "play"){
-                    interaction.editReply(errorReplyTemplate(interaction.user, `is not currently streaming any audio`, {}));
-                    return;
+                    return interaction.reply(errorReplyTemplate(interaction.user, `is not currently streaming any audio`, {}));
                 }
                 break;
         }
 
         try{
+            await interaction.deferReply();
+
             command.execute({
                 client,
                 interaction: interaction as ExtendedInteraction,
@@ -64,39 +60,49 @@ export default new Event('interactionCreate', async (interaction) => {
     }
 
     else if(interaction.isSelectMenu()){
+        // check for userId
+        if (!interaction.customId.endsWith(interaction.user.id)) {
+            return interaction.reply(errorReplyTemplate(interaction.user, `but this selection menu is not for you (⁎˃ᆺ˂)`, { ephemeral: true }));
+        }
+        
         await interaction.deferReply();
 
-        switch(interaction.customId){
-            case PLAY_OPTIONS.track_select:
+        switch(true){
+            case interaction.customId.startsWith(PLAY_OPTIONS.track_select):
                 handleSelectTrackInteraction(client as ExtendedClient, interaction);
                 break;
         }
     }
 
     else if(interaction.isButton()){
+        // check for userId
+        if (!interaction.customId.endsWith(interaction.user.id)) {
+            return interaction.reply(errorReplyTemplate(interaction.user, `but this button is not for you (⁎˃ᆺ˂)`, { ephemeral: true }));
+        }
+
         const mPlayer = client.music.get(interaction.guildId);
 
         if(mPlayer){
-            switch(interaction.customId){
-                case BUTTON_DISABLE_LOOP_QUEUE.yes:
+            switch(true){
+                case interaction.customId.startsWith(BUTTON_DISABLE_LOOP_QUEUE.yes):
                     await interaction.deferReply();
                     interaction.message.delete();
                     loopTrack(client, interaction);
                     break;
     
-                case BUTTON_DISABLE_LOOP_TRACK.yes:
+                case interaction.customId.startsWith(BUTTON_DISABLE_LOOP_TRACK.yes):
                     await interaction.deferReply();
                     interaction.message.delete();
                     loopQueue(client, interaction);
                     break;
     
-                case BUTTON_DISABLE_LOOP_QUEUE.no:
-                case BUTTON_DISABLE_LOOP_TRACK.no:
+                case interaction.customId.startsWith(BUTTON_DISABLE_LOOP_QUEUE.no) 
+                  || interaction.customId.startsWith(BUTTON_DISABLE_LOOP_TRACK.no):
                     await interaction.deferUpdate();
                     interaction.message.delete();
                     break;
     
-                case BUTTON_QUEUE_EMBED.start:{
+                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
                     await interaction.deferUpdate();
 
                     let currPage = mPlayer.currQueuePage.get(interaction.user.id);
@@ -109,7 +115,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
     
-                case BUTTON_QUEUE_EMBED.next:{
+                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.next):{
                     await interaction.deferUpdate();
 
                     let currPage = mPlayer.currQueuePage.get(interaction.user.id);
@@ -124,7 +130,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
 
-                case BUTTON_QUEUE_EMBED.back:{
+                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.back):{
                     await interaction.deferUpdate();
 
                     let currPage = mPlayer.currQueuePage.get(interaction.user.id);
@@ -138,7 +144,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
 
-                case BUTTON_QUEUE_EMBED.end:{
+                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.end):{
                     await interaction.deferUpdate();
 
                     let currPage = mPlayer.currQueuePage.get(interaction.user.id);
@@ -152,7 +158,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
 
-                case BUTTON_QUEUE_EMBED.done:
+                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
                     await interaction.deferUpdate();
                     interaction.message.delete();
                     mPlayer.currQueuePage.delete(interaction.user.id);

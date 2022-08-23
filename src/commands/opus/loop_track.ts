@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonInteraction, ButtonStyle, MessageActionRowComponentBuilder, PermissionFlagsBits } from "discord.js";
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
-import { BaseEmbed } from "../../structures/Utils";
+import { BaseEmbed, generateInteractionComponentId } from "../../structures/Utils";
 import { ExtendedInteraction } from "../../typings/command";
 
 export enum BUTTON_DISABLE_LOOP_QUEUE{
@@ -26,11 +26,11 @@ export default new Command({
             const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents([
                     new ButtonBuilder()
-                        .setCustomId(BUTTON_DISABLE_LOOP_QUEUE.yes)
+                        .setCustomId(generateInteractionComponentId(BUTTON_DISABLE_LOOP_QUEUE.yes, interaction.user.id))
                         .setLabel('Yes')
                         .setStyle(ButtonStyle.Success),
                     new ButtonBuilder()
-                        .setCustomId(BUTTON_DISABLE_LOOP_QUEUE.no)
+                        .setCustomId(generateInteractionComponentId(BUTTON_DISABLE_LOOP_QUEUE.no, interaction.user.id))
                         .setLabel('No')
                         .setStyle(ButtonStyle.Danger),
                 ]);

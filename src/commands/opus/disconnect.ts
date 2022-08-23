@@ -1,5 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { replyTemplate } from "../../structures/Utils";
 
 export default new Command({
     name: 'disconnect',
@@ -12,6 +13,6 @@ export default new Command({
 
         mPlayer.subscription.connection.disconnect();
 
-        interaction.followUp({ content: `Matta ne~` }); 
+        interaction.followUp(replyTemplate(interaction.user, `have disconnected per your request~`, {})); 
     }
 });

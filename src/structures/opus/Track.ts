@@ -44,15 +44,22 @@ export class Track {
         });
     }
 
-    createEmbed(){
+    private createEmbed(){
         return BaseEmbed()
             .setTitle(`Track`)
-            .setImage(`https://i.ytimg.com/vi/${this.id}/hqdefault.jpg`)
             .setDescription(`[${this.title}](${this.url})`)
             .addFields(
                 { name: 'Requested By', value: `${this.requester.username}-sama`, inline: true },
                 { name: 'Lenght', value: `${formatDuration(this.duration)}`, inline: true },
             )
+    }
+
+    createEmbedThumbnail(){
+        return this.createEmbed().setThumbnail(`https://i.ytimg.com/vi/${this.id}/maxresdefault.jpg`);
+    }
+
+    createEmbedImage(){
+        return this.createEmbed().setImage(`https://i.ytimg.com/vi/${this.id}/maxresdefault.jpg`);
     }
 
     remainingTime(){

@@ -6,7 +6,7 @@ import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
 import { Track } from "../../structures/opus/Track";
-import { BaseEmbed, errorReplyTemplate, formatDuration, replyTemplate } from "../../structures/Utils";
+import { BaseEmbed, errorReplyTemplate, formatDuration, generateInteractionComponentId, replyTemplate } from "../../structures/Utils";
 import { ExecuteOptions } from "../../typings/command";
 
 export enum PLAY_OPTIONS{
@@ -53,7 +53,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                 const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, user);
                 result.push(track);
 
-                interaction.followUp(replyTemplate(user, `has enqueued`, { embeds: [track.createEmbed()] }));
+                interaction.followUp(replyTemplate(user, `has enqueued`, { embeds: [track.createEmbedThumbnail()] }));
             }).catch(err => {});
         } // video link
                 
@@ -78,9 +78,9 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                     .setDescription(`[${playlist.title}](${playlist.url})`)
                     .setImage(playlist.bestThumbnail.url)
                     .addFields(
+                        { name: 'Requested By', value: `${interaction.user.username}-sama`, inline: true },
                         { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
                         { name: 'Size', value: `${result.length}`, inline: true },
-                        { name: 'Requested By', value: `${interaction.user.username}-sama`, inline: true },
                     );
                     interaction.followUp(replyTemplate(user, `has enqueued`, { embeds: [embed] }));
             }).catch(err => {});
@@ -114,12 +114,12 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
             const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(
                     new SelectMenuBuilder()
-                        .setCustomId(PLAY_OPTIONS.track_select)
+                        .setCustomId(generateInteractionComponentId(PLAY_OPTIONS.track_select, user.id))
                         .setPlaceholder(`${user.username}-sama, please select an option`)
                         .addOptions(menuOptBuilder)
                 );
 
-            await interaction.followUp(replyTemplate(user, 'found some results', {embeds: [embed], components: [actionRow]}));
+            await interaction.followUp(replyTemplate(user, 'has found some results from the query', { embeds: [embed], components: [actionRow] }));
 
         }).catch(err => {});
     } // end of else the given is keyword
@@ -136,7 +136,7 @@ export async function handleSelectTrackInteraction(client: ExtendedClient, inter
         mPlayer.queue.push(track);
 
         interaction.message.delete();
-        interaction.followUp(replyTemplate(interaction.user, 'has enqueued', {}));
+        interaction.followUp(replyTemplate(interaction.user, 'has enqueued', { embeds: [track.createEmbedThumbnail()] }));
 
         mPlayer.playCurrTrack(client);
     }).catch(err => {

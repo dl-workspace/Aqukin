@@ -45,6 +45,14 @@ export function errorReplyTemplate(author: User, replyContent: string, { embeds,
     return temp;
 }
 
+export function generateInteractionComponentId(componentName: string, authorId: string){
+    return `${componentName}_${authorId}`;
+}
+
+export function createButton(){
+
+}
+
 /**
  * Convert given string date input (hh:mm:ss) to milliseconds
  * @param value string input format hh:mm:ss

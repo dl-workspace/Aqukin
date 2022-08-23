@@ -23,6 +23,7 @@ export class OpusPlayer{
     queueRepeat: boolean;
     queue: Track[];
     loopQueue: Track[];
+    volume: number;
     statusMsg?: Message;
     currQueuePage: Collection<String, number>;
 
@@ -60,6 +61,7 @@ export class OpusPlayer{
                 }
             })
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
+                this.textChannel.send({ content: `Matta ne~` });
                 this.subscription.player.stop();
                 this.subscription.unsubscribe();
 
@@ -89,13 +91,14 @@ export class OpusPlayer{
             
         this.subscription = connection.subscribe(player);
 
-        client.music.set(this.id, this);
-
         this.trackRepeat = false;
         this.queueRepeat = false;
         this.queue = [];
         this.loopQueue = [];
+        this.volume = 1;
         this.currQueuePage = new Collection();
+
+        client.music.set(this.id, this);
     }
 
     async processQueue(client: ExtendedClient){
@@ -124,6 +127,7 @@ export class OpusPlayer{
         if(this.subscription.player.state.status != AudioPlayerStatus.Playing && this.queue.length > 0){
             try{
                 this.queue[0].resource = await this.queue[0].createAudioResource();
+                this.queue[0].resource.volume.setVolume(this.volume);
                 this.subscription.player.play(this.queue[0].resource);
             }
             catch(err){
@@ -152,7 +156,7 @@ export class OpusPlayer{
     }
 
     async playingStatusEmbed(){
-        return this.queue[0].createEmbed()
+        return this.queue[0].createEmbedImage()
             .addFields(
                 { name: 'Queue', value: `${this.queue.length}`, inline: true },
                 { name: 'Paused', value: `${formatBool(this.subscription.player.state.status == AudioPlayerStatus.Paused)}`, inline: true },

@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message, MessageActionRow
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
 import { Track } from "../../structures/opus/Track";
-import { BaseEmbed, formatDuration } from "../../structures/Utils";
+import { BaseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
 
 export enum BUTTON_QUEUE_EMBED {
     start = 'queueEmbed_start',
@@ -30,23 +30,23 @@ export default new Command({
         const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
             .addComponents([
                 new ButtonBuilder()
-                    .setCustomId(BUTTON_QUEUE_EMBED.start)
+                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.start, interaction.user.id))
                     .setLabel('<<')
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
-                    .setCustomId(BUTTON_QUEUE_EMBED.back)
+                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.back, interaction.user.id))
                     .setLabel('<')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId(BUTTON_QUEUE_EMBED.next)
+                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.next, interaction.user.id))
                     .setLabel('>')
                     .setStyle(ButtonStyle.Secondary),
                 new ButtonBuilder()
-                    .setCustomId(BUTTON_QUEUE_EMBED.end)
+                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.end, interaction.user.id))
                     .setLabel('>>')
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
-                    .setCustomId(BUTTON_QUEUE_EMBED.done)
+                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.done, interaction.user.id))
                     .setLabel('Done')
                     .setStyle(ButtonStyle.Danger),
 
