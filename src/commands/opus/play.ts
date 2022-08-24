@@ -56,7 +56,8 @@ export default new Command({
             result = await processQuery({ client, interaction, args }, 'inserted');
             mPlayer.queue.splice(1, 0, ...result);
         }
-        else if(args.getSubcommand() == PLAY_OPTIONS.queue, 'enqueued'){
+        else if(args.getSubcommand() == PLAY_OPTIONS.queue){
+            result = await processQuery({ client, interaction, args }, 'enqueued');
             mPlayer.queue.push(...result);
         }
     
