@@ -170,8 +170,15 @@ export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegat
 
 async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuInteraction) {
     try{
-        const track = await createTrack(interaction.values[0], interaction.user);
         const mPlayer = client.music.get(interaction.guildId);
+        
+        if(!mPlayer) { 
+            interaction.message.delete();
+            interaction.deleteReply();
+            return;
+        }
+
+        const track = await createTrack(interaction.values[0], interaction.user);
 
         mPlayer.queue.push(track);
         interaction.message.delete();

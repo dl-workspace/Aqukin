@@ -89,7 +89,12 @@ export default new Event('interactionCreate', async (interaction) => {
 
         const mPlayer = client.music.get(interaction.guildId);
 
-        if(mPlayer){
+        if(!mPlayer) { 
+            interaction.message.delete();
+            interaction.deleteReply();
+            return;
+        }
+
             switch(true){
                 case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
                     await interaction.deferReply();
@@ -172,4 +177,4 @@ export default new Event('interactionCreate', async (interaction) => {
             }
         }
     }
-});
+);
