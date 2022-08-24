@@ -138,7 +138,8 @@ export class OpusPlayer{
                 this.queue[0].resource = await this.queue[0].createAudioResource();
                 this.queue[0].resource.volume.setVolume(this.volume);    
             }
-            
+
+            this.subscription.player.stop();
             this.subscription.player.play(this.queue[0].resource);
         }
         catch(err){
