@@ -58,7 +58,7 @@ export default new Event('interactionCreate', async (interaction) => {
                 client,
                 interaction: interaction as ExtendedInteraction,
                 args: interaction.options as CommandInteractionOptionResolver,
-            });    
+            });
         }
         catch(err){
             console.log(err);
@@ -68,7 +68,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
     else if(interaction.isSelectMenu()){
         // check for userId
-        if (!interaction.customId.endsWith(interaction.user.id)) {
+        if (!interaction.customId.endsWith(interaction.user.id)){
             return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but this select menu is not for you (⁎˃ᆺ˂)`, ephemeral: true });
         }
         
@@ -83,7 +83,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
     else if(interaction.isButton()){
         // check for userId
-        if (!interaction.customId.endsWith(interaction.user.id)) {
+        if (!interaction.customId.endsWith(interaction.user.id)){
             return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but this button is not for you (⁎˃ᆺ˂)`, ephemeral: true });
         }
 

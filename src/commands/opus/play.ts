@@ -135,9 +135,9 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             })
 
             const embed = BaseEmbed()
-            .setTitle(`Search results ヽ (o´∀\`) ﾉ ♪ ♬`)
-            .setDescription(tracksInfo)
-            .setImage("https://c.tenor.com/pnXpZl3VRiwAAAAC/minato-aqua-akutan.gif");
+                .setTitle(`Search results ヽ (o´∀\`) ﾉ ♪ ♬`)
+                .setDescription(tracksInfo)
+                .setImage("https://c.tenor.com/pnXpZl3VRiwAAAAC/minato-aqua-akutan.gif");
 
             const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(
@@ -147,7 +147,6 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                         .addOptions(menuOptBuilder)
                 );
 
-            
             handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.next ? selectTrackInsert :  selectTrackPush;
 
             interaction.followUp({ content: `**${interaction.user.username}**-sama`, embeds: [embed], components: [actionRow] });

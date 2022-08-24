@@ -134,8 +134,11 @@ export class OpusPlayer{
 
     async playFromQueue(client: ExtendedClient){
         try{
-            this.queue[0].resource = await this.queue[0].createAudioResource();
-            this.queue[0].resource.volume.setVolume(this.volume);
+            if(!this.queue[0].resource){
+                this.queue[0].resource = await this.queue[0].createAudioResource();
+                this.queue[0].resource.volume.setVolume(this.volume);    
+            }
+            
             this.subscription.player.play(this.queue[0].resource);
         }
         catch(err){
