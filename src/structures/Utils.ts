@@ -1,4 +1,4 @@
-import { EmbedBuilder, InteractionReplyOptions, User } from "discord.js";
+import { EmbedBuilder } from "discord.js";
 import { client } from "..";
 
 export function BaseEmbed(){

@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Message, MessageActionRowComponentBuilder, MessagePayload, PermissionFlagsBits } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder, PermissionFlagsBits } from "discord.js";
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
 import { Track } from "../../structures/opus/Track";

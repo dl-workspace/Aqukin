@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, PermissionFlagsBits, time } from "discord.js";
+import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command, COMMAND_TAGS } from "../../structures/Command";
 import { convertInput, formatDuration } from "../../structures/Utils";
 
