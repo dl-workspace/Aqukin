@@ -49,7 +49,7 @@ export class OpusPlayer{
                 console.log('connection Ready');
             })
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
-                try {
+                try{
                     await Promise.race([
                         entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
                         entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
@@ -61,35 +61,45 @@ export class OpusPlayer{
                 }
             })
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
-                this.textChannel.send({ content: `Matta ne~` });
-                this.subscription.player.stop();
-                this.subscription.unsubscribe();
-
-                this.queue.splice(0);
-                this.loopQueue.splice(0);
-                this.currQueuePage.clear();
-
-                if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
-
-                client.music.delete(this.id);
+                try{
+                    this.textChannel.send({ content: `Matta ne~` });
+                    this.subscription.player.stop();
+                    this.subscription.unsubscribe();
+    
+                    this.queue.splice(0);
+                    this.loopQueue.splice(0);
+                    this.currQueuePage.clear();
+    
+                    if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
+    
+                    client.music.delete(this.id);    
+                }
+                catch(err) {}
             });
 
         const player = new ExtendedAudioPlayer(playerOptions)
             .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
-                if(this.queue[0].seek){
-                    this.queue[0].seek = 0;
+                try{
+                    if(!this.queue[0]) { return; }
+
+                    if(this.queue[0].seek){
+                        this.queue[0].seek = 0;
+                    }
+                    else if(oldState.status === AudioPlayerStatus.Buffering)
+                        this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });    
                 }
-                else if(oldState.status === AudioPlayerStatus.Buffering)
-                    this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
+                catch(err) {}
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
-                if(this.trackRepeat) { this.queue.splice(1, 0, this.queue[0]); }
-                else if(this.queueRepeat) { this.loopQueue.push(this.queue[0]); }
+                try{
+                    if(this.trackRepeat) { this.queue.splice(1, 0, this.queue[0]); }
+                    else if(this.queueRepeat) { this.loopQueue.push(this.queue[0]); }
 
-                if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
+                    if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
 
-                this.queue.shift();
-                await this.processQueue(client);
+                    this.queue.shift();
+                    await this.processQueue(client);
+                } catch(err) { }
             })
             
         this.subscription = connection.subscribe(player);

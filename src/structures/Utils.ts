@@ -15,11 +15,12 @@ export function formatBool(value: boolean){
 
 export function formatDuration(value: number){
     const d = new Date(Date.UTC(0,0,0,0,0,0,value));
+    // console.log(value);
 
     // Pull out parts of interest
     let parts = [];
     if(d.getUTCHours() > 0){
-        parts.push(d.getUTCHours());
+        parts.push(d.getUTCHours() + d.getDay()*24);
     }
 
     if(d.getUTCMinutes() > 0){

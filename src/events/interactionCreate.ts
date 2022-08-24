@@ -62,7 +62,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            await interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} has encounted an error\n${err}` });
+            interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} has encounted an error\n${err}` }).catch(err => console.log(err));
         }
     }
 
@@ -89,92 +89,90 @@ export default new Event('interactionCreate', async (interaction) => {
 
         const mPlayer = client.music.get(interaction.guildId);
 
-        if(!mPlayer) { 
+        if(!mPlayer) {
             interaction.message.delete();
-            interaction.deleteReply();
             return;
         }
 
-            switch(true){
-                case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
-                    await interaction.deferReply();
-                    await interaction.message.delete();
-                    loopTrack(client, interaction);
-                    break;
-    
-                case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopTrack_yes):
-                    await interaction.deferReply();
-                    await interaction.message.delete();
-                    loopQueue(client, interaction);
-                    break;
-    
-                case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
-                    await interaction.deferUpdate();
-                    await interaction.message.delete();
-                    break;
-    
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
-                    await interaction.deferUpdate();
+        switch(true){
+            case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
+                await interaction.deferReply();
+                await interaction.message.delete();
+                loopTrack(client, interaction);
+                break;
 
-                    let currPage = mPlayer.currQueuePage.get(interaction.user.id);
+            case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopTrack_yes):
+                await interaction.deferReply();
+                await interaction.message.delete();
+                loopQueue(client, interaction);
+                break;
 
-                    if(currPage > 0){
-                        mPlayer.currQueuePage.set(interaction.user.id, 0);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(interaction.user.id), mPlayer.queue, client)] });    
-                    }
+            case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
+                await interaction.deferUpdate();
+                await interaction.message.delete();
+                break;
 
-                    break;
-                }
-    
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.next):{
-                    await interaction.deferUpdate();
+            case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
+                await interaction.deferUpdate();
 
-                    let currPage = mPlayer.currQueuePage.get(interaction.user.id);
-                    const ceil = Math.ceil(mPlayer.queue.length/QUEUE_EMBED_PAGE_STEP)-1;
+                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
 
-                    if(currPage < ceil) { 
-                        currPage++; 
-                        mPlayer.currQueuePage.set(interaction.user.id, currPage);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
-                    }
-
-                    break;
+                if(currPage > 0){
+                    mPlayer.currQueuePage.set(interaction.user.id, 0);
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(interaction.user.id), mPlayer.queue, client)] });    
                 }
 
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.back):{
-                    await interaction.deferUpdate();
-
-                    let currPage = mPlayer.currQueuePage.get(interaction.user.id);
-
-                    if(currPage > 0) { 
-                        currPage--; 
-                        mPlayer.currQueuePage.set(interaction.user.id, currPage);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
-                    }
-
-                    break;
-                }
-
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.end):{
-                    await interaction.deferUpdate();
-
-                    let currPage = mPlayer.currQueuePage.get(interaction.user.id);
-                    const ceil = Math.ceil(mPlayer.queue.length/QUEUE_EMBED_PAGE_STEP)-1;
-
-                    if(currPage < ceil){
-                        mPlayer.currQueuePage.set(interaction.user.id, ceil);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(ceil, mPlayer.queue, client)] });
-                    }
-
-                    break;
-                }
-
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
-                    await interaction.deferUpdate();
-                    interaction.message.delete();
-                    mPlayer.currQueuePage.delete(interaction.user.id);
-                    break;
+                break;
             }
+
+            case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.next):{
+                await interaction.deferUpdate();
+
+                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
+                const ceil = Math.ceil(mPlayer.queue.length/QUEUE_EMBED_PAGE_STEP)-1;
+
+                if(currPage < ceil) { 
+                    currPage++; 
+                    mPlayer.currQueuePage.set(interaction.user.id, currPage);
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
+                }
+
+                break;
+            }
+
+            case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.back):{
+                await interaction.deferUpdate();
+
+                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
+
+                if(currPage > 0) { 
+                    currPage--; 
+                    mPlayer.currQueuePage.set(interaction.user.id, currPage);
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
+                }
+
+                break;
+            }
+
+            case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.end):{
+                await interaction.deferUpdate();
+
+                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
+                const ceil = Math.ceil(mPlayer.queue.length/QUEUE_EMBED_PAGE_STEP)-1;
+
+                if(currPage < ceil){
+                    mPlayer.currQueuePage.set(interaction.user.id, ceil);
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(ceil, mPlayer.queue, client)] });
+                }
+
+                break;
+            }
+
+            case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
+                await interaction.deferUpdate();
+                interaction.message.delete();
+                mPlayer.currQueuePage.delete(interaction.user.id);
+                break;
         }
     }
-);
+});

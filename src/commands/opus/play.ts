@@ -1,4 +1,5 @@
 import { ActionRowBuilder, ApplicationCommandOptionType, MessageActionRowComponentBuilder, PermissionFlagsBits, SelectMenuBuilder, SelectMenuInteraction, SelectMenuOptionBuilder, User } from "discord.js";
+import { link } from "fs";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
@@ -87,7 +88,8 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                 
         // if the queury is a youtube playlist link
         else if (ytpl.validateID(query)){
-            await ytpl(query, { limit: Infinity }).then(async playlist =>{
+            // limit can be Infinity
+            await ytpl(query, { limit: 1000 }).then(async playlist =>{
                 // console.log(playlist);
 
                 let playListDuration = 0;
@@ -173,9 +175,7 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
         const mPlayer = client.music.get(interaction.guildId);
         
         if(!mPlayer) { 
-            interaction.message.delete();
-            interaction.deleteReply();
-            return;
+            throw new Error('Outdated session');
         }
 
         const track = await createTrack(interaction.values[0], interaction.user);
@@ -194,8 +194,13 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
 
 async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenuInteraction) {
     try{
-        const track = await createTrack(interaction.values[0], interaction.user);
         const mPlayer = client.music.get(interaction.guildId);
+
+        if(!mPlayer) { 
+            throw new Error('Outdated session');
+        }
+
+        const track = await createTrack(interaction.values[0], interaction.user);
 
         mPlayer.queue.splice(1, 0, track);
         interaction.message.delete();
