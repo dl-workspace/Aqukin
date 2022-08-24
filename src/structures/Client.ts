@@ -1,4 +1,4 @@
-import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection, GuildVoiceChannelResolvable, VoiceChannel } from "discord.js";
+import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection, VoiceChannel } from "discord.js";
 import { CommandType } from "../typings/command";
 import { glob } from "glob";
 import { promisify } from "util";
@@ -34,7 +34,7 @@ export class ExtendedClient extends Client{
         this.registerCommands();
         this.login(process.env.BOT_TOKEN);
         this.alive(this);
-        
+
         process.on("warning", e => console.warn(e.stack)) // debug
     }
 

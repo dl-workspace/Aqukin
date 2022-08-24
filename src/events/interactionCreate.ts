@@ -18,9 +18,7 @@ export default new Event('interactionCreate', async (interaction) => {
         // user permission check
         if(!interaction.memberPermissions.has(command.userPermissions)){
             // app owner check
-            await interaction.client.application.fetch();
-
-            if(interaction.user!.id !== interaction.client.application.owner.id){
+            if(interaction.user.id !== process.env.OWNER_ID){
                 return interaction.reply({ content: `**${interaction.user.username}**-sama, sees that you don't have the permission to use this command`, ephemeral: true });
             }
         }
@@ -54,8 +52,6 @@ export default new Event('interactionCreate', async (interaction) => {
         }
 
         try{
-            await interaction.deferReply({ ephemeral: command.ephemeral });
-
             await command.execute({
                 client,
                 interaction: interaction as ExtendedInteraction,

@@ -5,6 +5,7 @@ declare global{
             BOT_TOKEN: string;
             PUBLIC_KEY: string;
             APP_ID: string;
+            OWNER_ID: string;
             environment: "dev" | "prod" | "debug";
         }
     }
