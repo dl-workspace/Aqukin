@@ -29,6 +29,7 @@ export class Track {
                 liveBuffer: 1 << 62,
                 dlChunkSize: 0,
                 begin: this.seek,
+                // range: { start: this.seek as number },
             };
 
             const stream = ytdl( this.url, ytdlOptions );

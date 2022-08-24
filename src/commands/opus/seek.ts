@@ -28,12 +28,12 @@ export default new Command({
             interaction.followUp({ content: `**${interaction.user.username}**-sama, the timestamp should be less than the track length \`${formatDuration(mPlayer.queue[0].duration)}\` ლ (¯ ロ ¯ "ლ)` }); 
         }
         else{
-            // mPlayer.queue[0].seek = timestamp;
-            // mPlayer.playCurrTrack(client);
+            mPlayer.queue[0].seek = timestamp;
+            mPlayer.playFromQueue(client);
 
-            mPlayer.queue.splice(1, 0, mPlayer.queue[0]);
-            mPlayer.queue[1].seek = timestamp;
-            mPlayer.subscription.player.stop();
+            // mPlayer.queue.splice(1, 0, mPlayer.queue[0]);
+            // mPlayer.queue[1].seek = timestamp;
+            // mPlayer.subscription.player.stop();
 
             interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} will now move the current track to position \`${formatDuration(timestamp)}\`` });
         }

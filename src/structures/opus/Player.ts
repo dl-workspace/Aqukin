@@ -76,7 +76,10 @@ export class OpusPlayer{
 
         const player = new ExtendedAudioPlayer(playerOptions)
             .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
-                if(oldState.status === AudioPlayerStatus.Buffering)
+                if(this.queue[0].seek){
+                    this.queue[0].seek = 0;
+                }
+                else if(oldState.status === AudioPlayerStatus.Buffering)
                     this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
@@ -120,19 +123,23 @@ export class OpusPlayer{
             }
         }
 
-        this.playCurrTrack(client);
+        this.playIfIdling(client);
     }
 
-    async playCurrTrack(client: ExtendedClient){
+    async playIfIdling(client: ExtendedClient){
         if(this.subscription.player.state.status != AudioPlayerStatus.Playing && this.queue.length > 0){
-            try{
-                this.queue[0].resource = await this.queue[0].createAudioResource();
-                this.queue[0].resource.volume.setVolume(this.volume);
-                this.subscription.player.play(this.queue[0].resource);
-            }
-            catch(err){
-                this.textChannel.send({ content: `${err}` });
-            }
+            this.playFromQueue(client);
+        }
+    }
+
+    async playFromQueue(client: ExtendedClient){
+        try{
+            this.queue[0].resource = await this.queue[0].createAudioResource();
+            this.queue[0].resource.volume.setVolume(this.volume);
+            this.subscription.player.play(this.queue[0].resource);
+        }
+        catch(err){
+            this.textChannel.send({ content: `${err}` });
         }
     }
 

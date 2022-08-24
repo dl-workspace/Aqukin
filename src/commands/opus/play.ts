@@ -61,7 +61,7 @@ export default new Command({
             mPlayer.queue.push(...result);
         }
     
-        mPlayer.playCurrTrack(client);
+        mPlayer.playIfIdling(client);
     }
 });
 
@@ -178,7 +178,7 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
         interaction.message.delete();
         interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has enqueued`, embeds: [track.createEmbedThumbnail()] });
     
-        mPlayer.playCurrTrack(client);    
+        mPlayer.playIfIdling(client);    
     }
     catch(err){
         interaction.message.delete();
@@ -195,7 +195,7 @@ async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenu
         interaction.message.delete();
         interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has inserted`, embeds: [track.createEmbedThumbnail()] });
     
-        mPlayer.playCurrTrack(client);    
+        mPlayer.playIfIdling(client);    
     }
     catch(err){
         interaction.message.delete();
