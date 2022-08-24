@@ -56,7 +56,7 @@ export default new Event('interactionCreate', async (interaction) => {
         try{
             await interaction.deferReply({ ephemeral: command.ephemeral });
 
-            command.execute({
+            await command.execute({
                 client,
                 interaction: interaction as ExtendedInteraction,
                 args: interaction.options as CommandInteractionOptionResolver,
@@ -64,7 +64,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} has encounted an error\n${err}` });
+            await interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} has encounted an error\n${err}` });
         }
     }
 
@@ -95,19 +95,19 @@ export default new Event('interactionCreate', async (interaction) => {
             switch(true){
                 case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
                     await interaction.deferReply();
-                    interaction.message.delete();
+                    await interaction.message.delete();
                     loopTrack(client, interaction);
                     break;
     
                 case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopTrack_yes):
                     await interaction.deferReply();
-                    interaction.message.delete();
+                    await interaction.message.delete();
                     loopQueue(client, interaction);
                     break;
     
                 case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
                     await interaction.deferUpdate();
-                    interaction.message.delete();
+                    await interaction.message.delete();
                     break;
     
                 case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
