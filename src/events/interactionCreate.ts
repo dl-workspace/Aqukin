@@ -52,6 +52,8 @@ export default new Event('interactionCreate', async (interaction) => {
         }
 
         try{
+            await interaction.deferReply({ ephemeral: command.ephemeral });
+            
             await command.execute({
                 client,
                 interaction: interaction as ExtendedInteraction,

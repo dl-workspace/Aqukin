@@ -50,7 +50,7 @@ export class Track {
             .setDescription(`[${this.title}](${this.url})`)
             .addFields(
                 { name: 'Requested By', value: `${this.requester.username}-sama`, inline: true },
-                { name: 'Lenght', value: `${formatDuration(this.duration)}`, inline: true },
+                { name: 'Lenght', value: `${this.duration > 0 ? formatDuration(this.duration) : `Live`}`, inline: true },
             )
     }
 

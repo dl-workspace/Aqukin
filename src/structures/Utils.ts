@@ -68,6 +68,6 @@ export function convertInput(value: string){
     
     total = (hours + minutes + seconds)*1000;
     total = (total < 0 || isNaN(total)) ? 0 : total;
-    console.log(total);
+    // console.log(total);
     return total;
 }
