@@ -50,12 +50,13 @@ export default new Command({
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId) || new OpusPlayer({ client, interaction, args });
 
-        const result = await processQuery({ client, interaction, args });
+        let result: Track[];
 
         if(args.getSubcommand() == PLAY_OPTIONS.next){
+            result = await processQuery({ client, interaction, args }, 'inserted');
             mPlayer.queue.splice(1, 0, ...result);
         }
-        else if(args.getSubcommand() == PLAY_OPTIONS.queue){
+        else if(args.getSubcommand() == PLAY_OPTIONS.queue, 'enqueued'){
             mPlayer.queue.push(...result);
         }
     
@@ -63,7 +64,7 @@ export default new Command({
     }
 });
 
-async function processQuery({ client, interaction, args }: ExecuteOptions){
+async function processQuery({ client, interaction, args }: ExecuteOptions, subCommand: string){
     const { user } = interaction;
     const query = args.get(PLAY_OPTIONS.query).value as string;
     let result: Track[] = [];
@@ -79,7 +80,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                 const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, user);
                 result.push(track);
 
-                interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has enqueued`, embeds: [track.createEmbedThumbnail()] });
+                interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has ${subCommand}`, embeds: [track.createEmbedThumbnail()] });
             }).catch(err => {});
         } // video link
                 
@@ -108,7 +109,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions){
                         { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
                         { name: 'Size', value: `${result.length}`, inline: true },
                     );
-                    interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has enqueued`, embeds: [embed] });
+                    interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has ${subCommand}`, embeds: [embed] });
             }).catch(err => {});
         } // playlist link
     }
