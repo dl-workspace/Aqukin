@@ -13,7 +13,7 @@ export default new Event('interactionCreate', async (interaction) => {
         const command = client.commands.get(interaction.commandName);
         if(!command) { return; }
 
-        // if(COMMAND_TAGS.owner && isAppOwner(interaction)) { return; }
+        // if(COMMAND_TAGS.owner && interaction.user.id !== process.env.OWNER_ID) { return; }
 
         // user permission check
         if(!interaction.memberPermissions.has(command.userPermissions)){
