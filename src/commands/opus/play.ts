@@ -1,5 +1,4 @@
 import { ActionRowBuilder, ApplicationCommandOptionType, MessageActionRowComponentBuilder, PermissionFlagsBits, SelectMenuBuilder, SelectMenuInteraction, SelectMenuOptionBuilder, User } from "discord.js";
-import { link } from "fs";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
