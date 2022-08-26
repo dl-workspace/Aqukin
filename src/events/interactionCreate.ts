@@ -39,8 +39,14 @@ export default new Event('interactionCreate', async (interaction) => {
                     }
                     else if(command.name != "play"){
                         if(channel.members.size > 2){
-                            if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator) && mPlayer.queue[0]?.requester.id != interaction.user.id){
-                                return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you can only use this command on your own requested track`, ephemeral: true });
+                            if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)){
+                                if(command.name === 'disconnect'){
+                                    // implement a voting system here
+                                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} would require others permission to disconnect`, ephemeral: true });
+                                }
+                                else if(mPlayer.queue[0]?.requester.id != interaction.user.id){
+                                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you can only use this command on your own requested track`, ephemeral: true });
+                                }
                             }
                         }
                     }
