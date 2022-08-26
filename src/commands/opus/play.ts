@@ -167,7 +167,7 @@ interface IHandlingSelectTrackInteractionDelegate{
     (client: ExtendedClient, interaction: SelectMenuInteraction) : void;
 }
 
-export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegate = selectTrackPush;
+export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegate;
 
 async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuInteraction) {
     try{
