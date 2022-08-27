@@ -82,11 +82,14 @@ export class OpusPlayer{
                 try{
                     if(!this.queue[0]) { return; }
 
-                    if(this.queue[0].seek){
-                        this.queue[0].seek = 0;
+                    if(oldState.status === AudioPlayerStatus.Buffering){
+                        if(this.queue[0].seek){
+                            this.queue[0].seek = 0;
+                        }
+                        else{
+                            this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
+                        }
                     }
-                    else if(oldState.status === AudioPlayerStatus.Buffering)
-                        this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });    
                 }
                 catch(err) {}
             })
