@@ -3,7 +3,7 @@ import { Command, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
     name: 'delete',
-    tag: COMMAND_TAGS.info,
+    tag: COMMAND_TAGS.utils,
     description: 'Delete a specified number (min 1, default 10, max 100) of messages in the current text channel',
     userPermissions: [PermissionFlagsBits.Administrator],
     ephemeral: true,

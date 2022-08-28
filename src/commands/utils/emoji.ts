@@ -22,7 +22,7 @@ export default new Command({
             return interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} coudln't find any emoji named \`${input}\``, ephemeral : true });
         }
 
-        interaction.followUp({ content: `<:${emoji.identifier}>` });
+        interaction.followUp({ content: emoji.animated ? `<a:${emoji.name}:${emoji.id}>` : `<:${emoji.identifier}>` });
         // <:Choco_Scream:887860541572395018>
     }
 });
