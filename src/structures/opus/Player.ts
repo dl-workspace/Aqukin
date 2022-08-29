@@ -63,6 +63,9 @@ export class OpusPlayer{
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
                 try{
                     this.textChannel.send({ content: `Matta ne~` });
+                }
+                catch(err) {}
+                finally{
                     this.subscription.player.stop();
                     this.subscription.unsubscribe();
     
@@ -72,9 +75,8 @@ export class OpusPlayer{
     
                     if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
     
-                    client.music.delete(this.id);    
+                    client.music.delete(this.id);
                 }
-                catch(err) {}
             });
 
         const player = new ExtendedAudioPlayer(playerOptions)
