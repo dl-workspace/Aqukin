@@ -14,24 +14,24 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
 
     options: [
-        {
-            type: ApplicationCommandOptionType.Subcommand,
-            name: REMOVE_OPTIONS.track,
-            description: 'Remove the specified track from the queue, default to the last enqueued track if leave blank',
+    {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: REMOVE_OPTIONS.track,
+        description: 'Remove the specified track from the queue, default to the last enqueued track if leave blank',
 
-            options: [{
-                type: ApplicationCommandOptionType.Number,
-                name: 'index',
-                description: 'index value (default `queue size`)',
-                min_value: 1,
-                required: false,
-            }],
-        },
-        {
-            type: ApplicationCommandOptionType.Subcommand,
-            name: REMOVE_OPTIONS.duplicate,
-            description: 'Remove duplicated tracks, if any , from the queue',
-        },
+        options: [{
+            type: ApplicationCommandOptionType.Number,
+            name: 'index',
+            description: 'index value (default `queue size`)',
+            min_value: 1,
+            required: false,
+        }],
+    },
+    {
+        type: ApplicationCommandOptionType.Subcommand,
+        name: REMOVE_OPTIONS.duplicate,
+        description: 'Remove duplicated tracks, if any , from the queue',
+    },
     ],
 
     execute: async({ client, interaction, args }) => {
