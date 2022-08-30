@@ -1,6 +1,10 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
+enum EMOJI_OPTIONS{
+    name = 'name',
+}
+
 export default new Command({
     name: COMMANDS.emoji,
     tag: COMMAND_TAGS.utils,
@@ -8,13 +12,13 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     options: [{
         type: ApplicationCommandOptionType.String,
-        name: 'name',
+        name: EMOJI_OPTIONS.name,
         description: 'exact identifier of the emoji (not case sensitive)',
         required: true,
     }],
 
     execute: async({ client, interaction, args }) => {
-        const input = args.get('name')?.value as string;
+        const input = args.get(EMOJI_OPTIONS.name)?.value as string;
 
         const emoji = interaction.guild.emojis.cache.find(emoji => emoji.name.toLowerCase() === input.toLowerCase());
         
