@@ -23,5 +23,6 @@ export default new Command({
         }
 
         interaction.followUp({ content: emoji.animated ? `<a:${emoji.name}:${emoji.id}>` : `<:${emoji.identifier}>` });
+        // <:Choco_Scream:887860541572395018>
     }
 });
