@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonInteraction, ButtonStyle, MessageActionRowComponentBuilder, PermissionFlagsBits } from "discord.js";
 import { ExtendedClient } from "../../structures/Client";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { BaseEmbed, generateInteractionComponentId } from "../../structures/Utils";
 import { ExtendedInteraction } from "../../typings/command";
 
@@ -13,7 +13,7 @@ export enum LOOP_OPTIONS{
 }
 
 export default new Command({
-    name: 'loop',
+    name: COMMANDS.loop,
     tag: COMMAND_TAGS.music,
     description: 'Toggle looping the current track/queue',
     userPermissions: [PermissionFlagsBits.SendMessages],

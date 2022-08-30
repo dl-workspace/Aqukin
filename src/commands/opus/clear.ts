@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
-    name: 'clear_queue',
+    name: COMMANDS.clear,
     tag: COMMAND_TAGS.music,
     description: 'Clear the current queue with the exception of the currently playing track',
     userPermissions: [PermissionFlagsBits.SendMessages],

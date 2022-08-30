@@ -1,11 +1,11 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
-    name: 'emoji',
+    name: COMMANDS.emoji,
     tag: COMMAND_TAGS.utils,
     description: 'Send a specified guild emoji on the user behalf',
-    userPermissions: [PermissionFlagsBits.Administrator],
+    userPermissions: [PermissionFlagsBits.SendMessages],
     options: [{
         type: ApplicationCommandOptionType.String,
         name: 'emoji_id',
@@ -23,6 +23,5 @@ export default new Command({
         }
 
         interaction.followUp({ content: emoji.animated ? `<a:${emoji.name}:${emoji.id}>` : `<:${emoji.identifier}>` });
-        // <:Choco_Scream:887860541572395018>
     }
 });

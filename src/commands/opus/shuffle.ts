@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
-    name: 'shuffle',
+    name: COMMANDS.shuffle,
     tag: COMMAND_TAGS.music,
     description: 'Shuffle the current queue',
     userPermissions: [PermissionFlagsBits.SendMessages],

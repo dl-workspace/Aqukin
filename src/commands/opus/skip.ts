@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
-    name: 'skip',
+    name: COMMANDS.skip,
     tag: COMMAND_TAGS.music,
     description: 'Skip the current playing track if any',
     userPermissions: [PermissionFlagsBits.SendMessages],

@@ -1,9 +1,9 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { convertInput, formatDuration } from "../../structures/Utils";
 
 export default new Command({
-    name: 'seek',
+    name: COMMANDS.seek,
     tag: COMMAND_TAGS.music,
     description: `Seek to a specified timestamp (hh:mm:ss) of the current track`,
     userPermissions: [PermissionFlagsBits.SendMessages],

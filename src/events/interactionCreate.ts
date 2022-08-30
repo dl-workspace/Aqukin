@@ -1,6 +1,6 @@
 import { CommandInteractionOptionResolver, GuildMember, PermissionFlagsBits } from "discord.js";
 import { client } from "..";
-import { COMMAND_TAGS } from "../structures/Command";
+import { COMMANDS, COMMAND_TAGS } from "../structures/Command";
 import { Event } from "../structures/Events";
 import { ExtendedInteraction } from "../typings/command";
 import { handleSelectTrackInteraction, PLAY_OPTIONS } from "../commands/opus/play";
@@ -37,12 +37,12 @@ export default new Event('interactionCreate', async (interaction) => {
                     if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
                         return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you need to be in the same voice channel with ${client.user.username} to use this command`, ephemeral: true });
                     }
-                    else if(command.name != "play"){
+                    else if(command.name != COMMANDS.play){
                         if(channel.members.size > 2){
                             if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)){
-                                if(command.name === 'disconnect'){
+                                if(command.name === COMMANDS.disconnect || command.name === COMMANDS.remove){
                                     // implement a voting system here
-                                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} would require others permission to disconnect`, ephemeral: true });
+                                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} would require others permission to execute`, ephemeral: true });
                                 }
                                 else if(mPlayer.queue[0]?.requester.id != interaction.user.id){
                                     return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you can only use this command on your own requested track`, ephemeral: true });
@@ -51,7 +51,7 @@ export default new Event('interactionCreate', async (interaction) => {
                         }
                     }
                 }
-                else if(command.name != "play"){
+                else if(command.name != COMMANDS.play){
                     return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but ${client.user.username} is not currently streaming any audio`, ephemeral: true });
                 }
                 break;

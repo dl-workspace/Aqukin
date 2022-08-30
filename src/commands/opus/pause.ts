@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
 import { AudioPlayerStatus } from "@discordjs/voice";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { formatDuration } from "../../structures/Utils";
 
 export default new Command({
-    name: 'pause',
+    name: COMMANDS.pause,
     tag: COMMAND_TAGS.music,
     description: 'Pause the current playing track if any',
     userPermissions: [PermissionFlagsBits.SendMessages],

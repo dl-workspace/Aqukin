@@ -1,8 +1,8 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
-    name: 'delete',
+    name: COMMANDS.delete,
     tag: COMMAND_TAGS.utils,
     description: 'Delete a specified number (min 1, default 10, max 100) of messages in the current text channel',
     userPermissions: [PermissionFlagsBits.Administrator],

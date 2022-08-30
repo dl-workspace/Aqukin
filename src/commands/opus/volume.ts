@@ -1,15 +1,21 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
+
+enum VOLUME_OPTIONS{
+    value = 'value',
+    type = 'type',
+}
 
 export default new Command({
-    name: 'volume',
+    name: COMMANDS.volume,
     tag: COMMAND_TAGS.music,
     description: `Change the currently playing track or the player's volume (min 0, default 1, max 10)`,
     userPermissions: [PermissionFlagsBits.SendMessages],
+
     options: [
     {
         type: ApplicationCommandOptionType.Number,
-        name: 'value',
+        name: VOLUME_OPTIONS.value,
         description: 'volume value (min 0, default 1, max 10)',
         min_value: 0,
         max_value: 10,
@@ -17,7 +23,7 @@ export default new Command({
     },
     {
         type: ApplicationCommandOptionType.Number,
-        name: 'volume_type',
+        name: VOLUME_OPTIONS.type,
         description: 'change the volume of only the current track (default) or the player (all tracks)',
         choices: [
             { name: 'track', value: 1 },
@@ -30,8 +36,8 @@ export default new Command({
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId);
 
-        const value = args.get('value')?.value as number || 1;
-        const type = args.get('volume_type')?.value as number || 1;
+        const value = args.get(VOLUME_OPTIONS.value)?.value as number || 1;
+        const type = args.get(VOLUME_OPTIONS.type)?.value as number || 1;
         let extraReply = '';
 
         if(type == 2) { 

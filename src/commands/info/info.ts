@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, Guild, GuildMember, PermissionFlagsBits, User } from "discord.js";
 import { ExtendedClient } from "../../structures/Client";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { BaseEmbed } from "../../structures/Utils";
 
 export enum INFO_OPTIONS{
@@ -10,7 +10,7 @@ export enum INFO_OPTIONS{
 }
 
 export default new Command({
-    name: 'info',
+    name: COMMANDS.info,
     tag: COMMAND_TAGS.info,
     description: 'Get info of a specified user/yourself or the server info',
     userPermissions: [PermissionFlagsBits.SendMessages],

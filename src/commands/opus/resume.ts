@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
 import { AudioPlayerStatus } from "@discordjs/voice";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
-    name: 'resume',
+    name: COMMANDS.resume,
     tag: COMMAND_TAGS.music,
     description: 'Resume the current paused track if any',
     userPermissions: [PermissionFlagsBits.SendMessages],

@@ -1,6 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder, PermissionFlagsBits } from "discord.js";
 import { ExtendedClient } from "../../structures/Client";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { Track } from "../../structures/opus/Track";
 import { BaseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
 
@@ -15,7 +15,7 @@ export enum BUTTON_QUEUE_EMBED {
 export const QUEUE_EMBED_PAGE_STEP = 7;
 
 export default new Command({
-    name: 'queue',
+    name: COMMANDS.queue,
     tag: COMMAND_TAGS.music,
     description: 'Display the current queue',
     userPermissions: [PermissionFlagsBits.SendMessages],

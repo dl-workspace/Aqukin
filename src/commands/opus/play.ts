@@ -3,7 +3,7 @@ import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
 import { ExtendedClient } from "../../structures/Client";
-import { Command, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
 import { Track } from "../../structures/opus/Track";
 import { BaseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
@@ -17,7 +17,7 @@ export enum PLAY_OPTIONS{
 }
 
 export default new Command({
-    name: 'play',
+    name: COMMANDS.play,
     tag: COMMAND_TAGS.music,
     description: 'Enqueue/Insert a Youtube track/playlist/search result from the given url or query',
     userPermissions: [PermissionFlagsBits.SendMessages],

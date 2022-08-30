@@ -7,6 +7,30 @@ export enum COMMAND_TAGS {
     utils = 'utils',
 }
 
+export enum COMMANDS {
+    // info commands
+    info = 'info',
+    ping = 'ping',
+
+    // utilities commands
+    delete = 'delete',
+    emoji = 'emoji',
+
+    // music commands
+    clear = 'clear',
+    disconnect = 'disconnect',
+    loop = 'loop',
+    play = 'play',
+    pause = 'pause',
+    queue = 'queue',
+    remove = 'remove',
+    resume = 'resume',
+    seek = 'seek',
+    shuffle = 'shuffle',
+    skip = 'skip',
+    volume = 'volume',
+}
+
 export class Command{
     constructor(options: CommandType){
         Object.assign(this, options);
