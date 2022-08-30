@@ -2,7 +2,7 @@ import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { Track } from "../../structures/opus/Track";
 
-export enum REMOVE_OPTIONS{
+enum REMOVE_OPTIONS{
     track = 'track',
     duplicate = 'duplicate',
 }

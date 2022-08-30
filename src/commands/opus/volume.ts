@@ -4,6 +4,8 @@ import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 enum VOLUME_OPTIONS{
     value = 'value',
     type = 'type',
+    type_track = 'track',
+    type_player = 'player',
 }
 
 export default new Command({
@@ -26,8 +28,8 @@ export default new Command({
         name: VOLUME_OPTIONS.type,
         description: 'change the volume of only the current track (default) or the player (all tracks)',
         choices: [
-            { name: 'track', value: 1 },
-            { name: 'player', value: 2 },
+            { name: VOLUME_OPTIONS.type_track, value: 1 },
+            { name: VOLUME_OPTIONS.type_player, value: 2 },
         ],
         required: false,
     }
