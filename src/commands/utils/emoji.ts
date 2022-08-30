@@ -8,13 +8,13 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     options: [{
         type: ApplicationCommandOptionType.String,
-        name: 'emoji',
+        name: 'name',
         description: 'exact identifier of the emoji (not case sensitive)',
         required: true,
     }],
 
     execute: async({ client, interaction, args }) => {
-        const input = args.get('emoji')?.value as string;
+        const input = args.get('name')?.value as string;
 
         const emoji = interaction.guild.emojis.cache.find(emoji => emoji.name.toLowerCase() === input.toLowerCase());
         
