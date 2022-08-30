@@ -97,8 +97,15 @@ export class OpusPlayer{
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
                 try{
-                    if(this.trackRepeat) { this.queue.splice(1, 0, this.queue[0]); }
-                    else if(this.queueRepeat) { this.loopQueue.push(this.queue[0]); }
+                    if(this.trackRepeat) { 
+                        this.queue.splice(1, 0, this.queue[0]); 
+                    }
+                    else{
+                        if(this.queueRepeat) { 
+                            this.loopQueue.push(this.queue[0]); 
+                        }
+                        this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
+                    }
 
                     if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
 

@@ -45,10 +45,13 @@ export class Track {
         });
     }
 
+    private BaseEmbedMusic(){
+        return BaseEmbed().setDescription(`[${this.title}](${this.url})`);
+    }
+
     private createEmbed(){
-        return BaseEmbed()
+        return this.BaseEmbedMusic()
             .setTitle(`Track`)
-            .setDescription(`[${this.title}](${this.url})`)
             .addFields(
                 { name: 'Requested By', value: `${this.requester.username}-sama`, inline: true },
                 { name: 'Lenght', value: `${this.duration > 0 ? formatDuration(this.duration) : `Live`}`, inline: true },
@@ -61,6 +64,10 @@ export class Track {
 
     createEmbedImage(){
         return this.createEmbed().setImage(`https://i.ytimg.com/vi/${this.id}/sddefault.jpg`);
+    }
+
+    creatEmbedFinished(){
+        return this.BaseEmbedMusic().setTitle('Previous Track');
     }
 
     remainingTime(){
