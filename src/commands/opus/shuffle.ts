@@ -11,8 +11,8 @@ export default new Command({
         const mPlayer = client.music.get(interaction.guildId);
 
         await shuffle(mPlayer.queue);
-
-        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has has shuffled the queue 乁 (• ω • 乁)` });
+        
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has has shuffled the queue`) });
     }
 });
 

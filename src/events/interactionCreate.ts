@@ -13,13 +13,15 @@ export default new Event('interactionCreate', async (interaction) => {
         const command = client.commands.get(interaction.commandName);
         if(!command) { return; }
 
+        const member = interaction.member as GuildMember
+
         // if(COMMAND_TAGS.owner && interaction.user.id !== process.env.OWNER_ID) { return; }
 
         // user permission check
         if(!interaction.memberPermissions.has(command.userPermissions)){
             // app owner check
-            if(interaction.user.id !== process.env.OWNER_ID){
-                return interaction.reply({ content: `**${interaction.user.username}**-sama, sees that you don't have the permission to use this command`, ephemeral: true });
+            if(member.id !== process.env.OWNER_ID){
+                return interaction.reply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} sees that you don't have the permission to use this command`), ephemeral : true });
             }
         }
 
@@ -27,32 +29,32 @@ export default new Event('interactionCreate', async (interaction) => {
         switch(command.tag){
             case COMMAND_TAGS.music:
                 const mPlayer = client.music.get(interaction.guildId);
-                const { channel } = (interaction.member as GuildMember).voice;
+                const { channel } = member.voice;
 
                 if(!channel){
-                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you need to be in a voice channel to use this command`, ephemeral: true });
+                    return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in a voice channel to use this command to use this command`), ephemeral : true });
                 }
 
                 if(mPlayer){
                     if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
-                        return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you need to be in the same voice channel with ${client.user.username} to use this command`, ephemeral: true });
+                        return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in the same voice channel with ${client.user.username} to use this command`), ephemeral : true });
                     }
                     else if(command.name != COMMANDS.play){
                         if(channel.members.size > 2){
                             if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)){
                                 if(command.name === COMMANDS.disconnect || command.name === COMMANDS.remove){
                                     // implement a voting system here
-                                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} would require others permission to execute`, ephemeral: true });
+                                    return interaction.reply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} would require others permission to execute this command`), ephemeral : true });
                                 }
-                                else if(mPlayer.queue[0]?.requester.id != interaction.user.id){
-                                    return interaction.reply({ content: `I'm sorry **${interaction.user.username}**-sama, but you can only use this command on your own requested track`, ephemeral: true });
+                                else if(mPlayer.queue[0]?.requester.id != member.id){
+                                    return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you can only use this command on your own requested track`), ephemeral : true });
                                 }
                             }
                         }
                     }
                 }
                 else if(command.name != COMMANDS.play){
-                    return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but ${client.user.username} is not currently streaming any audio`, ephemeral: true });
+                    return interaction.reply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} is not currently streaming any audio`), ephemeral : true });
                 }
                 break;
         }
@@ -68,14 +70,15 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, ${client.user.username} has encounted an error\n${err}` }).catch(err => console.log(err));
+            interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`) }).catch(err => console.log(err));
         }
     }
 
     else if(interaction.isSelectMenu()){
-        // check for userId
-        if (!interaction.customId.endsWith(interaction.user.id)){
-            return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but this select menu is not for you (⁎˃ᆺ˂)`, ephemeral: true });
+        const member = interaction.member as GuildMember
+        // check for user id
+        if (!interaction.customId.endsWith(member.id)){
+            return interaction.reply({ content: client.replyMsgErrorAuthor(member, `this select menu is not for you`), ephemeral : true });
         }
         
         await interaction.deferReply();
@@ -88,9 +91,10 @@ export default new Event('interactionCreate', async (interaction) => {
     }
 
     else if(interaction.isButton()){
-        // check for userId
-        if (!interaction.customId.endsWith(interaction.user.id)){
-            return interaction.reply({content: `I'm sorry **${interaction.user.username}**-sama, but this button is not for you (⁎˃ᆺ˂)`, ephemeral: true });
+        const member = interaction.member as GuildMember
+        // check for user id
+        if (!interaction.customId.endsWith(member.id)){
+            return interaction.reply({ content: client.replyMsgErrorAuthor(member, `this button is not for you`), ephemeral : true });
         }
 
         const mPlayer = client.music.get(interaction.guildId);
@@ -121,11 +125,11 @@ export default new Event('interactionCreate', async (interaction) => {
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
                 await interaction.deferUpdate();
 
-                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
+                let currPage = mPlayer.currQueuePage.get(member.id);
 
                 if(currPage > 0){
-                    mPlayer.currQueuePage.set(interaction.user.id, 0);
-                    interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(interaction.user.id), mPlayer.queue, client)] });    
+                    mPlayer.currQueuePage.set(member.id, 0);
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(member.id), mPlayer.queue, client)] });    
                 }
 
                 break;
@@ -134,12 +138,12 @@ export default new Event('interactionCreate', async (interaction) => {
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.next):{
                 await interaction.deferUpdate();
 
-                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
-                const ceil = Math.ceil(mPlayer.queue.length/QUEUE_EMBED_PAGE_STEP)-1;
+                let currPage = mPlayer.currQueuePage.get(member.id);
+                const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
                 if(currPage < ceil) { 
                     currPage++; 
-                    mPlayer.currQueuePage.set(interaction.user.id, currPage);
+                    mPlayer.currQueuePage.set(member.id, currPage);
                     interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
                 }
 
@@ -149,11 +153,11 @@ export default new Event('interactionCreate', async (interaction) => {
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.back):{
                 await interaction.deferUpdate();
 
-                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
+                let currPage = mPlayer.currQueuePage.get(member.id);
 
                 if(currPage > 0) { 
                     currPage--; 
-                    mPlayer.currQueuePage.set(interaction.user.id, currPage);
+                    mPlayer.currQueuePage.set(member.id, currPage);
                     interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
                 }
 
@@ -163,11 +167,11 @@ export default new Event('interactionCreate', async (interaction) => {
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.end):{
                 await interaction.deferUpdate();
 
-                let currPage = mPlayer.currQueuePage.get(interaction.user.id);
-                const ceil = Math.ceil(mPlayer.queue.length/QUEUE_EMBED_PAGE_STEP)-1;
+                let currPage = mPlayer.currQueuePage.get(member.id);
+                const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
                 if(currPage < ceil){
-                    mPlayer.currQueuePage.set(interaction.user.id, ceil);
+                    mPlayer.currQueuePage.set(member.id, ceil);
                     interaction.message.edit({ embeds: [await generateQueueEmbed(ceil, mPlayer.queue, client)] });
                 }
 
@@ -177,7 +181,7 @@ export default new Event('interactionCreate', async (interaction) => {
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
                 await interaction.deferUpdate();
                 interaction.message.delete();
-                mPlayer.currQueuePage.delete(interaction.user.id);
+                mPlayer.currQueuePage.delete(member.id);
                 break;
         }
     }

@@ -1,4 +1,4 @@
-import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection, VoiceChannel } from "discord.js";
+import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection, GuildMember, VoiceChannel } from "discord.js";
 import { CommandType } from "../typings/command";
 import { glob } from "glob";
 import { promisify } from "util";
@@ -97,5 +97,21 @@ export class ExtendedClient extends Client{
                 }).catch(err => console.log(err));
             });
         }, 560000);
+    }
+
+    replyMsg(content: string){
+        return `${content} ${this.media.kaomoji.happy.random()}`
+    }
+
+    replyMsgError(content: string){
+        return `${content} ${this.media.kaomoji.error.random()}`
+    }
+
+    replyMsgAuthor(author: GuildMember, content: string){
+        return `**${author.nickname || author.user.username}**-sama, ${this.replyMsg(content)}`;
+    }
+
+    replyMsgErrorAuthor(author: GuildMember, content: string){
+        return `I'm sorry **${author.nickname || author.user.username}**-sama, but ${this.replyMsgError(content)}`;
     }
 }

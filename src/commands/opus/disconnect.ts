@@ -12,6 +12,6 @@ export default new Command({
 
         mPlayer.subscription.connection.disconnect();
 
-        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has disconnected per your request` });
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has disconnected per your request`) });
     }
 });

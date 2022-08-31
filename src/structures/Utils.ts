@@ -3,7 +3,7 @@ import { client } from "..";
 
 export function BaseEmbed(){
     return new EmbedBuilder()
-        .setColor(client.media.embedColour[0])
+        .setColor(client.media.embedColour.random())
         // .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL() })
         // .setTimestamp()
         .setFooter({ text: "FREEDOM SMILE (^)o(^)b", iconURL: client.user.displayAvatarURL() });

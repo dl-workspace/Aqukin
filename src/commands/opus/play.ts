@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, MessageActionRowComponentBuilder, PermissionFlagsBits, SelectMenuBuilder, SelectMenuInteraction, SelectMenuOptionBuilder, User } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, GuildMember, MessageActionRowComponentBuilder, PermissionFlagsBits, SelectMenuBuilder, SelectMenuInteraction, SelectMenuOptionBuilder } from "discord.js";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
@@ -66,7 +66,7 @@ export default new Command({
 });
 
 async function processQuery({ client, interaction, args }: ExecuteOptions, subCommand: string){
-    const { user } = interaction;
+    const { member } = interaction;
     const query = args.get(PLAY_OPTIONS.query).value as string;
     let result: Track[] = [];
 
@@ -78,10 +78,10 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             await ytdl.getBasicInfo(query).then(async trackInfo => {
                 //console.log(trackInfo);
                 const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
-                const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, user);
+                const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, member);
                 result.push(track);
 
-                interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has ${subCommand}`, embeds: [track.createEmbedThumbnail()] });
+                interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [track.createEmbedThumbnail()] });
             }).catch(err => {});
         } // video link
                 
@@ -97,7 +97,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                     //console.log(trackInfo);
                     if(track.durationSec){
                         const trackDuration = track.durationSec * 1000;
-                        result.push(new Track(track.id, track.url, track.title, trackDuration, user));
+                        result.push(new Track(track.id, track.url, track.title, trackDuration, member));
                         playListDuration += trackDuration;
                     }
                 });
@@ -107,11 +107,11 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                     .setDescription(`[${playlist.title}](${playlist.url})`)
                     .setImage(playlist.bestThumbnail.url)
                     .addFields(
-                        { name: 'Requested By', value: `${interaction.user.username}-sama`, inline: true },
+                        { name: 'Requested By', value: `${member.nickname || member.user.username}-sama`, inline: true },
                         { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
                         { name: 'Size', value: `${result.length}`, inline: true },
                     );
-                    interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has ${subCommand}`, embeds: [embed] });
+                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has ${subCommand}`), embeds: [embed] });
             }).catch(err => {});
         } // playlist link
     }
@@ -121,7 +121,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             const tracks = results.items.filter(i => i.type == "video") as ytsr.Video[];
 
             if(tracks.length === 0) {
-                interaction.followUp({ content: `**${interaction.user.username}**-sama, but ${client.user.username} couldn't find any tracks with the given keywords (｡T ω T｡)` });
+                interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} couldn't find any tracks with the given keywords`) });
                 return; 
             }
 
@@ -143,21 +143,21 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(
                     new SelectMenuBuilder()
-                        .setCustomId(generateInteractionComponentId(PLAY_OPTIONS.track_select, user.id))
-                        .setPlaceholder(`${user.username}-sama, please select an option`)
+                        .setCustomId(generateInteractionComponentId(PLAY_OPTIONS.track_select, member.id))
+                        .setPlaceholder(`${member.nickname}-sama, please select an option`)
                         .addOptions(menuOptBuilder)
                 );
 
             handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.next ? selectTrackInsert :  selectTrackPush;
 
-            interaction.followUp({ content: `**${interaction.user.username}**-sama`, embeds: [embed], components: [actionRow] });
+            interaction.followUp({ content: `**${member.nickname}**-sama`, embeds: [embed], components: [actionRow] });
         }).catch(err => {});
     } // end of else the given is keyword
 
     return result;
 }
 
-async function createTrack(url: string, author: User){
+async function createTrack(url: string, author: GuildMember){
     const trackInfo = await ytdl.getBasicInfo(url);
     const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
     return new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, author);
@@ -171,17 +171,18 @@ export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegat
 
 async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuInteraction) {
     try{
+        const member = interaction.member as GuildMember;
         const mPlayer = client.music.get(interaction.guildId);
         
         if(!mPlayer) { 
             throw new Error('Outdated session');
         }
 
-        const track = await createTrack(interaction.values[0], interaction.user);
+        const track = await createTrack(interaction.values[0], member);
 
         mPlayer.queue.push(track);
         interaction.message.delete();
-        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has enqueued`, embeds: [track.createEmbedThumbnail()] });
+        interaction.followUp({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()] });
     
         mPlayer.playIfIdling(client);    
     }
@@ -193,17 +194,18 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
 
 async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenuInteraction) {
     try{
+        const member = interaction.member as GuildMember;
         const mPlayer = client.music.get(interaction.guildId);
 
         if(!mPlayer) { 
             throw new Error('Outdated session');
         }
 
-        const track = await createTrack(interaction.values[0], interaction.user);
+        const track = await createTrack(interaction.values[0], member);
 
         mPlayer.queue.splice(1, 0, track);
         interaction.message.delete();
-        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has inserted`, embeds: [track.createEmbedThumbnail()] });
+        interaction.followUp({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()] });
     
         mPlayer.playIfIdling(client);    
     }

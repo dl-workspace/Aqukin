@@ -40,29 +40,31 @@ export default new Command({
         switch(args.getSubcommand()){
             case REMOVE_OPTIONS.track:{
                 if(mPlayer.queue.length < 2){
-                    interaction.followUp({ content: `**${interaction.user.username}**-sama, there is no track/song next in queue ╮ (︶︿︶) ╭` });
+                    interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} there is no track/song next in queue`) });
                     return;
                 }
         
-                const value = args.get('index')?.value as number || mPlayer.queue.length-1;
+                const value = (args.get('index')?.value as number) || mPlayer.queue.length-1;
         
                 if(mPlayer.queue.length < value + 1){
-                    interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} could not find track indexed at \`${value}\`
-                    Please try something between \`1\` and \`${mPlayer.queue.length-1}\`` });
+                    interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} could not find track indexed at \`${value}\`
+                    Please try something between \`1\` and \`${mPlayer.queue.length-1}\``) });
                 }
                 else{
                     const trackName = mPlayer.queue[value].title;
                     mPlayer.queue.splice(value, 1);
                     mPlayer.updatePlayingStatusMsg();
-                    interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has has removed removed track \`${trackName}\` from the queue (っ ˘ω˘ς)` });
+                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed removed track \`${trackName}\` from the queue`) });
                 }
+                break;
             }
 
             case REMOVE_OPTIONS.duplicate:{
                 mPlayer.queue = await removeDuplicate(mPlayer.queue);
 
                 mPlayer.updatePlayingStatusMsg();
-                interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has has removed duplicated tracks from the queue 乁 (• ω • 乁)` });        
+                interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed duplicated tracks from the queue`) });
+                break;
             }
         }
     }

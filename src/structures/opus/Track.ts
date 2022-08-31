@@ -1,4 +1,4 @@
-import { User } from "discord.js";
+import { GuildMember } from "discord.js";
 import ytdl from "ytdl-core";
 import { BaseEmbed, formatDuration } from "../Utils";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
@@ -8,11 +8,11 @@ export class Track {
     url: string;
     title: string;
     duration: number;
-    requester: User;
+    requester: GuildMember;
     seek?: string | number;
     resource?: AudioResource;
 
-	constructor (id: string, url: string, title: string, duration: number, requester: User){
+	constructor (id: string, url: string, title: string, duration: number, requester: GuildMember){
         this.id = id;
         this.url = url;
         this.title = title;
@@ -53,9 +53,13 @@ export class Track {
         return this.BaseEmbedMusic()
             .setTitle(`Track`)
             .addFields(
-                { name: 'Requested By', value: `${this.requester.username}-sama`, inline: true },
+                { name: 'Requested By', value: this.getRequester(), inline: true },
                 { name: 'Lenght', value: `${this.duration > 0 ? formatDuration(this.duration) : `Live`}`, inline: true },
             )
+    }
+
+    getRequester(){
+        return `${this.requester.nickname || this.requester.user.username}-sama`;
     }
 
     createEmbedThumbnail(){

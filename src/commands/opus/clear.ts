@@ -8,16 +8,13 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     
     execute: async({ client, interaction, args }) => {
-        let reply = `**${interaction.user.username}**-sama, `;
+        let reply = client.replyMsgAuthor(interaction.member, `no need to clear the queue as there is no track upcoming`);
         const mPlayer = client.music.get(interaction.guildId);
 
         if(mPlayer.queue.length > 1) {
             mPlayer.queue.splice(1);
-            reply += `${client.user.username} has cleared the queue (っ ˘ω˘ς)`;
+            reply = client.replyMsgAuthor(interaction.member, `${client.user.username} has cleared the queue`);
             mPlayer.updatePlayingStatusMsg();
-        }
-        else{
-            reply += `no need to clear the queue as there is no track upcoming ╮ (︶︿︶) ╭`;
         }
 
         interaction.followUp({ content: reply });

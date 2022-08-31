@@ -41,6 +41,6 @@ export default new Command({
         mPlayer.queue[0].setVolume(value);
 
         mPlayer.updatePlayingStatusMsg();
-        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has set the${extraReply} volume to \`${mPlayer.queue[0].getVolume()}\`` });
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has set the${extraReply} volume to \`${mPlayer.queue[0].getVolume()}\``) });
     }
 });

@@ -106,7 +106,6 @@ async function createGuildinfoEmbed(guild: Guild){
         { name: "Joined At", value: guild.joinedAt.toLocaleDateString(), inline: true },
         { name: "Create At", value: guild.createdAt.toLocaleDateString(), inline: true },
         { name: "Owner", value: `${(await guild.fetchOwner()).user.username}-sama`, inline: true },
-
         // { name: "Invite Link", value: `[guild.vanityURLCode](${guild.vanityURLCode})`, inline: true },
         );
 }

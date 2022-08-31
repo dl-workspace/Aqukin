@@ -57,25 +57,29 @@ export default new Command({
 
 /* This function is for generating an embed with the queue information */
 export async function generateQueueEmbed(i: number, queue: Track[], client: ExtendedClient) {
-    let info: String;
-    let start = QUEUE_EMBED_PAGE_STEP*i+1;
-    let end = start+QUEUE_EMBED_PAGE_STEP;
-    end = end > queue.length ? queue.length : end;
-
-    const next = queue.slice(start, end);
-    // checks if there's anything next in queue
-    if (next.length !== 0){
-        let j = start;
-        info = next.map(track => `${j++}) [${track.title}](${track.url}) | \`${formatDuration(track.duration)}\` | requested by **${track.requester.username}**-sama`).join("\n\n");
-    } // end of if
-    else { info = "Currently no track is next in queueヾ (= `ω´ =) ノ”"; } // else next in queue is empty
-
-    // construct the embed(s)
-    if(i==0 || !info.startsWith("Currently")){
-        const embed = BaseEmbed()
-            .setTitle(`Page ${i+1}/${Math.ceil(queue.length/QUEUE_EMBED_PAGE_STEP)}`)
-            .setDescription(`⚓ Currently playing ▶️\n [${queue[0].title}](${queue[0].url}) | \`${formatDuration(queue[0].duration)}\` | requested by **${queue[0].requester.username}**-sama\n\n⚓ Next in queue ⏭️\n${info}`);
-        return embed;
-    }
+    try{
+        let info: String;
+        let start = QUEUE_EMBED_PAGE_STEP*i+1;
+        let end = start+QUEUE_EMBED_PAGE_STEP;
+        end = end > queue.length ? queue.length : end;
     
+        const next = queue.slice(start, end);
+        // checks if there's anything next in queue
+        if (next.length !== 0){
+            let j = start;
+            info = next.map(track => `${j++}) [${track.title}](${track.url}) | \`${formatDuration(track.duration)}\` | requested by ${queue[0].getRequester()}`).join("\n\n");
+        } // end of if
+        else { info = "Currently no track is next in queueヾ (= `ω´ =) ノ”"; } // else next in queue is empty
+    
+        // construct the embed(s)
+        if(i==0 || !info.startsWith("Currently")){
+            const embed = BaseEmbed()
+                .setTitle(`Page ${i+1}/${Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)}`)
+                .setDescription(`⚓ Currently playing ▶️\n [${queue[0].title}](${queue[0].url}) | \`${formatDuration(queue[0].duration)}\` | requested by **${queue[0].getRequester()}**-sama\n\n⚓ Next in queue ⏭️\n${info}`);
+            return embed;
+        }
+    }
+    catch(err){
+        console.log(err);
+    }
 } // end of gerenateQueueEmbed(...) helper function

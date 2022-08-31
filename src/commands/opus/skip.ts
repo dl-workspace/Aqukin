@@ -15,6 +15,6 @@ export default new Command({
         mPlayer.subscription.player.unpause();
         mPlayer.subscription.player.stop();
 
-        interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} has skipped track ヾ (⌐ ■ _ ■) ノ ♪ \`${mPlayer.queue[0].title}\`` });
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has skipped track \`${mPlayer.queue[0].title}\``) });
     }
 });

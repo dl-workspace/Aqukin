@@ -9,18 +9,15 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     
     execute: async({ client, interaction, args }) => {
-        let reply = `**${interaction.user.username}**-sama, `;
         const mPlayer = client.music.get(interaction.guildId);
 
         if(mPlayer.subscription.player.state.status === AudioPlayerStatus.Paused){
             mPlayer.subscription.player.unpause();
             mPlayer.updatePlayingStatusMsg();
-            reply += `${client.user.username} has resume has resumed audio streaming \\ (★ ω ★) /`;
+            interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has resume has resumed audio streaming`) });
         }
         else{
-            reply += `the player is not currently paused`;
-        }
-        
-        interaction.followUp({ content: reply });
+            interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `the player is not currently paused`) });
+        }        
     }
 });

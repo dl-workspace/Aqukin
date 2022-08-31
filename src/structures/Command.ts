@@ -10,7 +10,6 @@ export enum COMMAND_TAGS {
 export enum COMMANDS {
     // info commands
     info = 'info',
-    ping = 'ping',
 
     // utilities commands
     delete = 'delete',

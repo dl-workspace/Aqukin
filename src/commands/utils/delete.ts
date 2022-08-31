@@ -17,11 +17,11 @@ export default new Command({
     }],
 
     execute: async({ client, interaction, args }) => {
-        const { user, channel } = interaction;
+        const { channel } = interaction;
         const num = args.get('num')?.value as number || 10;
 
         await channel.bulkDelete(num, true).then(async (deleted) => {
-            interaction.editReply({ content: `**${user.username}**-sama, ${client.user.username} has deleted \`${deleted.size}\` messages` });
-        }).catch(err => channel.send({ content: `**${user.username}**-sama, \`${err}\`` }));
+            interaction.editReply({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has deleted \`${deleted.size}\` messages`) });
+        }).catch(err => channel.send({ content: `**${interaction.member.nickname}**-sama, \`${err}\`` }));
     }
 });

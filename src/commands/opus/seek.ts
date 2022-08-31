@@ -24,18 +24,13 @@ export default new Command({
 
         const timestamp = convertInput(input as string);
 
-        if(timestamp >= mPlayer.queue[0].duration){ 
-            interaction.followUp({ content: `**${interaction.user.username}**-sama, the timestamp should be less than the track length \`${formatDuration(mPlayer.queue[0].duration)}\` ლ (¯ ロ ¯ "ლ)` }); 
+        if(timestamp >= mPlayer.queue[0].duration){
+            interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `the timestamp should be less than the track length \`${formatDuration(mPlayer.queue[0].duration)}\``) });
         }
         else{
             mPlayer.queue[0].seek = timestamp;
             mPlayer.playFromQueue(client);
-
-            // mPlayer.queue.splice(1, 0, mPlayer.queue[0]);
-            // mPlayer.queue[1].seek = timestamp;
-            // mPlayer.subscription.player.stop();
-
-            interaction.followUp({ content: `**${interaction.user.username}**-sama, ${client.user.username} will now move the current track to position \`${formatDuration(timestamp)}\`` });
+            interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `will now move the current track to position \`${formatDuration(timestamp)}\``) });
         }
     }
 });
