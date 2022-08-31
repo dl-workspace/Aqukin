@@ -32,7 +32,7 @@ export default new Event('interactionCreate', async (interaction) => {
                 const { channel } = member.voice;
 
                 if(!channel){
-                    return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in a voice channel to use this command to use this command`), ephemeral : true });
+                    return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in a voice channel to use this command`), ephemeral : true });
                 }
 
                 if(mPlayer){

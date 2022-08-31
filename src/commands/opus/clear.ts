@@ -8,7 +8,7 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     
     execute: async({ client, interaction, args }) => {
-        let reply = client.replyMsgAuthor(interaction.member, `no need to clear the queue as there is no track upcoming`);
+        let reply = client.replyMsgAuthor(interaction.member, `the queue is already cleared`);
         const mPlayer = client.music.get(interaction.guildId);
 
         if(mPlayer.queue.length > 1) {
