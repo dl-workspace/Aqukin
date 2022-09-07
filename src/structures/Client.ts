@@ -38,19 +38,20 @@ export class ExtendedClient extends Client{
         process.on("warning", e => console.warn(e.stack)) // debug
     }
 
-    async importFile(filePath: string){
+    private async importFile(filePath: string){
         return (await import(filePath))?.default;
     }
 
-    async registerEvents(){
+    private async registerEvents(){
         const eventFiles = await globPromise(`${__dirname}/../events/*{.ts,.js}`);
+        
         eventFiles.forEach(async filePath => {
             const event: Event<keyof ClientEvents> = await this.importFile(filePath);
             this.on(event.event, event.execute);
         });
     }
 
-    async registerCommandsHelper({ guildId, commands }: RegisterCommandsOptions){
+    private async registerCommandsHelper({ guildId, commands }: RegisterCommandsOptions){
         if(guildId){
             this.guilds.cache.get(guildId)?.commands.set(commands);
             console.log(`Registering commands to ${guildId}`);
@@ -61,7 +62,7 @@ export class ExtendedClient extends Client{
         }
     }
 
-    async registerCommands(){
+    private async registerCommands(){
         const slashCommands: ApplicationCommandDataResolvable[] = [];
         const commandFiles = await globPromise(`${__dirname}/../commands/*/*{.ts,.js}`);
 
@@ -83,7 +84,7 @@ export class ExtendedClient extends Client{
         });
     }
 
-    async alive(client: ExtendedClient){
+    private async alive(client: ExtendedClient){
         setInterval(() => { 
             client.music.forEach(async mPlayer => {
                 const { connection } = mPlayer.subscription;
@@ -91,7 +92,7 @@ export class ExtendedClient extends Client{
                     const memberList = voiceChannel.members.filter(mem => !mem.user.bot);
 
                     if(memberList.size === 0){
-                        mPlayer.textChannel.send({ content: `Dear masters, please don't leave ${client.user.username} alone in a voice chat room like that (｡╯︵╰｡)` });
+                        mPlayer.textChannel.send({ content: this.replyMsg(`${client.user.username} will now leave since there are no listener left~`) });
                         mPlayer.subscription.connection.disconnect();
                     }
                 }).catch(err => console.log(err));
