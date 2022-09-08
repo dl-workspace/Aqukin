@@ -5,16 +5,6 @@ import { ExtendedClient } from "../Client";
 import { formatBool } from "../Utils";
 import { Track } from "./Track";
 
-class ExtendedAudioPlayer extends AudioPlayer{
-    constructor(options?: CreateAudioPlayerOptions){
-        super(options);
-        
-        this.on('error', (err) => {
-            console.error(err);
-        });
-    }
-}
-
 export class OpusPlayer{
     id: string;
     textChannel: GuildTextBasedChannel;
@@ -38,6 +28,7 @@ export class OpusPlayer{
         })
             .on('error', (err) =>{
                 console.log(err);
+                this.textChannel.send({ content: `${err}` });
             })
             .on(VoiceConnectionStatus.Signalling, async (oldState, newState) => {
                 console.log('connection signalling');
@@ -79,7 +70,11 @@ export class OpusPlayer{
                 }
             });
 
-        const player = new ExtendedAudioPlayer(playerOptions)
+        const player = new AudioPlayer(playerOptions)
+            .on('error', (err) => {
+                console.error(err);
+                this.textChannel.send({ content: `${err}` });
+            })
             .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
                 try{
                     if(!this.queue[0]) { return; }
@@ -111,7 +106,7 @@ export class OpusPlayer{
 
                     this.queue.shift();
                     await this.processQueue(client);
-                } catch(err) { }
+                } catch(err) {}
             })
             
         this.subscription = connection.subscribe(player);

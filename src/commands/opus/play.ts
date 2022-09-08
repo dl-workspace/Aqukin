@@ -82,7 +82,9 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                 result.push(track);
 
                 interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [track.createEmbedThumbnail()] });
-            }).catch(err => {});
+            }).catch(err => { 
+                interaction.followUp({ content: `${err}` }) 
+            });
         } // video link
                 
         // if the queury is a youtube playlist link
@@ -112,7 +114,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                         { name: 'Size', value: `${result.length}`, inline: true },
                     );
                     interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has ${subCommand}`), embeds: [embed] });
-            }).catch(err => {});
+            }).catch(err => { interaction.followUp({ content: `${err}` }) });
         } // playlist link
     }
     // else try searching youtube with the given argument
@@ -151,7 +153,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.next ? selectTrackInsert :  selectTrackPush;
 
             interaction.followUp({ content: `**${member.nickname}**-sama`, embeds: [embed], components: [actionRow] });
-        }).catch(err => {});
+        }).catch(err => { interaction.followUp({ content: `${err}` }) });
     } // end of else the given is keyword
 
     return result;
