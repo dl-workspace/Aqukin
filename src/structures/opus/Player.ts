@@ -2,7 +2,7 @@ import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscrip
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
-import { formatBool } from "../Utils";
+import { BaseEmbed, formatBool } from "../Utils";
 import { Track } from "./Track";
 
 export class OpusPlayer{
@@ -37,6 +37,7 @@ export class OpusPlayer{
                 console.log('connection Connecting');
             })
             .on(VoiceConnectionStatus.Ready, async (oldState, newState) => {
+                this.timeOut();
                 console.log('connection Ready');
             })
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
@@ -47,27 +48,33 @@ export class OpusPlayer{
                     ]);
                     // Seems to be reconnecting to a new channel - ignore disconnect
                 } catch (err) {
+                    const embed = BaseEmbed()
+                    .setTitle('Matta ne~')
+                    .setDescription(`${client.user.username} will now leave, this music session can be reconnected within 20 seconds`)
+                    .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
+                    this.textChannel.send({ embeds: [embed] });
+
                     // Seems to be a real disconnect which SHOULDN'T be recovered from
-                    connection.destroy();
+                    setTimeout( () => {
+                        if(connection.state.status === VoiceConnectionStatus.Disconnected){
+                            try{
+                                connection.destroy();
+                            } catch(err) {}      
+                        }
+                    }, 20000 );
                 }
             })
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
-                try{
-                    this.textChannel.send({ content: `Matta ne~` });
-                }
-                catch(err) {}
-                finally{
-                    this.subscription.player.stop();
-                    this.subscription.unsubscribe();
-    
-                    this.queue.splice(0);
-                    this.loopQueue.splice(0);
-                    this.currQueuePage.clear();
-    
-                    if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
-    
-                    client.music.delete(this.id);
-                }
+                this.subscription.player.stop();
+                this.subscription.unsubscribe();
+
+                this.queue.splice(0);
+                this.loopQueue.splice(0);
+                this.currQueuePage.clear();
+
+                if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}); }
+
+                client.music.delete(this.id);
             });
 
         const player = new AudioPlayer(playerOptions)
@@ -121,6 +128,24 @@ export class OpusPlayer{
         client.music.set(this.id, this);
     }
 
+    reconnect(){
+        if(this.subscription.connection.state.status === VoiceConnectionStatus.Disconnected){
+            this.subscription.connection.rejoin();
+            return true;
+        }
+        return false;
+    }
+
+    async timeOut(){
+        setTimeout( () => {
+            if(this.subscription.player.state.status === AudioPlayerStatus.Idle){
+                try{
+                    this.subscription.connection.disconnect();
+                } catch(err) { }
+            }
+        }, 300000 );
+    }
+
     async processQueue(client: ExtendedClient){
         let track = this.queue[0];
 
@@ -132,9 +157,8 @@ export class OpusPlayer{
             }
             else{
                 try{
-                    this.subscription.connection.destroy();
-                    this.textChannel.send({ content: "The queue has ended, arigatou gozaimatshita ☆ ⌒ ヽ (* '､ ^ *) chu~", files: ["https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169"] })
-                        .then(msg => setTimeout( () => msg.delete().catch(console.error), 5200 ));
+                    this.timeOut();
+                    this.textChannel.send({ content: client.replyMsg('The queue has ended~') });
                 } catch (err) { console.log(err); }
                 return;
             }

@@ -17,6 +17,7 @@ export enum COMMANDS {
 
     // music commands
     clear = 'clear',
+    connect = 'connect',
     disconnect = 'disconnect',
     loop = 'loop',
     play = 'play',
