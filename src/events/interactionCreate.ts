@@ -36,8 +36,6 @@ export default new Event('interactionCreate', async (interaction) => {
                 }
 
                 if(mPlayer){
-                    console.log(mPlayer.subscription.connection);
-
                     if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
                         return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in the same voice channel with ${client.user.username} to use this command`), ephemeral : true });
                     }

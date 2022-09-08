@@ -15,6 +15,7 @@ export class OpusPlayer{
     loopQueue: Track[];
     volume: number;
     statusMsg?: Message;
+    timer?: NodeJS.Timeout;
     currQueuePage: Collection<String, number>;
 
     constructor({ client, interaction, args }: ExecuteOptions, playerOptions?: CreateAudioPlayerOptions){
@@ -37,7 +38,6 @@ export class OpusPlayer{
                 console.log('connection Connecting');
             })
             .on(VoiceConnectionStatus.Ready, async (oldState, newState) => {
-                this.timeOut();
                 console.log('connection Ready');
             })
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
@@ -87,6 +87,8 @@ export class OpusPlayer{
                     if(!this.queue[0]) { return; }
 
                     if(oldState.status === AudioPlayerStatus.Buffering){
+                        clearTimeout(this.timer);
+                        
                         if(this.queue[0].seek){
                             this.queue[0].seek = 0;
                         }
@@ -137,7 +139,7 @@ export class OpusPlayer{
     }
 
     async timeOut(){
-        setTimeout( () => {
+        this.timer = setTimeout( () => {
             if(this.subscription.player.state.status === AudioPlayerStatus.Idle){
                 try{
                     this.subscription.connection.disconnect();

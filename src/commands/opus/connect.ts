@@ -21,6 +21,7 @@ export default new Command({
         }
         else{
             mPlayer = new OpusPlayer({ client, interaction, args });
+            mPlayer.timeOut();
             interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has established voice connection`) });
         }
     }
