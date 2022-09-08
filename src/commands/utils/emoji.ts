@@ -23,7 +23,7 @@ export default new Command({
         const emoji = interaction.guild.emojis.cache.find(emoji => emoji.name.toLowerCase() === input.toLowerCase());
         
         if(!emoji){
-            interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} coudln't find any emoji named \`${input}\``), ephemeral : true });
+            return interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} coudln't find any emoji named \`${input}\``), ephemeral : true });
         }
 
         interaction.followUp({ content: emoji.animated ? `<a:${emoji.name}:${emoji.id}>` : `<:${emoji.identifier}>` });
