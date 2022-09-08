@@ -136,12 +136,11 @@ export class OpusPlayer{
         client.music.set(this.id, this);
     }
 
-    reconnect(){
+    async reconnect(){
         let result = false;
 
         if(this.subscription.connection.state.status === VoiceConnectionStatus.Disconnected){
-            this.subscription.connection.rejoin();
-            result = true;
+            result = this.subscription.connection.rejoin();
         }
 
         return result;

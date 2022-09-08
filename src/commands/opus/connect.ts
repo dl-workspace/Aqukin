@@ -12,7 +12,7 @@ export default new Command({
         let mPlayer = client.music.get(interaction.guildId);
 
         if(mPlayer){
-            if(mPlayer.reconnect() == true){
+            if(await mPlayer.reconnect() === true){
                 interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has re-established voice connection`) });
             }
             else{
