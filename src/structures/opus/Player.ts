@@ -5,6 +5,12 @@ import { ExtendedClient } from "../Client";
 import { BaseEmbed, formatBool } from "../Utils";
 import { Track } from "./Track";
 
+const enum TIMERS{
+    reconnect = 5_000,
+    destroy = 20_000,
+    disconnect = 300_000,
+}
+
 export class OpusPlayer{
     id: string;
     textChannel: GuildTextBasedChannel;
@@ -43,11 +49,13 @@ export class OpusPlayer{
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
                 try{
                     await Promise.race([
-                        entersState(connection, VoiceConnectionStatus.Signalling, 5_000),
-                        entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
+                        entersState(connection, VoiceConnectionStatus.Signalling, TIMERS.reconnect),
+                        entersState(connection, VoiceConnectionStatus.Connecting, TIMERS.reconnect),
                     ]);
                     // Seems to be reconnecting to a new channel - ignore disconnect
                 } catch (err) {
+                    clearTimeout(this.timer);
+
                     const embed = BaseEmbed()
                     .setTitle('Matta ne~')
                     .setDescription(`${client.user.username} will now leave, this music session can be reconnected within 20 seconds`)
@@ -61,7 +69,7 @@ export class OpusPlayer{
                                 connection.destroy();
                             } catch(err) {}      
                         }
-                    }, 20000 );
+                    }, TIMERS.destroy );
                 }
             })
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
@@ -129,11 +137,14 @@ export class OpusPlayer{
     }
 
     reconnect(){
+        let result = false;
+
         if(this.subscription.connection.state.status === VoiceConnectionStatus.Disconnected){
             this.subscription.connection.rejoin();
-            return true;
+            result = true;
         }
-        return false;
+
+        return result;
     }
 
     async timeOut(){
@@ -145,7 +156,7 @@ export class OpusPlayer{
                     this.subscription.connection.disconnect();
                 } catch(err) { }
             }
-        }, 300000 );
+        }, TIMERS.disconnect );
     }
 
     async processQueue(client: ExtendedClient){
