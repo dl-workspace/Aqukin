@@ -86,9 +86,7 @@ export class OpusPlayer{
                 try{
                     if(!this.queue[0]) { return; }
 
-                    if(oldState.status === AudioPlayerStatus.Buffering){
-                        clearTimeout(this.timer);
-                        
+                    if(oldState.status === AudioPlayerStatus.Buffering){                        
                         if(this.queue[0].seek){
                             this.queue[0].seek = 0;
                         }
@@ -139,6 +137,8 @@ export class OpusPlayer{
     }
 
     async timeOut(){
+        clearTimeout(this.timer);
+
         this.timer = setTimeout( () => {
             if(this.subscription.player.state.status === AudioPlayerStatus.Idle){
                 try{
