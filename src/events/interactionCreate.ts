@@ -40,8 +40,6 @@ export default new Event('interactionCreate', async (interaction) => {
                         return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in the same voice channel with ${client.user.username} to use this command`), ephemeral : true });
                     }
                     else {
-                        mPlayer.reconnect();
-
                         if(command.name != COMMANDS.play && command.name != COMMANDS.connect){
                             if(channel.members.size > 2){
                                 if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)){
@@ -55,6 +53,8 @@ export default new Event('interactionCreate', async (interaction) => {
                                 }
                             }
                         }
+                        
+                        mPlayer.reconnect();
                     }
                 }
                 else if(command.name != COMMANDS.play && command.name != COMMANDS.connect){

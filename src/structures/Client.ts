@@ -92,9 +92,9 @@ export class ExtendedClient extends Client{
                     const memberList = voiceChannel.members.filter(mem => !mem.user.bot);
 
                     if(memberList.size === 0){
-                        clearTimeout(mPlayer.timer);
-                        connection.disconnect();
-                        mPlayer.textChannel.send({ content: this.replyMsg(`${client.user.username} will now leave since there are no listener left~`) });
+                        clearTimeout(mPlayer.disconnectTimer);
+                        mPlayer.disconnect();
+                        mPlayer.textChannel.send({ content: this.replyMsg(`Since there are no listener left`) });
                     }
                 }).catch(err => console.log(err));
             });

@@ -10,8 +10,8 @@ export default new Command({
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId);
 
-        if(mPlayer.subscription.connection.disconnect()){
-            interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has disconnected per your request`) });
+        if(mPlayer.disconnect()){
+            interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `as requested`) });
         }
         else{
             interaction.deleteReply();

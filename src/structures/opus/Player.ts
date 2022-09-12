@@ -1,4 +1,4 @@
-import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus } from "@discordjs/voice";
+import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice";
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
@@ -21,7 +21,8 @@ export class OpusPlayer{
     loopQueue: Track[];
     volume: number;
     statusMsg?: Message;
-    timer?: NodeJS.Timeout;
+    disconnectTimer?: NodeJS.Timeout;
+    destroyTimer?: NodeJS.Timeout;
     currQueuePage: Collection<String, number>;
 
     constructor({ client, interaction, args }: ExecuteOptions, playerOptions?: CreateAudioPlayerOptions){
@@ -54,16 +55,16 @@ export class OpusPlayer{
                     ]);
                     // Seems to be reconnecting to a new channel - ignore disconnect
                 } catch (err) {
-                    clearTimeout(this.timer);
+                    clearTimeout(this.disconnectTimer);
 
                     const embed = BaseEmbed()
-                    .setTitle('Matta ne~')
-                    .setDescription(`${client.user.username} will now leave, this music session can be reconnected within 20 seconds`)
-                    .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
+                        .setTitle('Matta ne~')
+                        .setDescription(`${client.user.username} will now leave\nThis music session can be re-established within 20 seconds`)
+                        .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
                     this.textChannel.send({ embeds: [embed] });
 
                     // Seems to be a real disconnect which SHOULDN'T be recovered from
-                    setTimeout( () => {
+                    this.destroyTimer = setTimeout( () => {
                         if(connection.state.status === VoiceConnectionStatus.Disconnected){
                             try{
                                 connection.destroy();
@@ -136,23 +137,42 @@ export class OpusPlayer{
         client.music.set(this.id, this);
     }
 
+    getConnection(){
+        return getVoiceConnection(this.id);
+    }
+
+    async disconnect(){
+        const { channelId } = this.subscription.connection.joinConfig;
+
+        if(this.subscription.connection.disconnect()){
+            this.subscription.connection.joinConfig.channelId = channelId;
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
     async reconnect(){
         let result = false;
 
         if(this.subscription.connection.state.status === VoiceConnectionStatus.Disconnected){
+            clearTimeout(this.destroyTimer);
             result = this.subscription.connection.rejoin();
+            this.subscription = this.subscription.connection.subscribe(this.subscription.player);
         }
 
         return result;
     }
 
     async timeOut(){
-        clearTimeout(this.timer);
+        clearTimeout(this.disconnectTimer);
 
-        this.timer = setTimeout( () => {
+        this.disconnectTimer = setTimeout( () => {
             if(this.subscription.player.state.status === AudioPlayerStatus.Idle){
                 try{
-                    this.subscription.connection.disconnect();
+                    this.textChannel.send({ content: `Since no track has been played for the pass 5 minutes` });
+                    this.disconnect();
                 } catch(err) { }
             }
         }, TIMERS.disconnect );
