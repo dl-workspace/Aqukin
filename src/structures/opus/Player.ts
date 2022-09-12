@@ -59,7 +59,10 @@ export class OpusPlayer{
 
                     const embed = BaseEmbed()
                         .setTitle('Matta ne~')
-                        .setDescription(`${client.user.username} will now leave\nThis music session can be re-established within 20 seconds`)
+                        .setDescription(`${client.user.username} will now leave
+                        This music session can be re-established within 20 seconds
+                        To re-establish the session in the same VC room, use any of the approved music commands
+                        To re-establish the session in another VC room, use the connect command`)
                         .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
                     this.textChannel.send({ embeds: [embed] });
 
@@ -142,6 +145,7 @@ export class OpusPlayer{
     }
 
     async disconnect(){
+        // return this.subscription.connection.disconnect();
         const { channelId } = this.subscription.connection.joinConfig;
 
         if(this.subscription.connection.disconnect()){
@@ -153,11 +157,16 @@ export class OpusPlayer{
         }
     }
 
-    async reconnect(){
+    async reconnect(channelId?: string){
         let result = false;
 
         if(this.subscription.connection.state.status === VoiceConnectionStatus.Disconnected){
             clearTimeout(this.destroyTimer);
+
+            if(channelId){
+                this.subscription.connection.joinConfig.channelId = channelId;
+            }
+            
             result = this.subscription.connection.rejoin();
             this.subscription = this.subscription.connection.subscribe(this.subscription.player);
         }

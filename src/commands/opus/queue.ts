@@ -21,37 +21,42 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     
     execute: async({ client, interaction, args }) => {
-        let currPage = 0;
         const mPlayer = client.music.get(interaction.guildId);
-        mPlayer.currQueuePage.set(interaction.user.id, currPage);
-
-        const queueEmbed = await generateQueueEmbed(currPage, mPlayer.queue, client);
-        
-        const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
-            .addComponents([
-                new ButtonBuilder()
-                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.start, interaction.user.id))
-                    .setLabel('<<')
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.back, interaction.user.id))
-                    .setLabel('<')
-                    .setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder()
-                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.next, interaction.user.id))
-                    .setLabel('>')
-                    .setStyle(ButtonStyle.Secondary),
-                new ButtonBuilder()
-                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.end, interaction.user.id))
-                    .setLabel('>>')
-                    .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                    .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.done, interaction.user.id))
-                    .setLabel('Done')
-                    .setStyle(ButtonStyle.Danger),
-            ]);
-
-        interaction.followUp({ embeds: [queueEmbed], components: [actionRow] });
+        if(mPlayer.queue.length > 0){
+            let currPage = 0;
+            mPlayer.currQueuePage.set(interaction.user.id, currPage);
+    
+            const queueEmbed = await generateQueueEmbed(currPage, mPlayer.queue, client);
+            
+            const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+                .addComponents([
+                    new ButtonBuilder()
+                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.start, interaction.user.id))
+                        .setLabel('<<')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.back, interaction.user.id))
+                        .setLabel('<')
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.next, interaction.user.id))
+                        .setLabel('>')
+                        .setStyle(ButtonStyle.Secondary),
+                    new ButtonBuilder()
+                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.end, interaction.user.id))
+                        .setLabel('>>')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.done, interaction.user.id))
+                        .setLabel('Done')
+                        .setStyle(ButtonStyle.Danger),
+                ]);
+    
+            interaction.followUp({ embeds: [queueEmbed], components: [actionRow] });
+        }
+        else{
+            interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `the queue is empty`) });
+        }
     }
 });
 

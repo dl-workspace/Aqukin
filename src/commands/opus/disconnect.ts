@@ -10,11 +10,18 @@ export default new Command({
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId);
 
-        if(mPlayer.disconnect()){
+        if(await mPlayer.disconnect()){
             interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `as requested`) });
         }
         else{
             interaction.deleteReply();
         }
+
+        // if(mPlayer.disconnect()){
+        //     interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `as requested`) });
+        // }
+        // else{
+        //     interaction.deleteReply();
+        // }
     }
 });

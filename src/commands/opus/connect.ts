@@ -1,3 +1,4 @@
+import { VoiceConnectionStatus } from "@discordjs/voice";
 import { PermissionFlagsBits } from "discord.js";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
@@ -12,11 +13,19 @@ export default new Command({
         let mPlayer = client.music.get(interaction.guildId);
 
         if(mPlayer){
-            if(await mPlayer.reconnect() === true){
-                interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has re-established voice connection`) });
+            if(mPlayer.subscription.connection.state.status !== VoiceConnectionStatus.Disconnected){
+                interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} is already connected to a different voice channel`) });
             }
             else{
-                interaction.deleteReply();
+                let result = await mPlayer.reconnect(interaction.member.voice.channelId);
+                console.log(result);
+    
+                if(result){
+                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has re-established voice connection`) });
+                }
+                else{
+                    interaction.deleteReply();
+                }    
             }
         }
         else{

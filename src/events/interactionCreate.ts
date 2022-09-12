@@ -36,25 +36,27 @@ export default new Event('interactionCreate', async (interaction) => {
                 }
 
                 if(mPlayer){
-                    if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
-                        return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in the same voice channel with ${client.user.username} to use this command`), ephemeral : true });
-                    }
-                    else {
-                        if(command.name != COMMANDS.play && command.name != COMMANDS.connect){
-                            if(channel.members.size > 2){
-                                if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)){
-                                    if(command.name === COMMANDS.disconnect || command.name === COMMANDS.remove){
-                                        // implement a voting system here
-                                        return interaction.reply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} would require others permission to execute this command`), ephemeral : true });
-                                    }
-                                    else if(mPlayer.queue[0]?.requester.id != member.id){
-                                        return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you can only use this command on your own requested track`), ephemeral : true });
+                    if(command.name != COMMANDS.connect){
+                        if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
+                            return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in the same voice channel with ${client.user.username} to use this command`), ephemeral : true });
+                        }
+                        else {
+                            if(command.name != COMMANDS.play){
+                                if(channel.members.size > 2){
+                                    if(!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)){
+                                        if(command.name === COMMANDS.disconnect || command.name === COMMANDS.remove){
+                                            // implement a voting system here
+                                            return interaction.reply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} would require others permission to execute this command`), ephemeral : true });
+                                        }
+                                        else if(mPlayer.queue[0]?.requester.id != member.id){
+                                            return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you can only use this command on your own requested track`), ephemeral : true });
+                                        }
                                     }
                                 }
                             }
+                            
+                            mPlayer.reconnect();
                         }
-                        
-                        mPlayer.reconnect();
                     }
                 }
                 else if(command.name != COMMANDS.play && command.name != COMMANDS.connect){
