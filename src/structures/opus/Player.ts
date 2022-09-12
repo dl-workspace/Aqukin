@@ -145,7 +145,6 @@ export class OpusPlayer{
     }
 
     async disconnect(){
-        // return this.subscription.connection.disconnect();
         const { channelId } = this.subscription.connection.joinConfig;
 
         if(this.subscription.connection.disconnect()){

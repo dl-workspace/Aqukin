@@ -16,11 +16,8 @@ export default new Command({
             if(mPlayer.subscription.connection.state.status !== VoiceConnectionStatus.Disconnected){
                 interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} is already connected to a different voice channel`) });
             }
-            else{
-                let result = await mPlayer.reconnect(interaction.member.voice.channelId);
-                console.log(result);
-    
-                if(result){
+            else{    
+                if(await mPlayer.reconnect(interaction.member.voice.channelId)){
                     interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has re-established voice connection`) });
                 }
                 else{

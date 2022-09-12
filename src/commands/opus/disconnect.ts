@@ -16,12 +16,5 @@ export default new Command({
         else{
             interaction.deleteReply();
         }
-
-        // if(mPlayer.disconnect()){
-        //     interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `as requested`) });
-        // }
-        // else{
-        //     interaction.deleteReply();
-        // }
     }
 });
