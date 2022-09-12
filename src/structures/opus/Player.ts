@@ -58,11 +58,10 @@ export class OpusPlayer{
                     clearTimeout(this.disconnectTimer);
 
                     const embed = BaseEmbed()
-                        .setTitle('Matta ne~')
-                        .setDescription(`${client.user.username} will now leave
-                        Within \`20\` seconds, to re-establish this music session:
-                        -In \`the same VC room\`, use any of the approved \`music commands\`
-                        -In \`another VC room\`, use the \`connect\` command`)
+                        .setTitle(`${client.user.username} will now leave, matta ne~ ヾ(＾ ∇ ＾)`)
+                        .setDescription(`Within \`20\` seconds, to re-establish this music session:
+                            -In \`the same VC room\`, use any of the approved \`music commands\`
+                            -In \`another VC room\`, use the \`connect\` command`)
                         .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
                     this.textChannel.send({ embeds: [embed] });
 

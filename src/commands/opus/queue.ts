@@ -22,6 +22,7 @@ export default new Command({
     
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId);
+        
         if(mPlayer.queue.length > 0){
             let currPage = 0;
             mPlayer.currQueuePage.set(interaction.user.id, currPage);
