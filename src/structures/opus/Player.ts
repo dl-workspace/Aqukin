@@ -60,9 +60,9 @@ export class OpusPlayer{
                     const embed = BaseEmbed()
                         .setTitle('Matta ne~')
                         .setDescription(`${client.user.username} will now leave
-                        This music session can be re-established within 20 seconds
-                        To re-establish the session in the same VC room, use any of the approved music commands
-                        To re-establish the session in another VC room, use the connect command`)
+                        Within \`20\` seconds, to re-establish this music session:
+                        -In \`the same VC room\`, use any of the approved \`music commands\`
+                        -In \`another VC room\`, use the \`connect\` command`)
                         .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
                     this.textChannel.send({ embeds: [embed] });
 
