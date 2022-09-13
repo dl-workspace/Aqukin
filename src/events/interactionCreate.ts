@@ -7,6 +7,7 @@ import { handleSelectTrackInteraction, PLAY_OPTIONS } from "../commands/opus/pla
 import { ExtendedClient } from "../structures/Client";
 import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
+import { VoiceConnectionStatus } from "@discordjs/voice";
 
 export default new Event('interactionCreate', async (interaction) => {
     if(interaction.isChatInputCommand()){
@@ -36,7 +37,12 @@ export default new Event('interactionCreate', async (interaction) => {
                 }
 
                 if(mPlayer){
-                    if(command.name != COMMANDS.connect){
+                    if(mPlayer.subscription.connection.state.status === VoiceConnectionStatus.Disconnected){
+                        if(command.name != COMMANDS.connect){
+                            return interaction.reply({ content: client.replyMsgErrorAuthor(member, `but the previous music session are just disconnected recently\nPlease wait a bit or use the \`connect\` command to restore it`) });
+                        }
+                    }
+                    else{
                         if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
                             return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you need to be in the same voice channel with ${client.user.username} to use this command`), ephemeral : true });
                         }
@@ -53,9 +59,7 @@ export default new Event('interactionCreate', async (interaction) => {
                                         }
                                     }
                                 }
-                            }
-                            
-                            mPlayer.reconnect();
+                            }                            
                         }
                     }
                 }

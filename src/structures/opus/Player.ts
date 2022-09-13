@@ -20,10 +20,10 @@ export class OpusPlayer{
     queue: Track[];
     loopQueue: Track[];
     volume: number;
+    currQueuePage: Collection<String, number>;
     statusMsg?: Message;
     disconnectTimer?: NodeJS.Timeout;
     destroyTimer?: NodeJS.Timeout;
-    currQueuePage: Collection<String, number>;
 
     constructor({ client, interaction, args }: ExecuteOptions, playerOptions?: CreateAudioPlayerOptions){
         this.id = interaction.guildId;
@@ -59,9 +59,7 @@ export class OpusPlayer{
 
                     const embed = BaseEmbed()
                         .setTitle(`${client.user.username} will now leave, matta ne~ ヾ(＾ ∇ ＾)`)
-                        .setDescription(`Within \`20\` seconds, to re-establish this music session:
-                            -In \`the same VC room\`, use any of the approved \`music commands\`
-                            -In \`another VC room\`, use the \`connect\` command`)
+                        .setDescription(`To re-establish this music session use the \`connect\` command while you are in a \`voice chat\`, within \`20 seconds\``)
                         .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
                     this.textChannel.send({ embeds: [embed] });
 

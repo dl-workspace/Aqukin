@@ -63,11 +63,11 @@ export class Track {
     }
 
     createEmbedThumbnail(){
-        return this.createEmbed().setThumbnail(`https://i.ytimg.com/vi/${this.id}/sddefault.jpg`);
+        return this.createEmbed().setThumbnail(`https://i.ytimg.com/vi/${this.id}/hqdefault.jpg`);
     }
 
     createEmbedImage(){
-        return this.createEmbed().setImage(`https://i.ytimg.com/vi/${this.id}/sddefault.jpg`);
+        return this.createEmbed().setImage(`https://i.ytimg.com/vi/${this.id}/mqdefault.jpg`);
     }
 
     creatEmbedFinished(){
