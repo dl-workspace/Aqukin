@@ -67,7 +67,7 @@ export class Track {
     }
 
     createEmbedImage(){
-        return this.createEmbed().setImage(`https://i.ytimg.com/vi/${this.id}/mqdefault.jpg`);
+        return this.createEmbed().setImage(`https://i.ytimg.com/vi/${this.id}/maxresdefault.jpg`);
     }
 
     creatEmbedFinished(){
