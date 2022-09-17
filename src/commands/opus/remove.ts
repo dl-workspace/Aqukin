@@ -54,7 +54,7 @@ export default new Command({
                     const trackName = mPlayer.queue[value].title;
                     mPlayer.queue.splice(value, 1);
                     mPlayer.updatePlayingStatusMsg();
-                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed removed track \`${trackName}\` from the queue`) });
+                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed track \`${trackName}\` from the queue`) });
                 }
                 break;
             }
