@@ -59,7 +59,7 @@ export class OpusPlayer{
 
                     const embed = BaseEmbed()
                         .setTitle(`${client.user.username} will now leave, matta ne~ ヾ(＾ ∇ ＾)`)
-                        .setDescription(`To re-establish this music session use the \`connect\` command while you are in a \`voice chat\`, within \`20 seconds\``)
+                        .setDescription(`To re-establish this music session, within \`20 seconds\`, use the \`connect\` command while you are in a \`voice chat\``)
                         .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
                     this.textChannel.send({ embeds: [embed] });
 
@@ -176,7 +176,7 @@ export class OpusPlayer{
         this.disconnectTimer = setTimeout( () => {
             if(this.subscription.player.state.status === AudioPlayerStatus.Idle){
                 try{
-                    this.textChannel.send({ content: `Since no track has been played for the pass 5 minutes` });
+                    this.textChannel.send({ content: `Since no track has been played for the past 5 minutes` });
                     this.disconnect();
                 } catch(err) { }
             }
