@@ -1,7 +1,7 @@
 import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonInteraction, ButtonStyle, GuildMember, MessageActionRowComponentBuilder, PermissionFlagsBits } from "discord.js";
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { BaseEmbed, generateInteractionComponentId } from "../../structures/Utils";
+import { baseEmbed, generateInteractionComponentId } from "../../structures/Utils";
 import { ExtendedInteraction } from "../../typings/command";
 
 export enum LOOP_OPTIONS{
@@ -38,7 +38,7 @@ export default new Command({
         switch(args.getSubcommand()){
             case LOOP_OPTIONS.track:
                 if(mPlayer.queueRepeat){
-                    const embed = BaseEmbed()
+                    const embed = baseEmbed()
                     .setTitle(`Stop looping the current queue?`)
         
                     const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
@@ -68,7 +68,7 @@ export default new Command({
 
             case LOOP_OPTIONS.queue:
                 if(mPlayer.trackRepeat){
-                    const embed = BaseEmbed()
+                    const embed = baseEmbed()
                     .setTitle(`Stop looping the current track?`)
         
                     const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()

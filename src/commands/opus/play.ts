@@ -6,7 +6,7 @@ import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
 import { Track } from "../../structures/opus/Track";
-import { BaseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
+import { baseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
 import { ExecuteOptions } from "../../typings/command";
 
 export enum PLAY_OPTIONS{
@@ -74,7 +74,6 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
     if(query.startsWith("https://")){
         // if the queury is a youtube video link
         if(ytdl.validateURL(query)) {  
-            // Get the song info
             await ytdl.getBasicInfo(query).then(async trackInfo => {
                 //console.log(trackInfo);
                 const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
@@ -82,11 +81,8 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                 result.push(track);
 
                 interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [track.createEmbedThumbnail()] });
-            }).catch(err => { 
-                interaction.followUp({ content: `${err}` }) 
-            });
-        } // video link
-                
+            }).catch(err => { interaction.followUp({ content: `${err}` }) });
+        }
         // if the queury is a youtube playlist link
         else if (ytpl.validateID(query)){
             // limit can be Infinity
@@ -104,7 +100,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                     }
                 });
 
-                const embed = BaseEmbed()
+                const embed = baseEmbed()
                     .setTitle(`Playlist`)
                     .setDescription(`[${playlist.title}](${playlist.url})`)
                     .setImage(playlist.bestThumbnail.url)
@@ -113,10 +109,11 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                         { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
                         { name: 'Size', value: `${result.length}`, inline: true },
                     );
-                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has ${subCommand}`), embeds: [embed] });
+
+                interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has ${subCommand}`), embeds: [embed] });
             }).catch(err => { interaction.followUp({ content: `${err}` }) });
-        } // playlist link
-    }
+        }
+    } // end of url
     // else try searching youtube with the given argument
     else{
         await ytsr(query, { limit:7 }).then(async results => {
@@ -137,7 +134,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                 menuOptBuilder.push(new SelectMenuOptionBuilder({ label: `Track ${i}`, description: `${track.title}`, value: `${track.url}` }));
             })
 
-            const embed = BaseEmbed()
+            const embed = baseEmbed()
                 .setTitle(`Search results ヽ (o´∀\`) ﾉ ♪ ♬`)
                 .setDescription(tracksInfo)
                 .setImage("https://c.tenor.com/pnXpZl3VRiwAAAAC/minato-aqua-akutan.gif");

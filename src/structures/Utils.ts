@@ -1,18 +1,27 @@
 import { EmbedBuilder } from "discord.js";
 import { client } from "..";
 
-export function BaseEmbed(){
+export function baseEmbed(){
     return new EmbedBuilder()
         .setColor(client.media.embedColour.random())
         // .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL() })
         // .setTimestamp()
-        .setFooter({ text: "FREEDOM SMILE (^)o(^)b", iconURL: client.user.displayAvatarURL() });
+        .setFooter({ text: 'FREEDOM SMILE (^)o(^)b', iconURL: client.user.displayAvatarURL() });
 }
 
 export function formatBool(value: boolean){
     return value ? 'Yse' : 'Nyo';
 }
 
+export function generateInteractionComponentId(componentName: string, authorId: string){
+    return `${componentName}_${authorId}`;
+}
+
+/**
+ * Convert the given number (in milliseconds) to hh:mm:ss format
+ * @param value number (in milliseconds)
+ * @returns string in hh:mm:ss format
+ */
 export function formatDuration(value: number){
     const d = new Date(Date.UTC(0,0,0,0,0,0,value));
     // console.log(value);
@@ -33,12 +42,8 @@ export function formatDuration(value: number){
     return parts.map(s => String(s).padStart(2,'0')).join(':');
 }
 
-export function generateInteractionComponentId(componentName: string, authorId: string){
-    return `${componentName}_${authorId}`;
-}
-
 /**
- * Convert given string date input (hh:mm:ss) to milliseconds
+ * Convert the given string date input (hh:mm:ss) to milliseconds
  * @param value string input format hh:mm:ss
  * @returns converted number in millisecs or 0
  */

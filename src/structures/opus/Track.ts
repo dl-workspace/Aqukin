@@ -1,6 +1,6 @@
 import { GuildMember } from "discord.js";
 import ytdl from "ytdl-core";
-import { BaseEmbed, formatDuration } from "../Utils";
+import { baseEmbed, formatDuration } from "../Utils";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
 
 export class Track {
@@ -45,21 +45,17 @@ export class Track {
         });
     }
 
-    private BaseEmbedMusic(){
-        return BaseEmbed().setDescription(`[${this.title}](${this.url})`);
+    private baseEmbedMusic(){
+        return baseEmbed().setDescription(`[${this.title}](${this.url})`);
     }
 
     private createEmbed(){
-        return this.BaseEmbedMusic()
+        return this.baseEmbedMusic()
             .setTitle(`Track`)
             .addFields(
                 { name: 'Requested By', value: this.getRequester(), inline: true },
                 { name: 'Lenght', value: `${this.duration > 0 ? formatDuration(this.duration) : `Live`}`, inline: true },
             )
-    }
-
-    getRequester(){
-        return `${this.requester.nickname || this.requester.user.username}-sama`;
     }
 
     createEmbedThumbnail(){
@@ -71,7 +67,11 @@ export class Track {
     }
 
     creatEmbedFinished(){
-        return this.BaseEmbedMusic().setTitle('Previous Track');
+        return this.baseEmbedMusic().setTitle('Previous Track');
+    }
+
+    getRequester(){
+        return `${this.requester.nickname || this.requester.user.username}-sama`;
     }
 
     remainingTime(){

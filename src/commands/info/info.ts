@@ -1,7 +1,7 @@
-import { ApplicationCommandOptionType, Guild, GuildMember, PermissionFlagsBits, User } from "discord.js";
-import { ExtendedClient } from "../../structures/Client";
+import { ActionRowBuilder, ApplicationCommandOptionType, ButtonBuilder, ButtonStyle, Guild, GuildMember, MessageActionRowComponentBuilder, PermissionFlagsBits, User } from "discord.js";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { BaseEmbed } from "../../structures/Utils";
+import { baseEmbed } from "../../structures/Utils";
+import { ExecuteOptions } from "../../typings/command";
 
 export enum INFO_OPTIONS{
     user = 'user',
@@ -40,7 +40,7 @@ export default new Command({
 
                 if(user){
                     if(user.user.id === client.user.id){
-                        interaction.followUp({ embeds: [await createBotInfoEmbed(client)] });
+                        handleBotInfo({ client, interaction, args });
                     }
                     else{
                         interaction.followUp({ embeds: [await createUserInfoEmbed(user.user, user.member as GuildMember)] });
@@ -61,38 +61,50 @@ export default new Command({
     }
 });
 
-async function createBotInfoEmbed(client: ExtendedClient){
-    const aquaCh = "https://www.youtube.com/channel/UC1opHUrw8rvnsadT-iGp7Cg";
-    const aquaTw = "https://twitter.com/minatoaqua";
-    const aThumbnails = "https://c.tenor.com/3D0ZX5vK_K4AAAAd/minato-aqua-caps.gif";
-
-    return BaseEmbed()
-        .setThumbnail(aThumbnails)
+async function handleBotInfo({client, interaction, args} : ExecuteOptions){
+    const embed = baseEmbed()
+        .setThumbnail('https://c.tenor.com/3D0ZX5vK_K4AAAAd/minato-aqua-caps.gif')
         .setTitle(`⚓ ${client.user.username} information (⁄ ⁄> ⁄ ▽ ⁄ <⁄ ⁄) ⚓`)
-        .addFields({ name: "Nickname", value: "Baqua\nOnion\nIQ-3", inline: true },
-               { name: "Minato Aqua Channel", value: `[Aqua Ch. 湊あくあ](${aquaCh})`, inline: true },
-               { name: "Minato Aqua Twitter", value: `[@minatoaqua](${aquaTw})`, inline: true },
-               { name: "Aliases (`･ω･´)", value: "Go-Sai\nDai Tenshi\nSeigi no Mikata\nIdol Combat Master Gamer Maid\nLeader of the Hololive Resistance" },
-            //    { name: "Description", value: `${process.env.npm_package_description}` },
+        .addFields({ name: "Nickname", value: "Aku-tan\nBaqua\nOnion\nIQ-3", inline: true },
+               { name: "Aliases (`･ω･´)", value: "Go-sai\nDai Tenshi\nSeigi no Mikata\nIdol Combat Master Gamer Maid\nLeader of the Hololive Resistance" },
+               { name: "Description", value: `Your (un)reliable Super Idol Gamer Maid♥, a bot that was created based on a Virtual Youtuber known as **Minato Aqua**` },
                { name: "Version", value: `${process.env.npm_package_version}`, inline: true },
                { name: "Date Created", value: client.user.createdAt.toLocaleDateString(), inline: true }, )
-        .setImage("https://c.tenor.com/NicUoz75sNwAAAAd/minato-aqua-aqua.gif")
+        .setImage('https://c.tenor.com/NicUoz75sNwAAAAd/minato-aqua-aqua.gif')
+
+    const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
+        .addComponents([
+            new ButtonBuilder()
+            .setLabel(`Invite ${client.user.username}`)
+            .setURL(process.env.INVITE_LINK)
+            .setStyle(ButtonStyle.Link),
+            new ButtonBuilder()
+                .setLabel('Aqua Ch. 湊あくあ')
+                .setURL('https://www.youtube.com/channel/UC1opHUrw8rvnsadT-iGp7Cg?view_as=subscriber?sub_confirmation=1')
+                .setStyle(ButtonStyle.Link),
+            new ButtonBuilder()
+                .setLabel('@minatoaqua')
+                .setURL('https://twitter.com/minatoaqua')
+                .setStyle(ButtonStyle.Link),
+        ]);
+
+    interaction.followUp({ embeds: [embed], components: [actionRow] });
 }
 
 async function createUserInfoEmbed(user: User, member: GuildMember){
     const memberRoles = member.roles.cache.filter(role => role.name !== "@everyone").map(role => `\`${role.name}\``).join("\n") || `No role`; 
 
-    return BaseEmbed()
+    return baseEmbed()
         .setTitle(`${user.username}-sama information`)
         .setThumbnail(user.displayAvatarURL())
         .addFields({ name: "Tag", value: user.tag, inline: true },
-        { name: "Nickname", value: member.nickname, inline: true },
+        { name: "Nickname", value: member.nickname || 'None', inline: true },
         { name: "Date Joined", value: member.joinedAt.toLocaleDateString() },
         { name: "Role(s)", value: memberRoles });
 }
 
 async function createGuildinfoEmbed(guild: Guild){
-    return BaseEmbed()
+    return baseEmbed()
         .setTitle(`${guild.name} information`)
         .setThumbnail(guild.iconURL())
         .setImage(guild.bannerURL())

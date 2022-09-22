@@ -2,7 +2,7 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageActionRowComponent
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { Track } from "../../structures/opus/Track";
-import { BaseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
+import { baseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
 
 export enum BUTTON_QUEUE_EMBED {
     start = 'queueEmbed_start',
@@ -12,7 +12,7 @@ export enum BUTTON_QUEUE_EMBED {
     done = 'queueEmbed_done',
 }
 
-export const QUEUE_EMBED_PAGE_STEP = 7;
+export const QUEUE_EMBED_PAGE_STEP = 10;
 
 export default new Command({
     name: COMMANDS.queue,
@@ -79,7 +79,7 @@ export async function generateQueueEmbed(i: number, queue: Track[], client: Exte
     
         // construct the embed(s)
         if(i==0 || !info.startsWith("Currently")){
-            const embed = BaseEmbed()
+            const embed = baseEmbed()
                 .setTitle(`Page ${i+1}/${Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)}`)
                 .setDescription(`⚓ Currently playing ▶️\n [${queue[0].title}](${queue[0].url}) | \`${formatDuration(queue[0].duration)}\` | requested by **${queue[0].getRequester()}**-sama\n\n⚓ Next in queue ⏭️\n${info}`);
             return embed;

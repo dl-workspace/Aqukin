@@ -6,6 +6,7 @@ declare global{
             PUBLIC_KEY: string;
             APP_ID: string;
             OWNER_ID: string;
+            INVITE_LINK: string;
             environment: "dev" | "prod" | "debug";
         }
     }

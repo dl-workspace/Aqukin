@@ -10,7 +10,7 @@ export default new Command({
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId);
 
-        mPlayer.disableQueueRepeat();
+        // mPlayer.disableQueueRepeat();
         mPlayer.disableTrackRepeat();
         mPlayer.subscription.player.unpause();
         mPlayer.subscription.player.stop();

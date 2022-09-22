@@ -2,7 +2,7 @@ import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscrip
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
-import { BaseEmbed, formatBool } from "../Utils";
+import { baseEmbed, formatBool } from "../Utils";
 import { Track } from "./Track";
 
 const enum TIMERS{
@@ -57,7 +57,7 @@ export class OpusPlayer{
                 } catch (err) {
                     clearTimeout(this.disconnectTimer);
 
-                    const embed = BaseEmbed()
+                    const embed = baseEmbed()
                         .setTitle(`${client.user.username} will now leave, matta ne~ ヾ(＾ ∇ ＾)`)
                         .setDescription(`To re-establish this music session, within \`20 seconds\`, use the \`connect\` command while you are in a \`voice chat\``)
                         .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
