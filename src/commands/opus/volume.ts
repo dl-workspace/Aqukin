@@ -17,7 +17,7 @@ export default new Command({
     },
     {
         type: ApplicationCommandOptionType.Number,
-        name: 'volume_type',
+        name: 'type',
         description: 'change the volume of only the current track (default) or the player (all tracks)',
         choices: [
             { name: 'track', value: 1 },
@@ -31,7 +31,7 @@ export default new Command({
         const mPlayer = client.music.get(interaction.guildId);
 
         const value = args.get('value')?.value as number || 1;
-        const type = args.get('volume_type')?.value as number || 1;
+        const type = args.get('type')?.value as number || 1;
         let extraReply = '';
 
         if(type == 2) { 
