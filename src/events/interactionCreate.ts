@@ -92,7 +92,7 @@ export default new Event('interactionCreate', async (interaction) => {
             return interaction.reply({ content: client.replyMsgErrorAuthor(member, `this select menu is not for you`), ephemeral : true });
         }
         
-        await interaction.deferReply();
+        await interaction.deferUpdate();
 
         switch(true){
             case interaction.customId.startsWith(PLAY_OPTIONS.track_select):

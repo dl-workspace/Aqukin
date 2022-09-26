@@ -16,6 +16,7 @@ export default new Command({
     }
 });
 
+// Durstenfeld shuffle algorithm
 async function shuffle(queue){
     for(let i = queue.length-1; i>0; i--){
         let j = 0;

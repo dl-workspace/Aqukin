@@ -67,6 +67,7 @@ export default new Command({
 
 async function processQuery({ client, interaction, args }: ExecuteOptions, subCommand: string){
     const { member } = interaction;
+    const memberName = member.nickname || member.user.username;
     const query = args.get(PLAY_OPTIONS.query).value as string;
     let result: Track[] = [];
 
@@ -105,7 +106,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                     .setDescription(`[${playlist.title}](${playlist.url})`)
                     .setImage(playlist.bestThumbnail.url)
                     .addFields(
-                        { name: 'Requested By', value: `${member.nickname || member.user.username}-sama`, inline: true },
+                        { name: 'Requested By', value: `${memberName}-sama`, inline: true },
                         { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
                         { name: 'Size', value: `${result.length}`, inline: true },
                     );
@@ -143,13 +144,13 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                 .addComponents(
                     new SelectMenuBuilder()
                         .setCustomId(generateInteractionComponentId(PLAY_OPTIONS.track_select, member.id))
-                        .setPlaceholder(`${member.nickname}-sama, please select an option`)
+                        .setPlaceholder(`${memberName}-sama, please select an option`)
                         .addOptions(menuOptBuilder)
                 );
 
             handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.next ? selectTrackInsert :  selectTrackPush;
 
-            interaction.followUp({ content: `**${member.nickname}**-sama`, embeds: [embed], components: [actionRow] });
+            interaction.followUp({ content: `**${memberName}**-sama`, embeds: [embed], components: [actionRow] });
         }).catch(err => { interaction.followUp({ content: `${err}` }) });
     } // end of else the given is keyword
 
@@ -180,8 +181,7 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
         const track = await createTrack(interaction.values[0], member);
 
         mPlayer.queue.push(track);
-        interaction.message.delete();
-        interaction.followUp({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()] });
+        interaction.message.edit({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
     
         mPlayer.playIfIdling(client);    
     }
@@ -203,8 +203,7 @@ async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenu
         const track = await createTrack(interaction.values[0], member);
 
         mPlayer.queue.splice(1, 0, track);
-        interaction.message.delete();
-        interaction.followUp({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()] });
+        interaction.message.edit({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
     
         mPlayer.playIfIdling(client);    
     }
