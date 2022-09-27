@@ -81,7 +81,7 @@ export class OpusPlayer{
                 this.loopQueue.splice(0);
                 this.currQueuePage.clear();
 
-                if(this.statusMsg?.deletable){ try { this.statusMsg?.delete() } catch(err) {} }
+                if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}) }
 
                 client.music.delete(this.id);
             });
@@ -118,7 +118,7 @@ export class OpusPlayer{
                         this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
                     }
 
-                    if(this.statusMsg?.deletable){ try { this.statusMsg?.delete() } catch(err) {} }
+                    if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}) }
 
                     this.queue.shift();
                     await this.processQueue(client);
