@@ -6,7 +6,7 @@ import { ExecuteOptions } from "../../typings/command";
 export enum INFO_OPTIONS{
     user = 'user',
     server = 'server',
-    mentioned_user = 'mentioned_user',
+    mention = 'mention',
 }
 
 export default new Command({
@@ -22,7 +22,7 @@ export default new Command({
         description: 'Get info of a specified user/yourself',
         options: [{
             type: ApplicationCommandOptionType.User,
-            name: INFO_OPTIONS.mentioned_user,
+            name: INFO_OPTIONS.mention,
             description: 'the user to get info',
         }]
     },
@@ -36,7 +36,7 @@ export default new Command({
     execute: async({ client, interaction, args }) => {
         switch(args.getSubcommand()){
             case INFO_OPTIONS.user:{
-                let user = args.get(INFO_OPTIONS.mentioned_user);
+                let user = args.get(INFO_OPTIONS.mention);
 
                 if(user){
                     if(user.user.id === client.user.id){

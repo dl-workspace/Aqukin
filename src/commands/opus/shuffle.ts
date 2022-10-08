@@ -9,15 +9,22 @@ export default new Command({
     
     execute: async({ client, interaction, args }) => {
         const mPlayer = client.music.get(interaction.guildId);
-
+        
         await shuffle(mPlayer.queue);
         
         interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has has shuffled the queue`) });
     }
 });
 
-// Durstenfeld shuffle algorithm
+// Shuffle(...) helper function
 async function shuffle(queue){
+    for(let i=0; i>=Math.round(queue.length/10); i++){
+        Durstenfield(queue);
+    }
+}
+
+// Durstenfield shuffle algorithm
+async function Durstenfield(queue){
     for(let i = queue.length-1; i>0; i--){
         let j = 0;
         while(j===0){
@@ -25,4 +32,4 @@ async function shuffle(queue){
         }
         [queue[i], queue[j]] = [queue[j], queue[i]];
     }
-} // end of shuffle(...) helper function
+}

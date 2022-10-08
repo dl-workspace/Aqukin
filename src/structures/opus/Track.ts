@@ -29,7 +29,7 @@ export class Track {
                 liveBuffer: 1 << 25,
                 dlChunkSize: 0,
                 begin: this.seek,
-                // range: { start: this.seek as number },
+                // range: { start: (this.seek as number)/1000 },
             };
 
             const stream = ytdl( this.url, ytdlOptions );
@@ -38,8 +38,6 @@ export class Track {
 				reject(new Error('No stdout'));
 				return;
 			}
-
-            // console.log(this.url, stream);
 
             resolve(createAudioResource(stream, { metadata: this, inlineVolume: true }));
         });
