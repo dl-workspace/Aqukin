@@ -18,8 +18,8 @@ export default new Command({
 
 // Shuffle(...) helper function
 async function shuffle(queue){
-    for(let i=0; i>=Math.round(queue.length/5); i--){
-        Durstenfield(queue);
+    for(let i=Math.round(queue.length/5); i>=0; i--){
+        await Durstenfield(queue);
     }
 }
 
