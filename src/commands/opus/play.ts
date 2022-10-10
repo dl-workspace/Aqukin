@@ -60,7 +60,8 @@ export default new Command({
             result = await processQuery({ client, interaction, args }, 'enqueued');
             mPlayer.queue.push(...result);
         }
-    
+
+        mPlayer.updatePlayingStatusMsg();
         mPlayer.playIfIdling(client);
     }
 });
@@ -182,8 +183,9 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
 
         mPlayer.queue.push(track);
         interaction.message.edit({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
-    
-        mPlayer.playIfIdling(client);    
+
+        mPlayer.updatePlayingStatusMsg();
+        mPlayer.playIfIdling(client);
     }
     catch(err){
         interaction.message.delete();
@@ -204,8 +206,9 @@ async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenu
 
         mPlayer.queue.splice(1, 0, track);
         interaction.message.edit({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
-    
-        mPlayer.playIfIdling(client);    
+
+        mPlayer.updatePlayingStatusMsg();
+        mPlayer.playIfIdling(client);
     }
     catch(err){
         interaction.message.delete();

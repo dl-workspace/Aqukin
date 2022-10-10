@@ -205,7 +205,7 @@ export class OpusPlayer{
     }
 
     async playIfIdling(client: ExtendedClient){
-        if(this.subscription.player.state.status != AudioPlayerStatus.Playing && this.queue.length > 0){
+        if(this.subscription.player.state.status != AudioPlayerStatus.Paused && this.subscription.player.state.status != AudioPlayerStatus.Playing && this.queue.length > 0){
             this.playFromQueue(client);
         }
     }
