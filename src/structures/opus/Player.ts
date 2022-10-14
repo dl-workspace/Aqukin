@@ -74,16 +74,19 @@ export class OpusPlayer{
                 }
             })
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
-                this.subscription.player.stop();
-                this.subscription.unsubscribe();
-
-                this.queue.splice(0);
-                this.loopQueue.splice(0);
-                this.currQueuePage.clear();
-
-                if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}) }
-
-                client.music.delete(this.id);
+                try{
+                    this.subscription.player.stop();
+                    this.queue.splice(0);
+                    this.loopQueue.splice(0);
+                    this.currQueuePage.clear();
+    
+                    if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
+                }
+                catch(err) { }
+                finally{
+                    this.subscription.unsubscribe();
+                    client.music.delete(this.id);
+                }
             });
 
         const player = new AudioPlayer(playerOptions)
@@ -118,11 +121,13 @@ export class OpusPlayer{
                         this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
                     }
 
-                    if(this.statusMsg?.deletable){ this.statusMsg.delete().catch(err => {}) }
-
+                    if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
+                   
+                } catch(err) {}
+                finally{
                     this.queue.shift();
                     await this.processQueue(client);
-                } catch(err) {}
+                }
             })
             
         this.subscription = connection.subscribe(player);
