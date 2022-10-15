@@ -80,7 +80,7 @@ export class OpusPlayer{
                     this.loopQueue.splice(0);
                     this.currQueuePage.clear();
 
-                    try{ this.statusMsg?.delete(); }catch(err) {}
+                    try{ await this.statusMsg?.delete(); } catch(err) { console.log(err); }
                     
                 }
                 catch(err) { }
@@ -123,7 +123,7 @@ export class OpusPlayer{
                     }
 
                     // if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
-                    try{ this.statusMsg?.delete(); }catch(err) {}
+                    try{ await this.statusMsg?.delete(); } catch(err) { console.log(err); }
                    
                 } catch(err) {}
                 finally{
