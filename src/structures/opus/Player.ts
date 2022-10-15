@@ -68,7 +68,7 @@ export class OpusPlayer{
                         if(connection.state.status === VoiceConnectionStatus.Disconnected){
                             try{
                                 connection.destroy();
-                            } catch(err) {}      
+                            } catch(err) { console.log(err); }
                         }
                     }, TIMERS.destroy );
                 }
@@ -98,6 +98,8 @@ export class OpusPlayer{
                 try{
                     if(!this.queue[0]) { return; }
 
+                    clearTimeout(this.disconnectTimer);
+
                     if(oldState.status === AudioPlayerStatus.Buffering){                        
                         if(this.queue[0].seek){
                             this.queue[0].seek = 0;
@@ -107,7 +109,7 @@ export class OpusPlayer{
                         }
                     }
                 }
-                catch(err) {}
+                catch(err) { console.log(err); }
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
                 try{
