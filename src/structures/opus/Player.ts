@@ -79,11 +79,10 @@ export class OpusPlayer{
                     this.queue.splice(0);
                     this.loopQueue.splice(0);
                     this.currQueuePage.clear();
-
-                    try{ await this.statusMsg?.delete(); } catch(err) { console.log(err); }
                     
+                    await this.statusMsg?.delete();
                 }
-                catch(err) { }
+                catch(err) { console.log(err); }
                 finally{
                     this.subscription.unsubscribe();
                     client.music.delete(this.id);
@@ -123,9 +122,9 @@ export class OpusPlayer{
                     }
 
                     // if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
-                    try{ await this.statusMsg?.delete(); } catch(err) { console.log(err); }
+                    await this.statusMsg?.delete();
                    
-                } catch(err) {}
+                } catch(err) { console.log(err); }
                 finally{
                     this.queue.shift();
                     await this.processQueue(client);
