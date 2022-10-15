@@ -79,8 +79,9 @@ export class OpusPlayer{
                     this.queue.splice(0);
                     this.loopQueue.splice(0);
                     this.currQueuePage.clear();
-    
-                    if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
+
+                    try{ this.statusMsg?.delete(); }catch(err) {}
+                    
                 }
                 catch(err) { }
                 finally{
@@ -121,7 +122,8 @@ export class OpusPlayer{
                         this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
                     }
 
-                    if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
+                    // if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
+                    try{ this.statusMsg?.delete(); }catch(err) {}
                    
                 } catch(err) {}
                 finally{
