@@ -115,27 +115,22 @@ export default new Event('interactionCreate', async (interaction) => {
             return;
         }
 
+        await interaction.deferUpdate();
+
         switch(true){
             case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
-                await interaction.deferReply();
-                await interaction.message.delete();
                 loopTrack(client, interaction);
                 break;
 
             case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopTrack_yes):
-                await interaction.deferReply();
-                await interaction.message.delete();
                 loopQueue(client, interaction);
                 break;
 
             case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
-                await interaction.deferUpdate();
                 await interaction.message.delete();
                 break;
 
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
-                await interaction.deferUpdate();
-
                 let currPage = mPlayer.currQueuePage.get(member.id);
 
                 if(currPage > 0){
@@ -147,8 +142,6 @@ export default new Event('interactionCreate', async (interaction) => {
             }
 
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.next):{
-                await interaction.deferUpdate();
-
                 let currPage = mPlayer.currQueuePage.get(member.id);
                 const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
@@ -162,8 +155,6 @@ export default new Event('interactionCreate', async (interaction) => {
             }
 
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.back):{
-                await interaction.deferUpdate();
-
                 let currPage = mPlayer.currQueuePage.get(member.id);
 
                 if(currPage > 0) { 
@@ -176,8 +167,6 @@ export default new Event('interactionCreate', async (interaction) => {
             }
 
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.end):{
-                await interaction.deferUpdate();
-
                 let currPage = mPlayer.currQueuePage.get(member.id);
                 const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
@@ -190,7 +179,6 @@ export default new Event('interactionCreate', async (interaction) => {
             }
 
             case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
-                await interaction.deferUpdate();
                 interaction.message.delete();
                 mPlayer.currQueuePage.delete(member.id);
                 break;

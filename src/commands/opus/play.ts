@@ -181,7 +181,7 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
         const track = await createTrack(interaction.values[0], member);
 
         mPlayer.queue.push(track);
-        interaction.message.edit({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
+        interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
 
         mPlayer.playIfIdling(client);
     }
@@ -203,7 +203,7 @@ async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenu
         const track = await createTrack(interaction.values[0], member);
 
         mPlayer.queue.splice(1, 0, track);
-        interaction.message.edit({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
+        interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
 
         mPlayer.playIfIdling(client);
     }

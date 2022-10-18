@@ -32,7 +32,7 @@ export default new Command({
     ],
     
     execute: async({ client, interaction, args }) => {
-        let reply = `**${interaction.member.nickname}**-sama, `;
+        let reply = `**${interaction.member.nickname || interaction.user.username}**-sama, `;
         const mPlayer = client.music.get(interaction.guildId);
 
         switch(args.getSubcommand()){
@@ -103,26 +103,26 @@ export async function stopLoopTrack(client: ExtendedClient, interaction: ButtonI
     const mPlayer = client.music.get(interaction.guildId);
     mPlayer.disableTrackRepeat();
     mPlayer.updatePlayingStatusMsg();
-    await interaction.followUp({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`stop looping\` the current \`track\``) });
+    await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`stop looping\` the current \`track\``), embeds: [], components: [] });
 }
 
 export async function loopTrack(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
     const mPlayer = client.music.get(interaction.guildId);
     mPlayer.enableTrackRepeat();
     mPlayer.updatePlayingStatusMsg();
-    await interaction.followUp({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`loop\` the current \`track\``) });
+    await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`loop\` the current \`track\``), embeds: [], components: [] });
 }
 
 export async function stopLoopQueue(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
     const mPlayer = client.music.get(interaction.guildId);
     mPlayer.disableQueueRepeat();
     mPlayer.updatePlayingStatusMsg();
-    await interaction.followUp({ content:  client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} has will now \`stop looping\` the current \`queue\``) });
+    await interaction.editReply({ content:  client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} has will now \`stop looping\` the current \`queue\``), embeds: [], components: [] });
 }
 
 export async function loopQueue(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
     const mPlayer = client.music.get(interaction.guildId);
     mPlayer.enableQueueRepeat();
     mPlayer.updatePlayingStatusMsg();
-    await interaction.followUp({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} has will now \`loop\` the current \`queue\``) });
+    await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} has will now \`loop\` the current \`queue\``), embeds: [], components: [] });
 }
