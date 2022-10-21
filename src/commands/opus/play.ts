@@ -173,10 +173,6 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
         return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
     }
 
-    if(interaction.values[0].localeCompare('0') === 0){
-        return interaction.deleteReply();
-    }
-
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.push(track);
@@ -190,10 +186,6 @@ async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenu
     const mPlayer = client.music.get(interaction.guildId);
     if(!mPlayer) { 
         return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
-    }
-
-    if(interaction.values[0].localeCompare('0') === 0){
-        return interaction.deleteReply();
     }
 
     const track = await createTrack(interaction.values[0], member);

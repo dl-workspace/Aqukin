@@ -101,6 +101,10 @@ export default new Event('interactionCreate', async (interaction) => {
 
         switch(true){
             case interaction.customId.startsWith(PLAY_OPTIONS.track_select):
+                if(interaction.values[0].localeCompare('0') === 0){
+                    return interaction.deleteReply();
+                }
+            
                 handleSelectTrackInteraction(client as ExtendedClient, interaction);
                 break;
         }
