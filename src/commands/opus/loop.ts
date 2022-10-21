@@ -117,12 +117,12 @@ export async function stopLoopQueue(client: ExtendedClient, interaction: ButtonI
     const mPlayer = client.music.get(interaction.guildId);
     mPlayer.disableQueueRepeat();
     mPlayer.updatePlayingStatusMsg();
-    await interaction.editReply({ content:  client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} has will now \`stop looping\` the current \`queue\``), embeds: [], components: [] });
+    await interaction.editReply({ content:  client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`stop looping\` the current \`queue\``), embeds: [], components: [] });
 }
 
 export async function loopQueue(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
     const mPlayer = client.music.get(interaction.guildId);
     mPlayer.enableQueueRepeat();
     mPlayer.updatePlayingStatusMsg();
-    await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} has will now \`loop\` the current \`queue\``), embeds: [], components: [] });
+    await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`loop\` the current \`queue\``), embeds: [], components: [] });
 }

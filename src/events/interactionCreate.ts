@@ -39,7 +39,12 @@ export default new Event('interactionCreate', async (interaction) => {
                 if(command.name != COMMANDS.connect){
                     if(mPlayer){
                         if(mPlayer.subscription.connection.state.status === VoiceConnectionStatus.Disconnected){
-                            return interaction.reply({ content: client.replyMsgErrorAuthor(member, `but the previous music session are just disconnected recently\nPlease wait a bit or use the \`connect\` command to restore it`) });
+                            if(command.name == COMMANDS.play && mPlayer.subscription.connection.joinConfig.channelId === channel.id){
+                                await mPlayer.reconnect();
+                            }
+                            else{
+                                return interaction.reply({ content: client.replyMsgErrorAuthor(member, `but the previous music session are just disconnected recently\nPlease wait a bit or use the \`connect\` command to restore it`) });
+                            }
                         }
                         else{
                             if(mPlayer.subscription.connection.joinConfig.channelId !== channel.id){
