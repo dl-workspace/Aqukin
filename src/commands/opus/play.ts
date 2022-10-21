@@ -167,45 +167,31 @@ interface IHandlingSelectTrackInteractionDelegate{
 export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegate;
 
 async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuInteraction) {
-    try{
-        const member = interaction.member as GuildMember;
-        const mPlayer = client.music.get(interaction.guildId);
-        
-        if(!mPlayer) { 
-            throw new Error('Outdated session');
-        }
-
-        const track = await createTrack(interaction.values[0], member);
-
-        mPlayer.queue.push(track);
-        interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
-
-        mPlayer.playIfIdling(client);
+    const member = interaction.member as GuildMember;
+    const mPlayer = client.music.get(interaction.guildId);
+    if(!mPlayer){
+        return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
     }
-    catch(err){
-        interaction.message.delete();
-        interaction.deleteReply();
-    }
+
+    const track = await createTrack(interaction.values[0], member);
+
+    mPlayer.queue.push(track);
+    interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
+
+    mPlayer.playIfIdling(client);
 }
 
 async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenuInteraction) {
-    try{
-        const member = interaction.member as GuildMember;
-        const mPlayer = client.music.get(interaction.guildId);
-
-        if(!mPlayer) { 
-            throw new Error('Outdated session');
-        }
-
-        const track = await createTrack(interaction.values[0], member);
-
-        mPlayer.queue.splice(1, 0, track);
-        interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
-
-        mPlayer.playIfIdling(client);
+    const member = interaction.member as GuildMember;
+    const mPlayer = client.music.get(interaction.guildId);
+    if(!mPlayer) { 
+        return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
     }
-    catch(err){
-        interaction.message.delete();
-        interaction.deleteReply();
-    }
+
+    const track = await createTrack(interaction.values[0], member);
+
+    mPlayer.queue.splice(1, 0, track);
+    interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
+
+    mPlayer.playIfIdling(client);
 }

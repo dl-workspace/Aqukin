@@ -86,7 +86,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`) }).catch(err => console.log(err));
+            interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`), embeds:[], components: [] })
         }
     }
 
