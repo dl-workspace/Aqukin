@@ -71,57 +71,54 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
     const query = args.get(PLAY_OPTIONS.query).value as string;
     let result: Track[] = [];
 
-    // if the given queuery is a url
-    if(query.startsWith("https://")){
-        // if the queury is a youtube video link
-        if(ytdl.validateURL(query)) {  
-            await ytdl.getBasicInfo(query).then(async trackInfo => {
+    // if the queury is a youtube video link
+    if(ytdl.validateURL(query)) {  
+        await ytdl.getBasicInfo(query).then(async trackInfo => {
+            //console.log(trackInfo);
+            const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
+            const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, member);
+            result.push(track);
+
+            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [track.createEmbedThumbnail()] });
+        }).catch(err => { interaction.followUp({ content: `${err}` }) });
+    }
+    // if the queury is a youtube playlist link
+    else if (ytpl.validateID(query)){
+        // limit can be Infinity
+        await ytpl(query, { limit: 1000 }).then(async playlist =>{
+            // console.log(playlist);
+
+            let playListDuration = 0;
+    
+            playlist.items.forEach(async track => {
                 //console.log(trackInfo);
-                const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
-                const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, member);
-                result.push(track);
+                if(track.durationSec){
+                    const trackDuration = track.durationSec * 1000;
+                    result.push(new Track(track.id, track.url, track.title, trackDuration, member));
+                    playListDuration += trackDuration;
+                }
+            });
 
-                interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [track.createEmbedThumbnail()] });
-            }).catch(err => { interaction.followUp({ content: `${err}` }) });
-        }
-        // if the queury is a youtube playlist link
-        else if (ytpl.validateID(query)){
-            // limit can be Infinity
-            await ytpl(query, { limit: 1000 }).then(async playlist =>{
-                // console.log(playlist);
+            const embed = baseEmbed()
+                .setTitle(`Playlist`)
+                .setDescription(`[${playlist.title}](${playlist.url})`)
+                .setImage(playlist.bestThumbnail.url)
+                .addFields(
+                    { name: 'Requested By', value: `${memberName}-sama`, inline: true },
+                    { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
+                    { name: 'Size', value: `${result.length}`, inline: true },
+                );
 
-                let playListDuration = 0;
-        
-                playlist.items.forEach(async track => {
-                    //console.log(trackInfo);
-                    if(track.durationSec){
-                        const trackDuration = track.durationSec * 1000;
-                        result.push(new Track(track.id, track.url, track.title, trackDuration, member));
-                        playListDuration += trackDuration;
-                    }
-                });
-
-                const embed = baseEmbed()
-                    .setTitle(`Playlist`)
-                    .setDescription(`[${playlist.title}](${playlist.url})`)
-                    .setImage(playlist.bestThumbnail.url)
-                    .addFields(
-                        { name: 'Requested By', value: `${memberName}-sama`, inline: true },
-                        { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
-                        { name: 'Size', value: `${result.length}`, inline: true },
-                    );
-
-                interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has ${subCommand}`), embeds: [embed] });
-            }).catch(err => { interaction.followUp({ content: `${err}` }) });
-        }
-    } // end of url
-    // else try searching youtube with the given argument
+            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [embed] });
+        }).catch(err => { interaction.followUp({ content: `${err}` }) });
+    }
+    // else try searching youtube with the given query
     else{
         await ytsr(query, { limit:7 }).then(async results => {
             const tracks = results.items.filter(i => i.type == "video") as ytsr.Video[];
 
             if(tracks.length === 0) {
-                interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} couldn't find any tracks with the given keywords`) });
+                interaction.followUp({ content: client.replyMsgErrorAuthor(member, `${client.user.username} couldn't find any tracks with the given keywords`) });
                 return; 
             }
 
