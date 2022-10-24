@@ -9,8 +9,3 @@ Your (un)reliable Super Idol Master Gamer Maid♥, a bot that was created based 
 
 # Description
 For the list of commands or more info on setting Aqukin up, please refer to the [Wiki pages](https://github.com/dealoux/Aqukin/wiki)
-
-# [License](https://github.com/DeaLoux/Aqukin/blob/master/LICENSE)
-- `Character Copyright` (c) 2017-2022 [COVER Corp.](https://cover-corp.com/)
-- `Background Copyright` (c) [Gaou-sensei](https://twitter.com/umaiyo_puyoman)
-- `Software Copyright` (c) 2020-2022 [DeaLoux](https://github.com/dealoux)
