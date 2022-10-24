@@ -7,9 +7,7 @@ export default new Command({
     description: 'Disconnect from the current voice chat if any',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-
+    execute: async({ client, interaction, args, mPlayer }) => {
         if(await mPlayer.disconnect()){
             interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `as requested`) });
         }

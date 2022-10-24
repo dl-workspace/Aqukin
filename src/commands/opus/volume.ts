@@ -27,9 +27,7 @@ export default new Command({
     }
     ],
 
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-
+    execute: async({ client, interaction, args, mPlayer }) => {
         const value = args.get('value')?.value as number || 1;
         const type = args.get('type')?.value as number || 1;
         let extraReply = '';

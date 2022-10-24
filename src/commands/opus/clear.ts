@@ -7,9 +7,8 @@ export default new Command({
     description: 'Clear the current queue with the exception of the currently playing track',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
+    execute: async({ client, interaction, mPlayer }) => {
         let reply = client.replyMsgAuthor(interaction.member, `the queue is already cleared`);
-        const mPlayer = client.music.get(interaction.guildId);
 
         if(mPlayer.queue.length > 1) {
             mPlayer.queue.splice(1);

@@ -9,9 +9,7 @@ export default new Command({
     description: 'Establish/re-establish voice connection to the current voice chat',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
-        let mPlayer = client.music.get(interaction.guildId);
-
+    execute: async({ client, interaction, args, mPlayer }) => {
         if(mPlayer){
             if(mPlayer.subscription.connection.state.status !== VoiceConnectionStatus.Disconnected){
                 interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} is already connected to a different voice channel`) });

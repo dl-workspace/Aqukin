@@ -7,9 +7,7 @@ export default new Command({
     description: 'Skip the current playing track if any',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-
+    execute: async({ client, interaction, args, mPlayer }) => {
         // mPlayer.disableQueueRepeat();
         mPlayer.disableTrackRepeat();
         mPlayer.subscription.player.unpause();

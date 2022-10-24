@@ -31,9 +31,8 @@ export default new Command({
     },
     ],
     
-    execute: async({ client, interaction, args }) => {
+    execute: async({ client, interaction, args, mPlayer }) => {
         let reply = `**${interaction.member.nickname || interaction.user.username}**-sama, `;
-        const mPlayer = client.music.get(interaction.guildId);
 
         switch(args.getSubcommand()){
             case LOOP_OPTIONS.track:

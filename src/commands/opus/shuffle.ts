@@ -7,11 +7,8 @@ export default new Command({
     description: 'Shuffle the current queue',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-        
+    execute: async({ client, interaction, args, mPlayer }) => {
         await shuffle(mPlayer.queue);
-        
         interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has has shuffled the queue`) });
     }
 });

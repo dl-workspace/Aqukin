@@ -8,6 +8,7 @@ import { ExtendedClient } from "../structures/Client";
 import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
 import { VoiceConnectionStatus } from "@discordjs/voice";
+import { OpusPlayer } from "../structures/opus/Player";
 
 export default new Event('interactionCreate', async (interaction) => {
     if(interaction.isChatInputCommand()){
@@ -15,6 +16,7 @@ export default new Event('interactionCreate', async (interaction) => {
         if(!command) { return; }
 
         const member = interaction.member as GuildMember
+        let mPlayer: OpusPlayer
 
         // if(COMMAND_TAGS.owner && interaction.user.id !== process.env.OWNER_ID) { return; }
 
@@ -29,7 +31,7 @@ export default new Event('interactionCreate', async (interaction) => {
         // command type check
         switch(command.tag){
             case COMMAND_TAGS.music:
-                const mPlayer = client.music.get(interaction.guildId);
+                mPlayer = client.music.get(interaction.guildId);
                 const { channel } = member.voice;
 
                 if(!channel){
@@ -82,6 +84,7 @@ export default new Event('interactionCreate', async (interaction) => {
                 client,
                 interaction: interaction as ExtendedInteraction,
                 args: interaction.options as CommandInteractionOptionResolver,
+                mPlayer
             });
         }
         catch(err){

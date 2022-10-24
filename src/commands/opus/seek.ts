@@ -15,8 +15,7 @@ export default new Command({
         required: true,
     }],
 
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
+    execute: async({ client, interaction, args, mPlayer }) => {
         // const timestamp = args.get('timestamp')?.value as number;
         const input = args.get('timestamp')?.value;
         

@@ -8,9 +8,7 @@ export default new Command({
     description: 'Resume the current paused track if any',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-
+    execute: async({ client, interaction, args, mPlayer }) => {
         if(mPlayer.subscription.player.state.status === AudioPlayerStatus.Paused){
             mPlayer.subscription.player.unpause();
             mPlayer.updatePlayingStatusMsg();

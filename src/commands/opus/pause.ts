@@ -10,9 +10,7 @@ export default new Command({
     description: 'Pause the current playing track if any',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-
+    execute: async({ client, interaction, args, mPlayer }) => {
         if(mPlayer.subscription.player.state.status === AudioPlayerStatus.Paused){
             interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `the player is already paused`) });
         }

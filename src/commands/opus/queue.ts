@@ -20,9 +20,7 @@ export default new Command({
     description: 'Display the current queue',
     userPermissions: [PermissionFlagsBits.SendMessages],
     
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-        
+    execute: async({ client, interaction, args, mPlayer }) => {        
         if(mPlayer.queue.length > 0){
             let currPage = 0;
             mPlayer.currQueuePage.set(interaction.user.id, currPage);

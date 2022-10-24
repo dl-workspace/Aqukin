@@ -34,9 +34,7 @@ export default new Command({
         },
     ],
 
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId);
-
+    execute: async({ client, interaction, args, mPlayer }) => {
         switch(args.getSubcommand()){
             case REMOVE_OPTIONS.track:{
                 if(mPlayer.queue.length < 2){
