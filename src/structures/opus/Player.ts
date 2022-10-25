@@ -123,7 +123,6 @@ export class OpusPlayer{
                         this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
                     }
 
-                    // if(this.statusMsg?.deletable){ this.statusMsg?.delete(); }
                     await this.statusMsg?.delete();
                    
                 } catch(err) { console.log(err); }
@@ -253,7 +252,7 @@ export class OpusPlayer{
     }
 
     async playingStatusEmbed(){
-        return this.queue[0].createEmbedImage()
+        return this.queue[0]?.createEmbedImage()
             .addFields(
                 { name: 'Queue', value: `${this.queue.length}`, inline: true },
                 { name: 'Paused', value: `${formatBool(this.subscription.player.state.status == AudioPlayerStatus.Paused)}`, inline: true },
