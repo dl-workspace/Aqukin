@@ -267,7 +267,7 @@ export class OpusPlayer{
             const embed = await this.playingStatusEmbed();
 
             if(embed){
-                if(this.statusMsg){
+                if(this.statusMsg?.editable){
                     await this.statusMsg.edit({ embeds: [embed] });
                 }
                 else{
