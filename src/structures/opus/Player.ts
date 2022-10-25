@@ -270,10 +270,6 @@ export class OpusPlayer{
                 if(this.statusMsg?.editable){
                     await this.statusMsg.edit({ embeds: [embed] });
                 }
-                else{
-                    this.statusMsg = await this.textChannel.send({ embeds: [embed] });
-                }
-    
             }
         }
         catch(err){
