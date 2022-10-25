@@ -104,7 +104,7 @@ export default new Event('interactionCreate', async (interaction) => {
             switch(true){
                 case interaction.customId.startsWith(PLAY_OPTIONS.track_select):
                     if(interaction.values[0].localeCompare('0') === 0){
-                        return interaction.deleteReply();
+                        return await interaction.deleteReply().catch(err => {});
                     }
                     handleSelectTrackInteraction(client as ExtendedClient, interaction);
                     break;
@@ -126,7 +126,7 @@ export default new Event('interactionCreate', async (interaction) => {
             mPlayer = client.music.get(interaction.guildId);
 
             if(!mPlayer) {
-                interaction.message.delete();
+                await interaction.message.delete().catch(err => {});
                 return;
             }
 
@@ -142,7 +142,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
 
                 case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
-                    await interaction.message.delete();
+                    await interaction.message.delete().catch(err => {});
                     break;
 
                 case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
@@ -194,8 +194,8 @@ export default new Event('interactionCreate', async (interaction) => {
                 }
 
                 case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
-                    interaction.message.delete();
-                    mPlayer.currQueuePage.delete(member.id);
+                    await interaction.message.delete().catch(err => {});
+                    await mPlayer.currQueuePage.delete(member.id);
                     break;
             }
         }

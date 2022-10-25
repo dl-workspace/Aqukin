@@ -80,7 +80,7 @@ export class OpusPlayer{
                     this.loopQueue.splice(0);
                     this.currQueuePage.clear();
                     
-                    await this.statusMsg?.delete();
+                    await this.deleteStatusMsg();
                 }
                 catch(err) { console.log(err); }
                 finally{
@@ -123,7 +123,7 @@ export class OpusPlayer{
                         this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
                     }
 
-                    await this.statusMsg?.delete();
+                    await this.deleteStatusMsg();
                    
                 } catch(err) { console.log(err); }
                 finally{
@@ -263,17 +263,14 @@ export class OpusPlayer{
     }
 
     async updatePlayingStatusMsg(){
-        try{
-            const embed = await this.playingStatusEmbed();
+        const embed = await this.playingStatusEmbed();
 
-            if(embed){
-                if(this.statusMsg?.editable){
-                    await this.statusMsg.edit({ embeds: [embed] });
-                }
-            }
+        if(embed){
+            await this.statusMsg?.edit({ embeds: [embed] }).catch(err => {});
         }
-        catch(err){
-            console.log(err);
-        }
+    }
+
+    async deleteStatusMsg(){
+        await this.statusMsg?.delete().catch(err => {});
     }
 }
