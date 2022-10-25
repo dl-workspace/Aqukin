@@ -61,8 +61,10 @@ export default new Command({
             mPlayer.queue.push(...result);
         }
 
-        mPlayer.updatePlayingStatusMsg();
-        mPlayer.playIfIdling(client);
+        if(result.length > 0){
+            mPlayer.updatePlayingStatusMsg();
+            mPlayer.playIfIdling(client);
+        }
     }
 });
 

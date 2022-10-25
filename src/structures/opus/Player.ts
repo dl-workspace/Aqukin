@@ -266,11 +266,14 @@ export class OpusPlayer{
         try{
             const embed = await this.playingStatusEmbed();
 
-            if(this.statusMsg){
-                this.statusMsg.edit({ embeds: [embed] });
-            }
-            else{
-                this.statusMsg = await this.textChannel.send({ embeds: [embed] });
+            if(embed){
+                if(this.statusMsg){
+                    await this.statusMsg.edit({ embeds: [embed] });
+                }
+                else{
+                    this.statusMsg = await this.textChannel.send({ embeds: [embed] });
+                }
+    
             }
         }
         catch(err){
