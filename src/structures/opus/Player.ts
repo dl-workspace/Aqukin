@@ -263,6 +263,18 @@ export class OpusPlayer{
     }
 
     async updatePlayingStatusMsg(){
-        await this.statusMsg?.edit({ embeds: [await this.playingStatusEmbed()] }).catch(err => console.log(err));
+        try{
+            const embed = await this.playingStatusEmbed();
+
+            if(this.statusMsg){
+                this.statusMsg.edit({ embeds: [embed] });
+            }
+            else{
+                this.statusMsg = await this.textChannel.send({ embeds: [embed] });
+            }
+        }
+        catch(err){
+            console.log(err);
+        }
     }
 }
