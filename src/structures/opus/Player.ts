@@ -228,6 +228,7 @@ export class OpusPlayer{
             this.subscription.player.play(this.queue[0].resource);
         }
         catch(err){
+            console.log(err);
             this.textChannel.send({ content: `${err}` });
         }
     }
