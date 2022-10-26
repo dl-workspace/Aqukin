@@ -47,8 +47,11 @@ export default new Command({
     },
     ],
     
-    execute: async({ client, interaction, args }) => {
-        const mPlayer = client.music.get(interaction.guildId) || new OpusPlayer({ client, interaction, args });
+    execute: async({ client, interaction, args, mPlayer }) => {
+        if(!mPlayer){
+            mPlayer = new OpusPlayer({ client, interaction, args });
+        }
+        // const mPlayer = client.music.get(interaction.guildId) || new OpusPlayer({ client, interaction, args });
 
         let result: Track[];
 

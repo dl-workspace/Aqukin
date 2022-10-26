@@ -1,8 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { AudioPlayerStatus } from "@discordjs/voice";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { formatDuration } from "../../structures/Utils";
-import { assert } from "console";
 
 export default new Command({
     name: COMMANDS.pause,
