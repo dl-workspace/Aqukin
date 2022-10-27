@@ -3,6 +3,7 @@ import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { baseEmbed, generateInteractionComponentId } from "../../structures/Utils";
 import { ExtendedInteraction } from "../../typings/command";
+import { OpusPlayer } from "../../structures/opus/Player";
 
 export enum LOOP_OPTIONS{
     track = 'track',
@@ -57,10 +58,10 @@ export default new Command({
                 else
                 {
                     if(mPlayer.trackRepeat){
-                        stopLoopTrack(client, interaction);
+                        stopLoopTrack(client, mPlayer, interaction);
                     }
                     else{
-                        loopTrack(client, interaction);
+                        loopTrack(client, mPlayer, interaction);
                     }
                 }
                 break;
@@ -87,10 +88,10 @@ export default new Command({
                 else
                 {
                     if(mPlayer.queueRepeat){
-                        stopLoopQueue(client, interaction);
+                        stopLoopQueue(client, mPlayer, interaction);
                     }
                     else{
-                        loopQueue(client, interaction);
+                        loopQueue(client, mPlayer, interaction);
                     }
                 }
                 break;
@@ -98,29 +99,25 @@ export default new Command({
     }
 });
 
-export async function stopLoopTrack(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    const mPlayer = client.music.get(interaction.guildId);
+export async function stopLoopTrack(client: ExtendedClient, mPlayer: OpusPlayer, interaction: ButtonInteraction | ExtendedInteraction){
     mPlayer.disableTrackRepeat();
     mPlayer.updatePlayingStatusMsg();
     await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`stop looping\` the current \`track\``), embeds: [], components: [] });
 }
 
-export async function loopTrack(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    const mPlayer = client.music.get(interaction.guildId);
+export async function loopTrack(client: ExtendedClient, mPlayer: OpusPlayer, interaction: ButtonInteraction | ExtendedInteraction){
     mPlayer.enableTrackRepeat();
     mPlayer.updatePlayingStatusMsg();
     await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`loop\` the current \`track\``), embeds: [], components: [] });
 }
 
-export async function stopLoopQueue(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    const mPlayer = client.music.get(interaction.guildId);
+export async function stopLoopQueue(client: ExtendedClient, mPlayer: OpusPlayer, interaction: ButtonInteraction | ExtendedInteraction){
     mPlayer.disableQueueRepeat();
     mPlayer.updatePlayingStatusMsg();
     await interaction.editReply({ content:  client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`stop looping\` the current \`queue\``), embeds: [], components: [] });
 }
 
-export async function loopQueue(client: ExtendedClient, interaction: ButtonInteraction | ExtendedInteraction){
-    const mPlayer = client.music.get(interaction.guildId);
+export async function loopQueue(client: ExtendedClient, mPlayer: OpusPlayer, interaction: ButtonInteraction | ExtendedInteraction){
     mPlayer.enableQueueRepeat();
     mPlayer.updatePlayingStatusMsg();
     await interaction.editReply({ content: client.replyMsgAuthor((interaction.member as GuildMember), `${client.user.username} will now \`loop\` the current \`queue\``), embeds: [], components: [] });

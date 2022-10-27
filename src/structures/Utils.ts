@@ -36,7 +36,7 @@ export function formatDuration(value: number){
         parts.push(d.getUTCMinutes());
     }
 
-    parts.push(d.getUTCSeconds());
+    parts.push(d.getUTCSeconds() || 0);
     
     // Zero-pad
     return parts.map(s => String(s).padStart(2,'0')).join(':');

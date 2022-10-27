@@ -51,7 +51,6 @@ export default new Command({
         if(!mPlayer){
             mPlayer = new OpusPlayer({ client, interaction, args });
         }
-        // const mPlayer = client.music.get(interaction.guildId) || new OpusPlayer({ client, interaction, args });
 
         let result: Track[];
 
@@ -167,18 +166,12 @@ async function createTrack(url: string, author: GuildMember){
 }
 
 interface IHandlingSelectTrackInteractionDelegate{
-    (client: ExtendedClient, interaction: SelectMenuInteraction) : void;
+    (client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction) : void;
 }
 
 export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegate;
 
-async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuInteraction) {
-    const member = interaction.member as GuildMember;
-    const mPlayer = client.music.get(interaction.guildId);
-    if(!mPlayer){
-        return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
-    }
-
+async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction) {
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.push(track);
@@ -188,13 +181,7 @@ async function selectTrackPush(client: ExtendedClient, interaction: SelectMenuIn
     mPlayer.playIfIdling(client);
 }
 
-async function selectTrackInsert(client: ExtendedClient, interaction: SelectMenuInteraction) {
-    const member = interaction.member as GuildMember;
-    const mPlayer = client.music.get(interaction.guildId);
-    if(!mPlayer) { 
-        return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
-    }
-
+async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction) {
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.splice(1, 0, track);

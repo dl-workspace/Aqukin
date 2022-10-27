@@ -16,7 +16,6 @@ export enum COMMANDS {
     emoji = 'emoji',
 
     // music commands
-    clear = 'clear',
     connect = 'connect',
     disconnect = 'disconnect',
     loop = 'loop',

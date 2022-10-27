@@ -8,23 +8,28 @@ export const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERN
 });
 
 // models
-export class mPlayer extends Model<
-InferAttributes<mPlayer>,
-InferCreationAttributes<mPlayer>> {
+export class MusicQueue extends Model<
+InferAttributes<MusicQueue>,
+InferCreationAttributes<MusicQueue>> {
     declare guild_id: string;
-    declare data: JSON;
+    declare main: Array<string>;
+    declare loop: Array<string>;
 };
 
-mPlayer.init({
+MusicQueue.init({
     guild_id: {
         type: DataTypes.STRING,
         primaryKey: true,
     },
 
-    data:{
-        type: DataTypes.JSON
-    }
+    main:{
+        type: DataTypes.ARRAY(DataTypes.STRING)
+    },
+
+    loop:{
+        type: DataTypes.ARRAY(DataTypes.STRING)
+    },
 }, {
     sequelize,
-    tableName: 'mPlayers',
+    tableName: 'mQueue',
 });

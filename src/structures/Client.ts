@@ -85,7 +85,7 @@ export class ExtendedClient extends Client{
     }
 
     private async alive(client: ExtendedClient){
-        setInterval(() => { 
+        setInterval(async () => {
             client.music.forEach(async mPlayer => {
                 const { connection } = mPlayer.subscription;
                 client.channels.fetch(connection.joinConfig.channelId).then(async (voiceChannel : VoiceChannel) => {

@@ -98,15 +98,20 @@ export default new Event('interactionCreate', async (interaction) => {
             if (!interaction.customId.endsWith(member.id)){
                 return interaction.reply({ content: client.replyMsgErrorAuthor(member, `this select menu is not for you`), ephemeral : true });
             }
-        
+
             await interaction.deferUpdate();
+
+            mPlayer = client.music.get(interaction.guildId);
+            if(!mPlayer){
+                return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
+            }
 
             switch(true){
                 case interaction.customId.startsWith(PLAY_OPTIONS.track_select):
                     if(interaction.values[0].localeCompare('0') === 0){
                         return await interaction.deleteReply().catch(err => {});
                     }
-                    handleSelectTrackInteraction(client as ExtendedClient, interaction);
+                    handleSelectTrackInteraction(client as ExtendedClient, mPlayer, member, interaction);
                     break;
             }
         }
@@ -124,21 +129,19 @@ export default new Event('interactionCreate', async (interaction) => {
             }
 
             mPlayer = client.music.get(interaction.guildId);
-
             if(!mPlayer) {
-                await interaction.message.delete().catch(err => {});
-                return;
+                return await interaction.message.delete().catch(err => {});
             }
 
             await interaction.deferUpdate();
 
             switch(true){
                 case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
-                    loopTrack(client, interaction);
+                    loopTrack(client, mPlayer , interaction);
                     break;
 
                 case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopTrack_yes):
-                    loopQueue(client, interaction);
+                    loopQueue(client, mPlayer, interaction);
                     break;
 
                 case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
@@ -195,7 +198,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
                 case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
                     await interaction.message.delete().catch(err => {});
-                    await mPlayer.currQueuePage.delete(member.id);
+                    mPlayer.currQueuePage.delete(member.id);
                     break;
             }
         }
