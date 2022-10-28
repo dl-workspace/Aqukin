@@ -10,8 +10,12 @@ import { baseEmbed, formatDuration, generateInteractionComponentId } from "../..
 import { ExecuteOptions } from "../../typings/command";
 
 export enum PLAY_OPTIONS{
+    // commands
     query = 'query',
-    next = 'next',
+    insert = 'insert',
+
+    // options
+    index = 'index',
     queue = 'queue',
     track_select = 'track_select'
 }
@@ -36,14 +40,23 @@ export default new Command({
     },
     {
         type: ApplicationCommandOptionType.Subcommand,
-        name: PLAY_OPTIONS.next,
+        name: PLAY_OPTIONS.insert,
         description: 'Insert to next a Youtube track/playlist/search result from the given url or query',
-        options: [{
+        options: [
+        {
             type: ApplicationCommandOptionType.String,
             name: PLAY_OPTIONS.query,
             description: 'Please provide an url or query for playback',
             required: true,
-        }],
+        },
+        {
+            type: ApplicationCommandOptionType.Number,
+            name: PLAY_OPTIONS.index,
+            description: 'Index position to insert into',
+            min_value: 1,
+            required: false,
+        }
+        ],
     },
     ],
     
@@ -54,23 +67,35 @@ export default new Command({
 
         let result: Track[];
 
-        if(args.getSubcommand() == PLAY_OPTIONS.next){
-            result = await processQuery({ client, interaction, args }, 'inserted');
-            mPlayer.queue.splice(1, 0, ...result);
+        if(args.getSubcommand() == PLAY_OPTIONS.insert){
+            let index = args.get(PLAY_OPTIONS.index)?.value as number || 1;
+
+            if(mPlayer.queue.length > 1 && index+1 > mPlayer.queue.length){
+                index = mPlayer.queue.length;
+            }
+            
+            result = await processQuery({ client, interaction, args }, 'inserted', index);
+
+            if(result.length > 0){
+                mPlayer.queue.splice(index, 0, ...result);
+                mPlayer.updatePlayingStatusMsg();
+                mPlayer.playIfIdling(client);    
+            }
+            
         }
         else if(args.getSubcommand() == PLAY_OPTIONS.queue){
-            result = await processQuery({ client, interaction, args }, 'enqueued');
-            mPlayer.queue.push(...result);
-        }
+            result = await processQuery({ client, interaction, args }, 'enqueued', mPlayer.queue.length-1);
 
-        if(result.length > 0){
-            mPlayer.updatePlayingStatusMsg();
-            mPlayer.playIfIdling(client);
+            if(result.length > 0){
+                mPlayer.queue.push(...result);
+                mPlayer.updatePlayingStatusMsg();
+                mPlayer.playIfIdling(client);    
+            }
         }
     }
 });
 
-async function processQuery({ client, interaction, args }: ExecuteOptions, subCommand: string){
+async function processQuery({ client, interaction, args }: ExecuteOptions, subCommand: string, index: number){
     const { member } = interaction;
     const memberName = member.nickname || member.user.username;
     const query = args.get(PLAY_OPTIONS.query).value as string;
@@ -84,7 +109,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, member);
             result.push(track);
 
-            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [track.createEmbedThumbnail()] });
+            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}${index ? ` to position \`${index}\`` : '' }`), embeds: [track.createEmbedThumbnail()] });
         }).catch(err => { interaction.followUp({ content: `${err}` }) });
     }
     // if the queury is a youtube playlist link
@@ -114,7 +139,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                     { name: 'Size', value: `${result.length}`, inline: true },
                 );
 
-            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}`), embeds: [embed] });
+            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}${index ? ` to position \`${index}\`` : '' }`), embeds: [embed] });
         }).catch(err => { interaction.followUp({ content: `${err}` }) });
     }
     // else try searching youtube with the given query
@@ -145,12 +170,12 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(
                     new SelectMenuBuilder()
-                        .setCustomId(generateInteractionComponentId(PLAY_OPTIONS.track_select, member.id))
+                        .setCustomId(generateInteractionComponentId(member.id, PLAY_OPTIONS.track_select, index))
                         .setPlaceholder(`${memberName}-sama, please select an option`)
                         .addOptions(menuOptBuilder)
                 );
 
-            handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.next ? selectTrackInsert :  selectTrackPush;
+            handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.insert ? selectTrackInsert :  selectTrackPush;
 
             interaction.followUp({ content: `**${memberName}**-sama`, embeds: [embed], components: [actionRow] });
         }).catch(err => { interaction.followUp({ content: `${err}` }) });
@@ -166,12 +191,12 @@ async function createTrack(url: string, author: GuildMember){
 }
 
 interface IHandlingSelectTrackInteractionDelegate{
-    (client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction) : void;
+    (client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction, index: number) : void;
 }
 
 export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegate;
 
-async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction) {
+async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction, index: number) {
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.push(track);
@@ -181,11 +206,11 @@ async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, memb
     mPlayer.playIfIdling(client);
 }
 
-async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction) {
+async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction, index: number) {
     const track = await createTrack(interaction.values[0], member);
 
-    mPlayer.queue.splice(1, 0, track);
-    interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
+    mPlayer.queue.splice(index, 0, track);
+    interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted to position \`${index}\``)}`, embeds: [track.createEmbedThumbnail()], components: [] });
 
     mPlayer.updatePlayingStatusMsg();
     mPlayer.playIfIdling(client);

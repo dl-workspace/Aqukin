@@ -13,8 +13,13 @@ export function formatBool(value: boolean){
     return value ? 'Yse' : 'Nyo';
 }
 
-export function generateInteractionComponentId(componentName: string, authorId: string){
-    return `${componentName}_${authorId}`;
+export function generateInteractionComponentId(authorId: string, componentName: string, args?: string | number){
+    let result = `${authorId},${componentName}`;
+    if(args){
+        result += `,${args}`;
+    }
+
+    return result;
 }
 
 /**

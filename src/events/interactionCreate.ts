@@ -94,8 +94,10 @@ export default new Event('interactionCreate', async (interaction) => {
 
     else if(interaction.isSelectMenu()){
         try{
+            const interactionData = interaction.customId.split(',');
+
             // check for user id
-            if (!interaction.customId.endsWith(member.id)){
+            if(interactionData[0].localeCompare(member.id) != 0){
                 return interaction.reply({ content: client.replyMsgErrorAuthor(member, `this select menu is not for you`), ephemeral : true });
             }
 
@@ -107,11 +109,11 @@ export default new Event('interactionCreate', async (interaction) => {
             }
 
             switch(true){
-                case interaction.customId.startsWith(PLAY_OPTIONS.track_select):
-                    if(interaction.values[0].localeCompare('0') === 0){
+                case interactionData[1].localeCompare(PLAY_OPTIONS.track_select) == 0:
+                    if(interaction.values[0].localeCompare('0') == 0){
                         return await interaction.deleteReply().catch(err => {});
                     }
-                    handleSelectTrackInteraction(client as ExtendedClient, mPlayer, member, interaction);
+                    handleSelectTrackInteraction(client as ExtendedClient, mPlayer, member, interaction, Number(interactionData[2]));
                     break;
             }
         }
@@ -123,8 +125,10 @@ export default new Event('interactionCreate', async (interaction) => {
 
     else if(interaction.isButton()){
         try{
+            const interactionData = interaction.customId.split(',');
+            
             // check for user id
-            if (!interaction.customId.endsWith(member.id)){
+            if (interactionData[0].localeCompare(member.id) != 0){
                 return interaction.reply({ content: client.replyMsgErrorAuthor(member, `this button is not for you`), ephemeral : true });
             }
 
@@ -136,19 +140,19 @@ export default new Event('interactionCreate', async (interaction) => {
             await interaction.deferUpdate();
 
             switch(true){
-                case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopQueue_yes):
-                    loopTrack(client, mPlayer , interaction);
+                case interactionData[1].localeCompare(LOOP_OPTIONS.disableLoopQueue_yes) == 0:
+                    loopTrack(client, mPlayer , interaction, Number(interactionData[2]));
                     break;
 
-                case interaction.customId.startsWith(LOOP_OPTIONS.disableLoopTrack_yes):
-                    loopQueue(client, mPlayer, interaction);
+                case interactionData[1].localeCompare(LOOP_OPTIONS.disableLoopTrack_yes) == 0:
+                    loopQueue(client, mPlayer, interaction, Number(interactionData[2]));
                     break;
 
-                case interaction.customId.startsWith(LOOP_OPTIONS.loop_no):
+                case interactionData[1].localeCompare(LOOP_OPTIONS.loop_no) == 0:
                     await interaction.message.delete().catch(err => {});
                     break;
 
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.start):{
+                case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.start) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
 
                     if(currPage > 0){
@@ -159,7 +163,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
 
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.next):{
+                case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.next) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
                     const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
@@ -172,7 +176,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
 
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.back):{
+                case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.back) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
 
                     if(currPage > 0) { 
@@ -184,7 +188,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
 
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.end):{
+                case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.end) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
                     const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
@@ -196,7 +200,7 @@ export default new Event('interactionCreate', async (interaction) => {
                     break;
                 }
 
-                case interaction.customId.startsWith(BUTTON_QUEUE_EMBED.done):
+                case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.done) == 0:
                     await interaction.message.delete().catch(err => {});
                     mPlayer.currQueuePage.delete(member.id);
                     break;

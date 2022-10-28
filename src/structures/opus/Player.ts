@@ -15,8 +15,8 @@ export class OpusPlayer{
     id: string;
     textChannel: GuildTextBasedChannel;
     subscription: PlayerSubscription;
-    trackRepeat: boolean;
-    queueRepeat: boolean;
+    trackLoopTimes: number;
+    queueLoopTimes: number;
     queue: Track[];
     loopQueue: Track[];
     volume: number;
@@ -113,11 +113,14 @@ export class OpusPlayer{
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
                 try{
-                    if(this.trackRepeat) { 
+                    if(this.isLoopingTrack()) {
+                        if(this.trackLoopTimes > 0){
+                            this.trackLoopTimes--;
+                        }
                         this.queue.splice(1, 0, this.queue[0]); 
                     }
                     else{
-                        if(this.queueRepeat) { 
+                        if(this.isLoopingQueue()) {
                             this.loopQueue.push(this.queue[0]); 
                         }
                         this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
@@ -134,8 +137,8 @@ export class OpusPlayer{
             
         this.subscription = connection.subscribe(player);
 
-        this.trackRepeat = false;
-        this.queueRepeat = false;
+        this.trackLoopTimes = 0;
+        this.queueLoopTimes = 0;
         this.queue = [];
         this.loopQueue = [];
         this.volume = 1;
@@ -194,7 +197,10 @@ export class OpusPlayer{
         let track = this.queue[0];
 
         if(!track){
-            if(this.queueRepeat){
+            if(this.isLoopingQueue()){
+                if(this.queueLoopTimes > 0){
+                    this.queueLoopTimes--;
+                }
                 this.queue.push(...this.loopQueue);
                 this.loopQueue.splice(0);
                 track = this.queue[0];
@@ -233,22 +239,30 @@ export class OpusPlayer{
     }
 
     async disableQueueRepeat(){
-        this.queueRepeat = false;
+        this.queueLoopTimes = 0;
         this.loopQueue.splice(0);
     }
 
-    async enableQueueRepeat(){
-        this.trackRepeat = false;
-        this.queueRepeat = true;
+    async enableQueueRepeat(times = -1){
+        this.trackLoopTimes = 0;
+        this.queueLoopTimes = times;
     }
 
     async disableTrackRepeat(){
-        this.trackRepeat = false;
+        this.trackLoopTimes = 0;
     }
 
-    async enableTrackRepeat(){
+    async enableTrackRepeat(times = -1){
         this.disableQueueRepeat();
-        this.trackRepeat = true;
+        this.trackLoopTimes = times;
+    }
+
+    isLoopingTrack(){
+        return this.trackLoopTimes != 0;
+    }
+
+    isLoopingQueue(){
+        return this.queueLoopTimes != 0;
     }
 
     async playingStatusEmbed(){
@@ -256,8 +270,8 @@ export class OpusPlayer{
             .addFields(
                 { name: 'Queue', value: `${this.queue.length}`, inline: true },
                 { name: 'Paused', value: `${formatBool(this.subscription.player.state.status == AudioPlayerStatus.Paused)}`, inline: true },
-                { name: 'Track Loop', value: `${formatBool(this.trackRepeat)}`, inline: true },
-                { name: 'Queue Loop', value: `${formatBool(this.queueRepeat)}`, inline: true },
+                { name: 'Track Loop', value: `${formatBool(this.isLoopingTrack())} (${ this.trackLoopTimes == -1 ? `∞` : this.trackLoopTimes })`, inline: true },
+                { name: 'Queue Loop', value: `${formatBool(this.isLoopingQueue())} (${ this.queueLoopTimes == -1 ? `∞` : this.queueLoopTimes })`, inline: true },
                 { name: 'Volume', value: `${this.queue[0].getVolume()}`, inline: true },
         );
     }

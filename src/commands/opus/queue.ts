@@ -30,23 +30,23 @@ export default new Command({
             const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents([
                     new ButtonBuilder()
-                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.start, interaction.user.id))
+                        .setCustomId(generateInteractionComponentId(interaction.user.id, BUTTON_QUEUE_EMBED.start))
                         .setLabel('<<')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
-                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.back, interaction.user.id))
+                        .setCustomId(generateInteractionComponentId(interaction.user.id, BUTTON_QUEUE_EMBED.back))
                         .setLabel('<')
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
-                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.next, interaction.user.id))
+                        .setCustomId(generateInteractionComponentId(interaction.user.id, BUTTON_QUEUE_EMBED.next))
                         .setLabel('>')
                         .setStyle(ButtonStyle.Secondary),
                     new ButtonBuilder()
-                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.end, interaction.user.id))
+                        .setCustomId(generateInteractionComponentId(interaction.user.id, BUTTON_QUEUE_EMBED.end))
                         .setLabel('>>')
                         .setStyle(ButtonStyle.Primary),
                     new ButtonBuilder()
-                        .setCustomId(generateInteractionComponentId(BUTTON_QUEUE_EMBED.done, interaction.user.id))
+                        .setCustomId(generateInteractionComponentId(interaction.user.id, BUTTON_QUEUE_EMBED.done))
                         .setLabel('Done')
                         .setStyle(ButtonStyle.Danger),
                 ]);
