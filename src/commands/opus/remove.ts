@@ -91,19 +91,6 @@ export default new Command({
                 break;
             }
 
-            case REMOVE_OPTIONS.all:{
-                let reply = client.replyMsgAuthor(interaction.member, `the upcoming queue is already empty`);
-
-                if(mPlayer.queue.length > 1) {
-                    mPlayer.queue.splice(1);
-                    reply = client.replyMsgAuthor(interaction.member, `${client.user.username} has cleared the queue`);
-                    mPlayer.updatePlayingStatusMsg();
-                }
-        
-                interaction.followUp({ content: reply });
-                break;
-            }
-
             case REMOVE_OPTIONS.range:{
                 if(mPlayer.queue.length < 2){
                     return interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} there is no track/song next in queue`) });
@@ -120,6 +107,19 @@ export default new Command({
                     mPlayer.updatePlayingStatusMsg();
                     interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed \`${length}\` tracks from the queue, starting from \`${start}\` and ending at \`${end}\``) });
                 }
+                break;
+            }
+
+            case REMOVE_OPTIONS.all:{
+                let reply = client.replyMsgAuthor(interaction.member, `the upcoming queue is already empty`);
+
+                if(mPlayer.queue.length > 1) {
+                    mPlayer.queue.splice(1);
+                    reply = client.replyMsgAuthor(interaction.member, `${client.user.username} has cleared the queue`);
+                    mPlayer.updatePlayingStatusMsg();
+                }
+        
+                interaction.followUp({ content: reply });
                 break;
             }
 

@@ -4,7 +4,7 @@
 Your (un)reliable Super Idol Master Gamer Maid♥, a bot that was created based on a Virtual Youtuber known as [Minato Aqua](https://www.youtube.com/channel/UC1opHUrw8rvnsadT-iGp7Cg)
 
 <p align="center">
-  <img src="https://github.com/DeaLoux/Aqukin/blob/master/src/utilities/media/background.png">
+  <img src="https://github.com/DeaLoux/Aqukin-old/blob/master/src/utilities/media/background.png">
 </p>
 
 # Description
