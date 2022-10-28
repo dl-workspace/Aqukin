@@ -74,7 +74,7 @@ export default new Command({
                 index = mPlayer.queue.length;
             }
             
-            result = await processQuery({ client, interaction, args }, 'inserted', index);
+            result = await processQuery({ client, interaction, args }, index);
 
             if(result.length > 0){
                 mPlayer.queue.splice(index, 0, ...result);
@@ -84,7 +84,7 @@ export default new Command({
             
         }
         else if(args.getSubcommand() == PLAY_OPTIONS.queue){
-            result = await processQuery({ client, interaction, args }, 'enqueued', mPlayer.queue.length-1);
+            result = await processQuery({ client, interaction, args }, (mPlayer.queue.length > 1 ? mPlayer.queue.length-1 : 1));
 
             if(result.length > 0){
                 mPlayer.queue.push(...result);
@@ -95,7 +95,7 @@ export default new Command({
     }
 });
 
-async function processQuery({ client, interaction, args }: ExecuteOptions, subCommand: string, index: number){
+async function processQuery({ client, interaction, args }: ExecuteOptions, index: number){
     const { member } = interaction;
     const memberName = member.nickname || member.user.username;
     const query = args.get(PLAY_OPTIONS.query).value as string;
@@ -109,7 +109,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
             const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, member);
             result.push(track);
 
-            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}${index ? ` to position \`${index}\`` : '' }`), embeds: [track.createEmbedThumbnail()] });
+            interaction.followUp({ content: statusReply(client, member, index), embeds: [track.createEmbedThumbnail()] });
         }).catch(err => { interaction.followUp({ content: `${err}` }) });
     }
     // if the queury is a youtube playlist link
@@ -139,7 +139,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, subCo
                     { name: 'Size', value: `${result.length}`, inline: true },
                 );
 
-            interaction.followUp({ content: client.replyMsgAuthor(member, `${client.user.username} has ${subCommand}${index ? ` to position \`${index}\`` : '' }`), embeds: [embed] });
+            interaction.followUp({ content: statusReply(client, member, index), embeds: [embed] });
         }).catch(err => { interaction.followUp({ content: `${err}` }) });
     }
     // else try searching youtube with the given query
@@ -200,7 +200,7 @@ async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, memb
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.push(track);
-    interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has enqueued`)}`, embeds: [track.createEmbedThumbnail()], components: [] });
+    interaction.editReply({ content: statusReply(client, member, index), embeds: [track.createEmbedThumbnail()], components: [] });
 
     mPlayer.updatePlayingStatusMsg();
     mPlayer.playIfIdling(client);
@@ -210,8 +210,12 @@ async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, me
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.splice(index, 0, track);
-    interaction.editReply({ content: `${client.replyMsgAuthor(member, `${client.user.username} has inserted to position \`${index}\``)}`, embeds: [track.createEmbedThumbnail()], components: [] });
+    interaction.editReply({ content: statusReply(client, member, index), embeds: [track.createEmbedThumbnail()], components: [] });
 
     mPlayer.updatePlayingStatusMsg();
     mPlayer.playIfIdling(client);
+}
+
+function statusReply(client: ExtendedClient, member: GuildMember, index: number){
+    return client.replyMsgAuthor(member, `${client.user.username} has inserted to position \`${index}\``);
 }
