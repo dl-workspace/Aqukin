@@ -88,7 +88,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`), embeds:[], components: [] })
+            await interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`), embeds:[], components: [] }).catch(err => {});
         }
     }
 
@@ -119,7 +119,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`), embeds:[], components: [] })
+            await interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`), embeds:[], components: [] }).catch(err => {});
         }
     }
 
@@ -157,9 +157,9 @@ export default new Event('interactionCreate', async (interaction) => {
 
                     if(currPage > 0){
                         mPlayer.currQueuePage.set(member.id, 0);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(member.id), mPlayer.queue, client)] });    
                     }
 
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(member.id), mPlayer.queue, client)] });    
                     break;
                 }
 
@@ -170,9 +170,9 @@ export default new Event('interactionCreate', async (interaction) => {
                     if(currPage < ceil) { 
                         currPage++; 
                         mPlayer.currQueuePage.set(member.id, currPage);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
                     }
 
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
                     break;
                 }
 
@@ -182,9 +182,9 @@ export default new Event('interactionCreate', async (interaction) => {
                     if(currPage > 0) { 
                         currPage--; 
                         mPlayer.currQueuePage.set(member.id, currPage);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
                     }
 
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
                     break;
                 }
 
@@ -194,9 +194,9 @@ export default new Event('interactionCreate', async (interaction) => {
 
                     if(currPage < ceil){
                         mPlayer.currQueuePage.set(member.id, ceil);
-                        interaction.message.edit({ embeds: [await generateQueueEmbed(ceil, mPlayer.queue, client)] });
                     }
 
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(ceil, mPlayer.queue, client)] });
                     break;
                 }
 
@@ -208,7 +208,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
         catch(err){
             console.log(err);
-            interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`), embeds:[], components: [] })
+            await interaction.editReply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} has encounted an error\n${err}`), embeds:[], components: [] }).catch(err => {});
         }
     }
 });
