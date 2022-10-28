@@ -79,7 +79,7 @@ export default new Command({
                 else
                 {
                     if(times == -1){
-                        if(mPlayer.isLoopingQueue()){
+                        if(mPlayer.isLoopingTrack()){
                             stopLoopTrack(client, mPlayer, interaction);
                         }
                         else{
