@@ -41,7 +41,7 @@ export default new Command({
     {
         type: ApplicationCommandOptionType.Subcommand,
         name: PLAY_OPTIONS.insert,
-        description: 'Insert to a specified postion a Youtube track/playlist/search result from the given url or query, default to 1 aka next position',
+        description: 'Insert to a specified postion (default 1) a Youtube track/playlist/search result from the given url or query',
         options: [
         {
             type: ApplicationCommandOptionType.String,
