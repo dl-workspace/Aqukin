@@ -9,7 +9,7 @@ export class Track {
     title: string;
     duration: number;
     requester: GuildMember;
-    seek?: string | number;
+    seek?: number;
     resource?: AudioResource;
 
 	constructor (id: string, url: string, title: string, duration: number, requester: GuildMember){
@@ -29,7 +29,7 @@ export class Track {
                 liveBuffer: 1 << 25,
                 dlChunkSize: 0,
                 begin: this.seek,
-                // range: { start: (this.seek as number)/1000 },
+                // range: { start: this.seek/1000 },
             };
 
             const stream = ytdl( this.url, ytdlOptions );

@@ -16,12 +16,7 @@ export default new Command({
     }],
 
     execute: async({ client, interaction, args, mPlayer }) => {
-        // const timestamp = args.get('timestamp')?.value as number;
-        const input = args.get('timestamp')?.value;
-        
-        // const timestamp = isNaN(Number(input)) ? convertInput(input as string) : input as number;
-
-        const timestamp = convertInput(input as string);
+        const timestamp = convertInput(args.get('timestamp')?.value as string);
 
         if(timestamp >= mPlayer.queue[0].duration){
             interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `the timestamp should be less than the track length \`${formatDuration(mPlayer.queue[0].duration)}\``) });
