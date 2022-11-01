@@ -1,4 +1,4 @@
-import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus, getVoiceConnection, DiscordGatewayAdapterCreator } from "@discordjs/voice";
+import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice";
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
@@ -32,7 +32,7 @@ export class OpusPlayer{
         const connection = joinVoiceChannel({
             channelId: interaction.member.voice.channelId,
             guildId: this.id,
-            adapterCreator: interaction.guild.voiceAdapterCreator as DiscordGatewayAdapterCreator,
+            adapterCreator: interaction.guild.voiceAdapterCreator,
         })
             .on('error', (err) =>{
                 console.log(err);
