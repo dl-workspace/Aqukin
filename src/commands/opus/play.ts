@@ -70,7 +70,7 @@ export default new Command({
         if(args.getSubcommand() == PLAY_OPTIONS.insert){
             let index = args.get(PLAY_OPTIONS.index)?.value as number || 1;
 
-            if(mPlayer.queue.length > 1 && index+1 > mPlayer.queue.length){
+            if(mPlayer.queue.length > 1 && index > mPlayer.queue.length){
                 index = mPlayer.queue.length;
             }
             
