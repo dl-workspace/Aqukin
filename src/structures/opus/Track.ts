@@ -25,8 +25,8 @@ export class Track {
             const ytdlOptions: ytdl.downloadOptions = { 
                 filter: 'audio', 
                 quality: 'highestaudio', 
-                highWaterMark: 1 << 64,
-                liveBuffer: 1 << 64,
+                highWaterMark: 1 << 35,
+                liveBuffer: 1 << 35,
                 dlChunkSize: 0,
                 begin: this.seek,
                 // range: { start: this.seek/1000 },
