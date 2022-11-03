@@ -101,8 +101,8 @@ export class OpusPlayer{
                     clearTimeout(this.disconnectTimer);
 
                     if(oldState.status === AudioPlayerStatus.Buffering){                        
-                        if(this.queue[0].seek){
-                            this.queue[0].seek = 0;
+                        if(this.queue[0].seek != undefined){
+                            this.queue[0].seek = undefined;
                         }
                         else{
                             this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
@@ -136,7 +136,6 @@ export class OpusPlayer{
             })
             
         this.subscription = connection.subscribe(player);
-
         this.trackLoopTimes = 0;
         this.queueLoopTimes = 0;
         this.queue = [];

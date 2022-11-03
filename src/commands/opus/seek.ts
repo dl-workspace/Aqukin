@@ -16,6 +16,10 @@ export default new Command({
     }],
 
     execute: async({ client, interaction, args, mPlayer }) => {
+        if(mPlayer.queue[0] == undefined){
+            return interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `no track is currently being played`) });
+        }
+
         const timestamp = convertInput(args.get('timestamp')?.value as string);
 
         if(timestamp >= mPlayer.queue[0].duration){

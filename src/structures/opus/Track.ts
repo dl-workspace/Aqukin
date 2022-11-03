@@ -28,7 +28,7 @@ export class Track {
                 highWaterMark: 1 << 25,
                 liveBuffer: 1 << 25,
                 dlChunkSize: 0,
-                begin: this.seek,
+                begin: this.seek || 0,
                 // range: { start: this.seek/1000 },
             };
 
