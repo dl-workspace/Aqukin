@@ -79,7 +79,7 @@ export default new Command({
             if(result.length > 0){
                 mPlayer.queue.splice(index, 0, ...result);
                 mPlayer.updatePlayingStatusMsg();
-                mPlayer.playIfIdling(client);    
+                mPlayer.playIfIdling(client);
             }
             
         }
@@ -89,7 +89,7 @@ export default new Command({
             if(result.length > 0){
                 mPlayer.queue.push(...result);
                 mPlayer.updatePlayingStatusMsg();
-                mPlayer.playIfIdling(client);    
+                mPlayer.playIfIdling(client);
             }
         }
     }
