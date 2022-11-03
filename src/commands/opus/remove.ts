@@ -30,7 +30,7 @@ export default new Command({
             options: [{
                 type: ApplicationCommandOptionType.Number,
                 name: REMOVE_OPTIONS.index,
-                description: 'index value (default `queue size`)',
+                description: 'index value (default is last enqueued track)',
                 min_value: 1,
                 required: false,
             }],
