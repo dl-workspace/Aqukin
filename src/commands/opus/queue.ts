@@ -79,7 +79,7 @@ export async function generateQueueEmbed(i: number, queue: Track[], client: Exte
         if(i==0 || !info.startsWith("Currently")){
             const embed = baseEmbed()
                 .setTitle(`Page ${i+1}/${Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)}`)
-                .setDescription(`⚓ Currently playing ▶️\n [${queue[0].title}](${queue[0].url}) | \`${formatDuration(queue[0].duration)}\` | requested by **${queue[0].getRequester()}**-sama\n\n⚓ Next in queue ⏭️\n${info}`);
+                .setDescription(`⚓ Currently playing ▶️\n [${queue[0].title}](${queue[0].url}) | \`${formatDuration(queue[0].duration)}\` | requested by ${queue[0].getRequester()}-sama\n\n⚓ Next in queue ⏭️\n${info}`);
             return embed;
         }
     }
