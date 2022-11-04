@@ -67,35 +67,38 @@ export default new Command({
 
         let result: Track[];
 
-        if(args.getSubcommand() == PLAY_OPTIONS.insert){
-            let index: number;
-            if(mPlayer.queue.length == 0){
-                index = 0;
-            }
-            else{
-                index = args.get(PLAY_OPTIONS.index)?.value as number || 1;
+        switch(args.getSubcommand()){
+            case PLAY_OPTIONS.queue:
+                result = await processQuery({ client, interaction, args }, mPlayer.queue.length);
 
-                if(index+1 > mPlayer.queue.length){
-                    index = mPlayer.queue.length;
+                if(result.length > 0){
+                    mPlayer.queue.push(...result);
+                    mPlayer.updatePlayingStatusMsg();
+                    mPlayer.playIfIdling(client);
                 }
-            }
-            
-            result = await processQuery({ client, interaction, args }, index);
+                break;
 
-            if(result.length > 0){
-                mPlayer.queue.splice(index, 0, ...result);
-                mPlayer.updatePlayingStatusMsg();
-                mPlayer.playIfIdling(client);
-            }
-            
-        }
-        else if(args.getSubcommand() == PLAY_OPTIONS.queue){
-            result = await processQuery({ client, interaction, args }, mPlayer.queue.length);
+            case PLAY_OPTIONS.insert:{
+                let index: number;
+                if(mPlayer.queue.length == 0){
+                    index = 0;
+                }
+                else{
+                    index = args.get(PLAY_OPTIONS.index)?.value as number || 1;
 
-            if(result.length > 0){
-                mPlayer.queue.push(...result);
-                mPlayer.updatePlayingStatusMsg();
-                mPlayer.playIfIdling(client);
+                    if(index+1 > mPlayer.queue.length){
+                        index = mPlayer.queue.length;
+                    }
+                }
+
+                result = await processQuery({ client, interaction, args }, index);
+
+                if(result.length > 0){
+                    mPlayer.queue.splice(index, 0, ...result);
+                    mPlayer.updatePlayingStatusMsg();
+                    mPlayer.playIfIdling(client);
+                }
+                break;
             }
         }
     }
