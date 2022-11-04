@@ -84,7 +84,7 @@ export default new Command({
             
         }
         else if(args.getSubcommand() == PLAY_OPTIONS.queue){
-            result = await processQuery({ client, interaction, args }, mPlayer.queue.length || 0);
+            result = await processQuery({ client, interaction, args }, mPlayer.queue.length);
 
             if(result.length > 0){
                 mPlayer.queue.push(...result);

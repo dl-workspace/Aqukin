@@ -15,7 +15,7 @@ export function formatBool(value: boolean){
 
 export function generateInteractionComponentId(authorId: string, componentName: string, args?: string | number){
     let result = `${authorId},${componentName}`;
-    if(args){
+    if(args != undefined){
         result += `,${args}`;
     }
 
