@@ -68,7 +68,7 @@ export default new Command({
         let result: Track[];
 
         if(args.getSubcommand() == PLAY_OPTIONS.insert){
-            let index = args.get(PLAY_OPTIONS.index)?.value as number || (mPlayer.queue.length > 0 ? 1 : 0);
+            let index = mPlayer.queue.length > 0 ? (args.get(PLAY_OPTIONS.index)?.value as number || 1) : 0;
 
             if(mPlayer.queue.length > 1 && index+1 > mPlayer.queue.length){
                 index = mPlayer.queue.length;
