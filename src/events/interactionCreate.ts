@@ -92,7 +92,7 @@ export default new Event('interactionCreate', async (interaction) => {
         }
     }
 
-    else if(interaction.isSelectMenu()){
+    else if(interaction.isStringSelectMenu()){
         try{
             const interactionData = interaction.customId.split(',');
 
