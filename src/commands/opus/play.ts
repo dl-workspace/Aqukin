@@ -1,4 +1,4 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, GuildMember, MessageActionRowComponentBuilder, PermissionFlagsBits, SelectMenuBuilder, SelectMenuInteraction, SelectMenuOptionBuilder } from "discord.js";
+import { ActionRowBuilder, ApplicationCommandOptionType, GuildMember, MessageActionRowComponentBuilder, PermissionFlagsBits, StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder } from "discord.js";
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
@@ -164,11 +164,11 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, index
             // embed the result(s)
             let i = 0;
             let tracksInfo = '';
-            let menuOptBuilder: SelectMenuOptionBuilder[] = [new SelectMenuOptionBuilder({ label: 'Dismiss', description: 'Dismiss the current results', value: '0' })];
+            let menuOptBuilder: StringSelectMenuOptionBuilder[] = [new StringSelectMenuOptionBuilder({ label: 'Dismiss', description: 'Dismiss the current results', value: '0' })];
 
             tracks.forEach( async (track) => {
                 tracksInfo += `${++i}) [${track.title}](${track.url}) | length \`${track.duration}\` \n\n`;
-                menuOptBuilder.push(new SelectMenuOptionBuilder({ label: `Track ${i}`, description: `${track.title}`, value: `${track.url}` }));
+                menuOptBuilder.push(new StringSelectMenuOptionBuilder({ label: `Track ${i}`, description: `${track.title}`, value: `${track.url}` }));
             })
 
             const embed = baseEmbed()
@@ -178,7 +178,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, index
 
             const actionRow = new ActionRowBuilder<MessageActionRowComponentBuilder>()
                 .addComponents(
-                    new SelectMenuBuilder()
+                    new StringSelectMenuBuilder()
                         .setCustomId(generateInteractionComponentId(member.id, PLAY_OPTIONS.track_select, index))
                         .setPlaceholder(`${memberName}-sama, please select an option`)
                         .addOptions(menuOptBuilder)
@@ -200,12 +200,12 @@ async function createTrack(url: string, author: GuildMember){
 }
 
 interface IHandlingSelectTrackInteractionDelegate{
-    (client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction, index: number) : void;
+    (client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: StringSelectMenuInteraction, index: number) : void;
 }
 
 export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegate;
 
-async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction, index: number) {
+async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: StringSelectMenuInteraction, index: number) {
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.push(track);
@@ -215,7 +215,7 @@ async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, memb
     mPlayer.playIfIdling(client);
 }
 
-async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: SelectMenuInteraction, index: number) {
+async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: StringSelectMenuInteraction, index: number) {
     const track = await createTrack(interaction.values[0], member);
 
     mPlayer.queue.splice(index, 0, track);
