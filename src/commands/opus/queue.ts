@@ -71,7 +71,7 @@ export async function generateQueueEmbed(i: number, queue: Track[], client: Exte
         // checks if there's anything next in queue
         if (next.length !== 0){
             let j = start;
-            info = next.map(track => `${j++}) [${track.title}](${track.url}) | \`${formatDuration(track.duration)}\` | requested by ${queue[0].getRequester()}`).join("\n\n");
+            info = next.map(track => `${j++}) [${track.title}](${track.url}) | \`${formatDuration(track.duration)}\` | requested by ${track.getRequester()}`).join("\n\n");
         } // end of if
         else { info = "Currently no track is next in queueヾ (= `ω´ =) ノ”"; } // else next in queue is empty
     
