@@ -112,26 +112,28 @@ export class OpusPlayer{
                 catch(err) { console.log(err); }
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
-                try{
-                    if(this.isLoopingTrack()) {
-                        if(this.trackLoopTimes > 0){
-                            this.trackLoopTimes--;
+                if(oldState.status == AudioPlayerStatus.Playing){
+                    try{
+                        if(this.isLoopingTrack()) {
+                            if(this.trackLoopTimes > 0){
+                                this.trackLoopTimes--;
+                            }
+                            this.queue.splice(1, 0, this.queue[0]); 
                         }
-                        this.queue.splice(1, 0, this.queue[0]); 
-                    }
-                    else{
-                        if(this.isLoopingQueue()) {
-                            this.loopQueue.push(this.queue[0]); 
+                        else{
+                            if(this.isLoopingQueue()) {
+                                this.loopQueue.push(this.queue[0]); 
+                            }
+                            this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
                         }
-                        this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
+    
+                        await this.deleteStatusMsg();
+                       
+                    } catch(err) { console.log(err); }
+                    finally{
+                        this.queue.shift();
+                        await this.processQueue(client);
                     }
-
-                    await this.deleteStatusMsg();
-                   
-                } catch(err) { console.log(err); }
-                finally{
-                    this.queue.shift();
-                    await this.processQueue(client);
                 }
             })
             
