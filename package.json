@@ -3,6 +3,7 @@
   "version": "2.12.1",
   "description": "Your (un)reliable Super Idol Gamer Maid♥, a bot that was created based on a Virtual Youtuber known as **Minato Aqua**",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "start": "ts-node src/index.ts",
     "dev": "ts-node-dev src/index.ts",
@@ -22,19 +23,19 @@
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
     "ffmpeg-static": "^5.1.0",
-    "glob": "^8.0.3",
+    "glob": "^8.1.0",
     "libsodium-wrappers": "^0.7.10",
-    "pg": "^8.8.0",
+    "pg": "^8.9.0",
     "sequelize": "^6.28.0",
     "ytdl-core": "https://github.com/matteopolak/node-ytdl-core.git#d6b56cd67aaa38c22966b98f7b36ad3db4c90192",
     "ytpl": "^2.3.0",
     "ytsr": "^3.8.0"
   },
   "devDependencies": {
-    "@types/glob": "^8.0.0",
-    "@types/node": "^18.11.17",
+    "@types/glob": "^8.0.1",
+    "@types/node": "^18.11.19",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.5"
   }
 }
