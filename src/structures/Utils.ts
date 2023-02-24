@@ -35,12 +35,12 @@ export function formatDuration(value: number){
     let parts = [];
     if(d.getUTCHours() > 0){
         parts.push(d.getUTCHours() + (value >= 86400000? d.getUTCDay()*24 : 0));
-    }
-
-    if(d.getUTCMinutes() > 0){
         parts.push(d.getUTCMinutes());
     }
-
+    else if(d.getUTCMinutes() >= 0){
+        parts.push(d.getUTCMinutes());
+    }
+    
     parts.push(d.getUTCSeconds() || 0);
     
     // Zero-pad
