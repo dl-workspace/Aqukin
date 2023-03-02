@@ -43,6 +43,9 @@ export class OpusPlayer{
             })
             .on(VoiceConnectionStatus.Connecting, async (oldState, newState) => {
                 console.log('connection Connecting');
+                if(oldState.status === VoiceConnectionStatus.Ready){
+                    connection.configureNetworking();
+                }
             })
             .on(VoiceConnectionStatus.Ready, async (oldState, newState) => {
                 console.log('connection Ready');
