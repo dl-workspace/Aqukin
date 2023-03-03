@@ -35,7 +35,7 @@ export class OpusPlayer{
             adapterCreator: interaction.guild.voiceAdapterCreator,
         })
             .on('stateChange', (oldState, newState) => {
-                if(newState.status !== VoiceConnectionStatus.Disconnected){
+                if(oldState.status !== VoiceConnectionStatus.Disconnected){
                     const oldNetworking = Reflect.get(oldState, 'networking');
                     const newNetworking = Reflect.get(newState, 'networking');
               
