@@ -45,7 +45,10 @@ export class OpusPlayer{
                     }
               
                     oldNetworking?.off('stateChange', networkStateChangeHandler);
-                    newNetworking?.on('stateChange', networkStateChangeHandler);    
+                    newNetworking?.on('stateChange', networkStateChangeHandler);
+                    if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+                        connection.configureNetworking();
+                    }
                 }
             })
             .on('error', (err) =>{
