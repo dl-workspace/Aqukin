@@ -34,6 +34,18 @@ export class OpusPlayer{
             guildId: this.id,
             adapterCreator: interaction.guild.voiceAdapterCreator,
         })
+            .on('stateChange', (oldState, newState) => {
+                const oldNetworking = Reflect.get(oldState, 'networking');
+                const newNetworking = Reflect.get(newState, 'networking');
+          
+                const networkStateChangeHandler = (oldNetworkState: any, newNetworkState: any) => {
+                    const newUdp = Reflect.get(newNetworkState, 'udp');
+                    clearInterval(newUdp?.keepAliveInterval);
+                }
+          
+                oldNetworking?.off('stateChange', networkStateChangeHandler);
+                newNetworking?.on('stateChange', networkStateChangeHandler);
+            })
             .on('error', (err) =>{
                 console.log(err);
                 this.textChannel.send({ content: `${err}` });
@@ -43,9 +55,6 @@ export class OpusPlayer{
             })
             .on(VoiceConnectionStatus.Connecting, async (oldState, newState) => {
                 console.log('connection Connecting');
-                if(oldState.status === VoiceConnectionStatus.Ready){
-                    connection.configureNetworking();
-                }
             })
             .on(VoiceConnectionStatus.Ready, async (oldState, newState) => {
                 console.log('connection Ready');

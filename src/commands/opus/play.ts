@@ -79,17 +79,7 @@ export default new Command({
                 break;
 
             case PLAY_OPTIONS.insert:{
-                let index: number;
-                if(mPlayer.queue.length == 0){
-                    index = 0;
-                }
-                else{
-                    index = args.get(PLAY_OPTIONS.index)?.value as number || 1;
-
-                    if(index+1 > mPlayer.queue.length){
-                        index = mPlayer.queue.length;
-                    }
-                }
+                const index: number = await insertIndex(args.get(PLAY_OPTIONS.index)?.value as number, mPlayer.queue.length);
 
                 result = await processQuery({ client, interaction, args }, index);
 
@@ -217,6 +207,7 @@ async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, memb
 
 async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: StringSelectMenuInteraction, index: number) {
     const track = await createTrack(interaction.values[0], member);
+    index = await insertIndex(index, mPlayer.queue.length);
 
     mPlayer.queue.splice(index, 0, track);
     interaction.editReply({ content: statusReply(client, member, index), embeds: [track.createEmbedThumbnail()], components: [] });
@@ -227,4 +218,14 @@ async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, me
 
 function statusReply(client: ExtendedClient, member: GuildMember, index: number){
     return client.replyMsgAuthor(member, `${client.user.username} has inserted to position \`${index}\``);
+}
+
+async function insertIndex(queueLength: number = 1, args: number) {
+    let index: number = args;
+
+    if(index+1 > queueLength){
+        index = queueLength;
+    }
+
+    return index;
 }
