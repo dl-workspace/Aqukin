@@ -1,12 +1,9 @@
 import { ApplicationCommandDataResolvable, Client, ClientEvents, Collection, GuildMember, VoiceChannel } from "discord.js";
 import { CommandType } from "../typings/command";
 import { glob } from "glob";
-import { promisify } from "util";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Events";
 import { OpusPlayer } from "./opus/Player";
-
-const globPromise = promisify(glob);
 
 export class ExtendedClient extends Client{
     commands: Collection<string, CommandType>;
@@ -43,7 +40,7 @@ export class ExtendedClient extends Client{
     }
 
     private async registerEvents(){
-        const eventFiles = await globPromise(`${__dirname}/../events/*{.ts,.js}`);
+        const eventFiles = await glob(`${__dirname}/../events/*{.ts,.js}`);
         
         eventFiles.forEach(async filePath => {
             const event: Event<keyof ClientEvents> = await this.importFile(filePath);
@@ -64,7 +61,7 @@ export class ExtendedClient extends Client{
 
     private async registerCommands(){
         const slashCommands: ApplicationCommandDataResolvable[] = [];
-        const commandFiles = await globPromise(`${__dirname}/../commands/*/*{.ts,.js}`);
+        const commandFiles = await glob(`${__dirname}/../commands/*/*{.ts,.js}`);
 
         // console.log({ commandFiles });
 
