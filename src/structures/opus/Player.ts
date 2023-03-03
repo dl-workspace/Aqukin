@@ -35,16 +35,18 @@ export class OpusPlayer{
             adapterCreator: interaction.guild.voiceAdapterCreator,
         })
             .on('stateChange', (oldState, newState) => {
-                const oldNetworking = Reflect.get(oldState, 'networking');
-                const newNetworking = Reflect.get(newState, 'networking');
-          
-                const networkStateChangeHandler = (oldNetworkState: any, newNetworkState: any) => {
-                    const newUdp = Reflect.get(newNetworkState, 'udp');
-                    clearInterval(newUdp?.keepAliveInterval);
+                if(newState.status !== VoiceConnectionStatus.Disconnected){
+                    const oldNetworking = Reflect.get(oldState, 'networking');
+                    const newNetworking = Reflect.get(newState, 'networking');
+              
+                    const networkStateChangeHandler = (oldNetworkState: any, newNetworkState: any) => {
+                        const newUdp = Reflect.get(newNetworkState, 'udp');
+                        clearInterval(newUdp?.keepAliveInterval);
+                    }
+              
+                    oldNetworking?.off('stateChange', networkStateChangeHandler);
+                    newNetworking?.on('stateChange', networkStateChangeHandler);    
                 }
-          
-                oldNetworking?.off('stateChange', networkStateChangeHandler);
-                newNetworking?.on('stateChange', networkStateChangeHandler);
             })
             .on('error', (err) =>{
                 console.log(err);
@@ -60,32 +62,14 @@ export class OpusPlayer{
                 console.log('connection Ready');
             })
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
-                // try{
-                //     await Promise.race([
-                //         entersState(connection, VoiceConnectionStatus.Signalling, TIMERS.reconnect),
-                //         entersState(connection, VoiceConnectionStatus.Connecting, TIMERS.reconnect),
-                //     ]);
-                //     // Seems to be reconnecting to a new channel - ignore disconnect
-                // } catch (err) {
-                //     clearTimeout(this.disconnectTimer);
-
-                //     const embed = baseEmbed()
-                //         .setTitle(`${client.user.username} will now leave, matta ne~ ヾ(＾ ∇ ＾)`)
-                //         .setDescription(`To re-establish this music session, within \`20 seconds\`, use the \`connect\` command while you are in a \`voice chat\``)
-                //         .setThumbnail('https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169')
-                //     this.textChannel.send({ embeds: [embed] });
-
-                //     // Seems to be a real disconnect which SHOULDN'T be recovered from
-                //     this.destroyTimer = setTimeout( () => {
-                //         if(connection.state.status === VoiceConnectionStatus.Disconnected){
-                //             try{
-                //                 connection.destroy();
-                //             } catch(err) { console.log(err); }
-                //         }
-                //     }, TIMERS.destroy );
-                // }
-
-                clearTimeout(this.disconnectTimer);
+                try{
+                    await Promise.race([
+                        entersState(connection, VoiceConnectionStatus.Signalling, TIMERS.reconnect),
+                        entersState(connection, VoiceConnectionStatus.Connecting, TIMERS.reconnect),
+                    ]);
+                    // Seems to be reconnecting to a new channel - ignore disconnect
+                } catch (err) {
+                    clearTimeout(this.disconnectTimer);
 
                     const embed = baseEmbed()
                         .setTitle(`${client.user.username} will now leave, matta ne~ ヾ(＾ ∇ ＾)`)
@@ -101,6 +85,7 @@ export class OpusPlayer{
                             } catch(err) { console.log(err); }
                         }
                     }, TIMERS.destroy );
+                }
             })
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
                 try{
