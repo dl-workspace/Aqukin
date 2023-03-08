@@ -29,6 +29,11 @@ export class OpusPlayer{
         this.id = interaction.guildId;
         this.textChannel = interaction.channel;
 
+        const networkStateChangeHandler = (oldNetworkState: any, newNetworkState: any) => {
+            const newUdp = Reflect.get(newNetworkState, 'udp');
+            clearInterval(newUdp?.keepAliveInterval);
+        }
+
         const connection = joinVoiceChannel({
             channelId: interaction.member.voice.channelId,
             guildId: this.id,
@@ -36,16 +41,9 @@ export class OpusPlayer{
         })
             .on('stateChange', (oldState, newState) => {
                 if(oldState.status !== VoiceConnectionStatus.Disconnected){
-                    const oldNetworking = Reflect.get(oldState, 'networking');
-                    const newNetworking = Reflect.get(newState, 'networking');
-              
-                    const networkStateChangeHandler = (oldNetworkState: any, newNetworkState: any) => {
-                        const newUdp = Reflect.get(newNetworkState, 'udp');
-                        clearInterval(newUdp?.keepAliveInterval);
-                    }
-              
-                    oldNetworking?.off('stateChange', networkStateChangeHandler);
-                    newNetworking?.on('stateChange', networkStateChangeHandler);
+                    Reflect.get(oldState, 'networking')?.off('stateChange', networkStateChangeHandler);
+                    Reflect.get(newState, 'networking')?.on('stateChange', networkStateChangeHandler);
+                    
                     if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
                         connection.configureNetworking();
                     }
