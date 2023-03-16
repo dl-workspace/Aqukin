@@ -39,16 +39,17 @@ export class OpusPlayer{
             guildId: this.id,
             adapterCreator: interaction.guild.voiceAdapterCreator,
         })
-            .on('stateChange', (oldState, newState) => {
-                if(oldState.status !== VoiceConnectionStatus.Disconnected){
-                    Reflect.get(oldState, 'networking')?.off('stateChange', networkStateChangeHandler);
-                    Reflect.get(newState, 'networking')?.on('stateChange', networkStateChangeHandler);
+        // temporary fix for connection bug, no longer needed
+            // .on('stateChange', (oldState, newState) => {
+            //     if(oldState.status !== VoiceConnectionStatus.Disconnected){
+            //         Reflect.get(oldState, 'networking')?.off('stateChange', networkStateChangeHandler);
+            //         Reflect.get(newState, 'networking')?.on('stateChange', networkStateChangeHandler);
                     
-                    if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
-                        connection.configureNetworking();
-                    }
-                }
-            })
+            //         if (oldState.status === VoiceConnectionStatus.Ready && newState.status === VoiceConnectionStatus.Connecting) {
+            //             connection.configureNetworking();
+            //         }
+            //     }
+            // })
             .on('error', (err) =>{
                 console.log(err);
                 this.textChannel.send({ content: `${err}` });

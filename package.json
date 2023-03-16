@@ -19,21 +19,21 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/opus": "^0.9.0",
-    "@discordjs/voice": "^0.14.0",
-    "discord.js": "^14.7.1",
+    "@discordjs/voice": "^0.15.0",
+    "discord.js": "^14.8.0",
     "dotenv": "^16.0.3",
     "ffmpeg-static": "^5.1.0",
-    "glob": "^9.2.1",
+    "glob": "^9.3.0",
     "libsodium-wrappers": "^0.7.11",
-    "pg": "^8.9.0",
-    "sequelize": "^6.29.0",
+    "pg": "^8.10.0",
+    "sequelize": "^6.29.3",
     "ytdl-core": "https://github.com/matteopolak/node-ytdl-core.git#d6b56cd67aaa38c22966b98f7b36ad3db4c90192",
     "ytpl": "^2.3.0",
     "ytsr": "^3.8.0"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
-    "@types/node": "^18.14.6",
+    "@types/node": "^18.15.3",
     "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.5"
