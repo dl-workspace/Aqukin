@@ -29,10 +29,11 @@ export class OpusPlayer{
         this.id = interaction.guildId;
         this.textChannel = interaction.channel;
 
-        const networkStateChangeHandler = (oldNetworkState: any, newNetworkState: any) => {
-            const newUdp = Reflect.get(newNetworkState, 'udp');
-            clearInterval(newUdp?.keepAliveInterval);
-        }
+        // temporary fix for connection bug, no longer needed
+        // const networkStateChangeHandler = (oldNetworkState: any, newNetworkState: any) => {
+        //     const newUdp = Reflect.get(newNetworkState, 'udp');
+        //     clearInterval(newUdp?.keepAliveInterval);
+        // }
 
         const connection = joinVoiceChannel({
             channelId: interaction.member.voice.channelId,
