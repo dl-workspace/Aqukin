@@ -22,12 +22,13 @@ export class Track {
 
     async createAudioResource(): Promise<AudioResource> {
         return new Promise((resolve, reject) => {
-            const ytdlOptions: ytdl.downloadOptions | ytdl.videoFormat = { 
+            // const ytdlOptions: ytdl.downloadOptions | ytdl.videoFormat = { 
+            const ytdlOptions: ytdl.downloadOptions = { 
                 filter: 'audio', 
                 quality: 'highestaudio', 
                 highWaterMark: 1 << 62,
                 liveBuffer: 1 << 62,
-                bitrate: 128,
+                // bitrate: 128,
                 dlChunkSize: 0,
                 begin: this.seek || 0,
                 // range: { start: this.seek/1000 },
