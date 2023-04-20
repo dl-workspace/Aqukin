@@ -5,4 +5,5 @@ RUN npm install
 RUN npm run build
 RUN pwd
 RUN ls -la /usr/src/app/aqukin
+RUN cat .env
 CMD [ "npm", "run", "serve" ]
