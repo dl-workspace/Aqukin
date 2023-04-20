@@ -3,4 +3,6 @@ WORKDIR /usr/src/app/aqukin
 ADD * /usr/src/app
 RUN npm install
 RUN npm run build
+RUN pwd
+RUN ls -la
 CMD [ "npm", "run", "serve" ]
