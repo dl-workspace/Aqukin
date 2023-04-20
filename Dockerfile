@@ -1,4 +1,4 @@
-FROM node:18.16.0-slim
+FROM node:19.9.0
 WORKDIR /usr/src/app/aqukin
 COPY . .
 RUN npm install
