@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:18.16.0-slim
 WORKDIR /usr/src/app/aqukin
 ADD * /usr/src/app
 ADD http://vincentprivate.synology.me:107/file_manager/discord_bot/aqukin/.env /usr/src/app
