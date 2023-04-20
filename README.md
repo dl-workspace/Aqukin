@@ -1,6 +1,4 @@
-[![License](https://badgen.net/github/license/dealoux/Aqukin)](https://github.com/dealoux/Aqukin/blob/master/LICENSE)
-
-[![Build Status](https://vincentprivate.synology.me:112/buildStatus/icon?job=vincent-services%2FBE%2Faqukin-dev)](https://vincentprivate.synology.me:112/job/vincent-services/job/BE/job/aqukin-dev/)
+[![License](https://badgen.net/github/license/dealoux/Aqukin)](https://github.com/dealoux/Aqukin/blob/master/LICENSE) [![Build Status](https://vincentprivate.synology.me:112/buildStatus/icon?job=vincent-services%2FBE%2Faqukin-dev)](https://vincentprivate.synology.me:112/job/vincent-services/job/BE/job/aqukin-dev/)
 
 
 # [Invite Aqukin](https://discord.com/api/oauth2/authorize?client_id=702620458130079750&permissions=8&scope=bot%20applications.commands)
