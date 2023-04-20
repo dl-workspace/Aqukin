@@ -6,3 +6,4 @@
 application.yml
 package-lock.json
 /dist
+.lh
