@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: authenticator-stage
-  namespace: authenticator-stage
+  name: aqukin-stage
+  namespace: aqukin-stage
   labels:
-    app: authenticator-stage
+    app: aqukin-stage
 spec:
   selector:
     matchLabels:
-      app: authenticator-stage
+      app: aqukin-stage
   replicas: 1
   strategy:
     rollingUpdate:
@@ -18,11 +18,11 @@ spec:
   template:
     metadata:
       labels:
-        app: authenticator-stage
+        app: aqukin-stage
     spec:
       containers:
-      - name: authenticator-stage
-        image: vincentbuiwork/authenticator:stage
+      - name: aqukin-stage
+        image: vincentbuiwork/aqukin:stage
         imagePullPolicy: Always
         resources:
           requests:

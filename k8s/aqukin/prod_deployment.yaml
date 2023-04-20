@@ -1,14 +1,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: authenticator-prod
-  namespace: authenticator-prod
+  name: aqukin-prod
+  namespace: aqukin-prod
   labels:
-    app: authenticator-prod
+    app: aqukin-prod
 spec:
   selector:
     matchLabels:
-      app: authenticator-prod
+      app: aqukin-prod
   replicas: 3
   strategy:
     rollingUpdate:
@@ -18,11 +18,11 @@ spec:
   template:
     metadata:
       labels:
-        app: authenticator-prod
+        app: aqukin-prod
     spec:
       containers:
-      - name: authenticator-prod
-        image: vincentbuiwork/authenticator:prod
+      - name: aqukin-prod
+        image: vincentbuiwork/aqukin:prod
         imagePullPolicy: Always
         resources:
           requests:
