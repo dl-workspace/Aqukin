@@ -135,11 +135,11 @@ MVotingData.init({
 });
 
 // associations
-MPlayerData.hasMany(MQueueData, { foreignKey: 'guild_id' });
-MQueueData.belongsTo(MPlayerData);
+MPlayerData.hasOne(MQueueData);
+MQueueData.belongsTo(MPlayerData, { foreignKey: 'guild_id', as: 'queueData' });
 
-MPlayerData.hasMany(MQueuePage, { foreignKey: 'guild_id' });
-MQueuePage.belongsTo(MPlayerData);
+MPlayerData.hasMany(MQueuePage, { foreignKey: 'author_id' });
+MQueuePage.belongsTo(MPlayerData, { foreignKey: 'guild_id', as: 'queuePage' });
 
-MPlayerData.hasMany(MVotingData, { foreignKey: 'guild_id' });
-MVotingData.belongsTo(MPlayerData);
+MPlayerData.hasMany(MQueuePage, { foreignKey: 'command' });
+MVotingData.belongsTo(MPlayerData, { foreignKey: 'guild_id', as: 'votingData' });
