@@ -12,7 +12,8 @@ export enum DB_OBJECTS {
 }
 
 export const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
-    host: "localhost",
+    host: process.env.DB_DOMAIN,
+    port: Number(process.env.DB_PORT),
     dialect: "postgres",
     logging: false,
 });
@@ -36,15 +37,16 @@ MPlayerData.init({
     guild_id: {
         type: DataTypes.STRING,
         primaryKey: true,
+        allowNull: false,
     },
     volume:{
-        type: DataTypes.NUMBER,
+        type: DataTypes.FLOAT,
     },
     trackLoop:{
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
     },
     queueLoop:{
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
     },
 
     textChannel:{
@@ -75,7 +77,7 @@ InferCreationAttributes<MQueueData>> {
 };
 MQueueData.init({
     queueIndex:{
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
     },
     queue:{
         type: DataTypes.ARRAY(DataTypes.JSON)
@@ -97,7 +99,7 @@ MQueuePage.init({
         primaryKey: true,
     },
     page:{
-        type: DataTypes.NUMBER
+        type: DataTypes.INTEGER
     },
 }, {
     sequelize,
@@ -119,10 +121,10 @@ MVotingData.init({
         primaryKey: true,
     },
     count:{
-        type: DataTypes.NUMBER
+        type: DataTypes.INTEGER
     },
     required:{
-        type: DataTypes.NUMBER
+        type: DataTypes.INTEGER
     },
     voters:{
         type: DataTypes.ARRAY(DataTypes.JSON)

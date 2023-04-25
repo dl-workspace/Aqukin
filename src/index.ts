@@ -1,5 +1,6 @@
 require('dotenv').config();
 import { ExtendedClient } from "./structures/Client";
+import { initProperties } from "./database/properties";
 
 declare global{
     interface Array<T> {
@@ -7,7 +8,6 @@ declare global{
         standardDeviation() : Promise<number>;
     }
 }
-
 Array.prototype.random = function () {
     return this[Math.floor((Math.random()*this.length))];
 }
@@ -20,3 +20,4 @@ Array.prototype.standardDeviation = async function (){
 
 export const client = new ExtendedClient();
 client.start();
+initProperties(client);
