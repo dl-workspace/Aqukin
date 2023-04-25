@@ -26,6 +26,7 @@
     "glob": "^10.2.1",
     "libsodium-wrappers": "^0.7.11",
     "pg": "^8.10.0",
+    "pg-hstore": "^2.3.4",
     "sequelize": "^6.31.0",
     "ytdl-core": "^4.11.4",
     "ytpl": "^2.3.0",
