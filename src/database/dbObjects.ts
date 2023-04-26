@@ -108,7 +108,7 @@ InferCreationAttributes<MPlayerData>> {
             volume: mPlayer.volume, 
             trackLoop: mPlayer.trackLoopTimes, 
             queueLoop: mPlayer.queueLoopTimes,
-            queue: mPlayer.queue,
+            // queue: mPlayer.queue,
             textChannel: mPlayer.textChannel,
             subscription: mPlayer.subscription,
             statusMsg: mPlayer.statusMsg,
@@ -177,25 +177,76 @@ InferCreationAttributes<MQueueData>> {
     declare index: number;
     declare queue: Array<Track>;
 
+    static async createQueueData(guildId: string){
+        return await MQueueData.create({ guild_id: guildId, queue: new Array<Track> });
+    }
+
     static async getQueueData(guildId: string) {
         let queueData: MQueueData = await MQueueData.findByPk(guildId);
     
-        if (!queueData) {
-            queueData = await MQueueData.create({ queue: new Array<Track> });
-        }
+        // if (!queueData) {
+        //     queueData = await MQueueData.createQueueData(guildId);
+        // }
         return queueData;
     };
 
-    static async removeQueueData(guildId: string) {
-        await MPlayerData.destroy({ where: { guild_id: guildId } });
+    static async getQueue(guildId: string){
+        const queueData = await MQueueData.getQueueData(guildId);
+        
+        if(queueData){
+            return queueData.queue;
+        }
     }
 
     static async getCurrTrack(guildId: string){
         let queueData: MQueueData = await MQueueData.findByPk(guildId);
 
         if (queueData) { 
-            return queueData.queue[queueData.index];
+            return queueData.currTrack();
         }
+    }
+
+    static async removeQueueData(guildId: string) {
+        await MPlayerData.destroy({ where: { guild_id: guildId } });
+    }
+
+    currTrack(){
+        return this.queue[this.index];
+    }
+
+    increaseIndex(){
+        this.increment('index');
+    }
+
+    resetIndex(){
+        this.index = 0;
+        this.save();
+    }
+
+    queueTrack(track: Track){
+        this.queue.push(track);
+        this.save();
+    }
+
+    addTrack(index: number, track: Track){
+        this.queue.splice(index, 1, track);
+        this.save();
+    }
+
+    removeTrack(index: number){
+        this.queue.splice(index, 1);
+        this.save();
+    }
+
+    removeTrackRange(start: number, end: number){
+        this.queue.splice(start, end);
+        this.save();
+    }
+
+    removeTrackAll(){
+        this.addTrack(0, this.currTrack());
+        this.queue.splice(1);
+        this.resetIndex();
     }
 };
 MQueueData.init({

@@ -9,7 +9,7 @@ import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
 import { VoiceConnectionStatus } from "@discordjs/voice";
 import { OpusPlayer } from "../structures/opus/Player";
-import { MPlayerList } from "../database/dbObjects";
+import { MPlayerList, MQueueData } from "../database/dbObjects";
 
 export default new Event('interactionCreate', async (interaction) => {
     const member = interaction.member as GuildMember
@@ -63,7 +63,7 @@ export default new Event('interactionCreate', async (interaction) => {
                                                     // implement a voting system here
                                                     return interaction.reply({ content: client.replyMsgErrorAuthor(member, `${client.user.username} would require others permission to execute this command`), ephemeral : true });
                                                 }
-                                                else if(mPlayer.queue[0]?.requester.id != member.id){
+                                                else if((await MQueueData.getCurrTrack(interaction.guildId))?.requester.id != member.id){
                                                     return interaction.reply({ content: client.replyMsgErrorAuthor(member, `you can only use this command on your own requested track`), ephemeral : true });
                                                 }
                                             }
@@ -147,7 +147,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
             switch(true){
                 case interactionData[1].localeCompare(LOOP_OPTIONS.disableLoopQueue_yes) == 0:
-                    loopTrack(client, mPlayer , interaction, Number(interactionData[2]));
+                    loopTrack(client, mPlayer, interaction, Number(interactionData[2]));
                     break;
 
                 case interactionData[1].localeCompare(LOOP_OPTIONS.disableLoopTrack_yes) == 0:
@@ -160,49 +160,53 @@ export default new Event('interactionCreate', async (interaction) => {
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.start) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
+                    const queue = await MQueueData.getQueue(mPlayer.id);
 
                     if(currPage > 0){
                         mPlayer.currQueuePage.set(member.id, 0);
                     }
 
-                    interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(member.id), mPlayer.queue, client)] });    
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(mPlayer.currQueuePage.get(member.id), queue, client)] });    
                     break;
                 }
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.next) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
-                    const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
+                    const queue = await MQueueData.getQueue(mPlayer.id);
+                    const ceil = Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
                     if(currPage < ceil) { 
                         currPage++; 
                         mPlayer.currQueuePage.set(member.id, currPage);
                     }
 
-                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, queue, client)] });
                     break;
                 }
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.back) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
+                    const queue = await MQueueData.getQueue(mPlayer.id);
 
                     if(currPage > 0) { 
                         currPage--; 
                         mPlayer.currQueuePage.set(member.id, currPage);
                     }
 
-                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)] });
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(currPage, queue, client)] });
                     break;
                 }
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.end) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
-                    const ceil = Math.ceil((mPlayer.queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
+                    const queue = await MQueueData.getQueue(mPlayer.id);
+                    const ceil = Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
                     if(currPage < ceil){
                         mPlayer.currQueuePage.set(member.id, ceil);
                     }
 
-                    interaction.message.edit({ embeds: [await generateQueueEmbed(ceil, mPlayer.queue, client)] });
+                    interaction.message.edit({ embeds: [await generateQueueEmbed(ceil, queue, client)] });
                     break;
                 }
 

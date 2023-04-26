@@ -41,14 +41,16 @@ export default new Command({
         const value = args.get(VOLUME_OPTIONS.value)?.value as number || 1;
         const type = args.get(VOLUME_OPTIONS.type)?.value as number || 1;
         let extraReply = '';
+        const queueData = await mPlayer.getQueueData();
 
         if(type == 2) { 
             mPlayer.volume = value;
             extraReply = ` \`player's\``
         }
-        mPlayer.queue[0].setVolume(value);
+        queueData.currTrack().setVolume(value);
+        queueData.save();
 
         mPlayer.updatePlayingStatusMsg();
-        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has set the${extraReply} volume to \`${mPlayer.queue[0].getVolume()}\``) });
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has set the${extraReply} volume to \`${queueData.currTrack().getVolume()}\``) });
     }
 });

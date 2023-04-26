@@ -70,21 +70,22 @@ export default new Command({
     ],
 
     execute: async({ client, interaction, args, mPlayer }) => {
+        const queueData = await mPlayer.getQueueData();
         switch(args.getSubcommand()){
             case REMOVE_OPTIONS.track:{
-                if(mPlayer.queue.length < 2){
+                if(queueData.queue.length < 2){
                     return interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} there is no track/song next in queue`) });
                 }
         
-                const value = (args.get(REMOVE_OPTIONS.index)?.value as number) || mPlayer.queue.length-1;
+                const value = (args.get(REMOVE_OPTIONS.index)?.value as number) || queueData.queue.length-1;
         
-                if(mPlayer.queue.length < value + 1){
+                if(queueData.queue.length < value + 1){
                     interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} could not find track indexed at \`${value}\`
-                    Please try something between \`1\` and \`${mPlayer.queue.length-1}\``) });
+                    Please try something between \`1\` and \`${queueData.queue.length-1}\``) });
                 }
                 else{
-                    const trackName = mPlayer.queue[value].title;
-                    mPlayer.queue.splice(value, 1);
+                    const trackName = queueData.queue[value].title;
+                    queueData.removeTrack(value);
                     mPlayer.updatePlayingStatusMsg();
                     interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed track \`${trackName}\` from the queue`) });
                 }
@@ -92,20 +93,20 @@ export default new Command({
             }
 
             case REMOVE_OPTIONS.range:{
-                if(mPlayer.queue.length < 2){
+                if(queueData.queue.length < 2){
                     return interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `${client.user.username} there is no track/song next in queue`) });
                 }
 
                 const start = (args.get(REMOVE_OPTIONS.start)?.value as number) || 1;
                 const end = (args.get(REMOVE_OPTIONS.end)?.value as number) || start;
         
-                if(mPlayer.queue.length < start + 1 || mPlayer.queue.length < end + 1 || end < start){
-                    interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `you have given an invalid range! Please try something between \`1\` and \`${mPlayer.queue.length-1}\``) });
+                if(queueData.queue.length < start + 1 || queueData.queue.length < end + 1 || end < start){
+                    interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `you have given an invalid range! Please try something between \`1\` and \`${queueData.queue.length-1}\``) });
                 }
                 else{
-                    const { length } = mPlayer.queue.splice(start, end-start+1);
+                    queueData.removeTrackRange(start, end-start+1);
                     mPlayer.updatePlayingStatusMsg();
-                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed \`${length}\` tracks from the queue, starting from \`${start}\` and ending at \`${end}\``) });
+                    interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed \`${queueData.queue.length}\` tracks from the queue, starting from \`${start}\` and ending at \`${end}\``) });
                 }
                 break;
             }
@@ -113,8 +114,8 @@ export default new Command({
             case REMOVE_OPTIONS.all:{
                 let reply = client.replyMsgAuthor(interaction.member, `the upcoming queue is already empty`);
 
-                if(mPlayer.queue.length > 1) {
-                    mPlayer.queue.splice(1);
+                if(queueData.queue.length > 1) {
+                    queueData.removeTrackAll();
                     reply = client.replyMsgAuthor(interaction.member, `${client.user.username} has cleared the queue`);
                     mPlayer.updatePlayingStatusMsg();
                 }
@@ -124,7 +125,8 @@ export default new Command({
             }
 
             case REMOVE_OPTIONS.duplicate:{
-                mPlayer.queue = await removeDuplicate(mPlayer.queue);
+                queueData.queue = await removeDuplicate(queueData.queue);
+                queueData.save();
 
                 mPlayer.updatePlayingStatusMsg();
                 interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has removed duplicated tracks from the queue`) });
@@ -134,6 +136,6 @@ export default new Command({
     }
 });
 
-async function removeDuplicate(queue: Track[]){
+async function removeDuplicate(queue: Array<Track>){
     return [...new Map(queue.map(track => [track.id, track])).values()];
 } // end of removeDuplicate(...) helper function

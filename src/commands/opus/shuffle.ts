@@ -8,20 +8,22 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     
     execute: async({ client, interaction, args, mPlayer }) => {
-        await shuffle(mPlayer.queue);
+        const queueData = await mPlayer.getQueueData();
+        await shuffle(queueData.queue);
+        queueData.resetIndex();
         interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has has shuffled the queue`) });
     }
 });
 
 // Shuffle(...) helper function
-async function shuffle(queue){
+async function shuffle(queue: Array<any>){
     for(let i=Math.round(queue.length/5); i>=0; i--){
         await Durstenfield(queue);
     }
 }
 
 // Durstenfield shuffle algorithm
-async function Durstenfield(queue){
+async function Durstenfield(queue: Array<any>){
     for(let i = queue.length-1; i>0; i--){
         let j = 0;
         while(j===0){

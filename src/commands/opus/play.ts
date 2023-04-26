@@ -2,6 +2,7 @@ import { ActionRowBuilder, ApplicationCommandOptionType, GuildMember, MessageAct
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
+import { MQueueData } from "../../database/dbObjects";
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
@@ -65,28 +66,31 @@ export default new Command({
             mPlayer = new OpusPlayer({ client, interaction, args });
         }
 
+        const queueData = await mPlayer.getQueueData();
         let result: Track[];
 
         switch(args.getSubcommand()){
             case PLAY_OPTIONS.queue:
-                result = await processQuery({ client, interaction, args }, mPlayer.queue.length);
+                result = await processQuery({ client, interaction, args }, queueData.queue.length);
 
                 if(result.length > 0){
-                    mPlayer.queue.push(...result);
+                    queueData.queue.push(...result);
+                    queueData.save();
                     mPlayer.updatePlayingStatusMsg();
-                    mPlayer.playIfIdling(client);
+                    mPlayer.playIfIdling(client, queueData);
                 }
                 break;
 
             case PLAY_OPTIONS.insert:{
-                const index: number = await insertIndex(args.get(PLAY_OPTIONS.index)?.value as number, mPlayer.queue.length);
+                const index: number = await insertIndex(args.get(PLAY_OPTIONS.index)?.value as number, queueData);
 
                 result = await processQuery({ client, interaction, args }, index);
 
                 if(result.length > 0){
-                    mPlayer.queue.splice(index, 0, ...result);
+                    queueData.queue.splice(index, 0, ...result);
+                    queueData.save();
                     mPlayer.updatePlayingStatusMsg();
-                    mPlayer.playIfIdling(client);
+                    mPlayer.playIfIdling(client, queueData);
                 }
                 break;
             }
@@ -197,34 +201,36 @@ export let handleSelectTrackInteraction : IHandlingSelectTrackInteractionDelegat
 
 async function selectTrackPush(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: StringSelectMenuInteraction, index: number) {
     const track = await createTrack(interaction.values[0], member);
+    const queueData = await mPlayer.getQueueData();
 
-    mPlayer.queue.push(track);
+    queueData.queueTrack(track);
     interaction.editReply({ content: statusReply(client, member, index), embeds: [track.createEmbedThumbnail()], components: [] });
 
     mPlayer.updatePlayingStatusMsg();
-    mPlayer.playIfIdling(client);
+    mPlayer.playIfIdling(client, queueData);
 }
 
 async function selectTrackInsert(client: ExtendedClient, mPlayer: OpusPlayer, member: GuildMember, interaction: StringSelectMenuInteraction, index: number) {
     const track = await createTrack(interaction.values[0], member);
-    index = await insertIndex(index, mPlayer.queue.length);
+    const queueData = await mPlayer.getQueueData();
+    index = await insertIndex(index, queueData);
 
-    mPlayer.queue.splice(index, 0, track);
+    queueData.addTrack(index, track);
     interaction.editReply({ content: statusReply(client, member, index), embeds: [track.createEmbedThumbnail()], components: [] });
 
     mPlayer.updatePlayingStatusMsg();
-    mPlayer.playIfIdling(client);
+    mPlayer.playIfIdling(client, queueData);
 }
 
 function statusReply(client: ExtendedClient, member: GuildMember, index: number){
     return client.replyMsgAuthor(member, `${client.user.username} has inserted to position \`${index}\``);
 }
 
-async function insertIndex(queueLength: number = 1, args: number) {
-    let index: number = args;
+async function insertIndex(args: number, queueData: MQueueData) {
+    let index: number = args || queueData.index + 1;
 
-    if(index+1 > queueLength){
-        index = queueLength;
+    if(index+1 > queueData.queue.length){
+        index = queueData.queue.length;
     }
 
     return index;

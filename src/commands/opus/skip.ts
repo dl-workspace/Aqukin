@@ -1,4 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
+import { MQueueData } from "../../database/dbObjects";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
@@ -13,6 +14,6 @@ export default new Command({
         mPlayer.subscription.player.unpause();
         mPlayer.subscription.player.stop();
 
-        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has skipped track \`${mPlayer.queue[0].title}\``) });
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has skipped track \`${(await MQueueData.getCurrTrack(mPlayer.id)).title}\``) });
     }
 });

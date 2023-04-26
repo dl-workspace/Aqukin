@@ -18,8 +18,6 @@ export class OpusPlayer{
     subscription: PlayerSubscription;
     trackLoopTimes: number;
     queueLoopTimes: number;
-    queue: Track[];
-    loopQueue: Track[];
     volume: number;
     currQueuePage: Collection<String, number>;
     statusMsg?: Message;
@@ -77,8 +75,6 @@ export class OpusPlayer{
             .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
                 try{
                     this.subscription.player.stop();
-                    this.queue.splice(0);
-                    this.loopQueue.splice(0);
                     this.currQueuePage.clear();
                     
                     await this.deleteStatusMsg();
@@ -98,13 +94,15 @@ export class OpusPlayer{
             })
             .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
                 try{
-                    if(!this.queue[0]) { return; }
+                    const queueData = await MQueueData.getQueueData(this.id);
+                    if(!queueData.currTrack()) { return; }
 
                     clearTimeout(this.disconnectTimer);
 
                     if(oldState.status === AudioPlayerStatus.Buffering){                        
-                        if(this.queue[0].seek != undefined){
-                            this.queue[0].seek = undefined;
+                        if(queueData.currTrack().seek != undefined){
+                            queueData.currTrack().seek = undefined;
+                            queueData.save();
                         }
                         else{
                             this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
@@ -114,36 +112,33 @@ export class OpusPlayer{
                 catch(err) { console.log(err); }
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
+                const queueData = await MQueueData.getQueueData(this.id);
+
                 try{
                     if(this.isLoopingTrack()) {
                         if(this.trackLoopTimes > 0){
                             this.trackLoopTimes--;
                         }
-                        this.queue.splice(1, 0, this.queue[0]); 
                     }
                     else{
-                        if(this.isLoopingQueue()) {
-                            this.loopQueue.push(this.queue[0]); 
-                        }
-                        this.textChannel.send({ embeds: [this.queue[0].creatEmbedFinished()] });
+                        queueData.increaseIndex();
+                        this.textChannel.send({ embeds: [queueData.currTrack().creatEmbedFinished()] });
                     }
 
                     await this.deleteStatusMsg();
                    
                 } catch(err) { console.log(err); }
                 finally{
-                    this.queue.shift();
-                    await this.processQueue(client);
+                    await this.processQueue(client, queueData);
                 }
             })
             
         this.subscription = connection.subscribe(player);
         this.trackLoopTimes = 0;
         this.queueLoopTimes = 0;
-        this.queue = [];
-        this.loopQueue = [];
         this.volume = 1;
         this.currQueuePage = new Collection();
+        // MQueueData.createQueueData(this.id);
 
         // MPlayerList.addPlayer(this);
         client.music.set(this.id, this);
@@ -195,17 +190,16 @@ export class OpusPlayer{
         }, TIMERS.disconnect );
     }
 
-    async processQueue(client: ExtendedClient){
-        let track = this.queue[0];
+    async processQueue(client: ExtendedClient, queueData: MQueueData){
+        let track = queueData.currTrack();
 
         if(!track){
             if(this.isLoopingQueue()){
                 if(this.queueLoopTimes > 0){
                     this.queueLoopTimes--;
                 }
-                this.queue.push(...this.loopQueue);
-                this.loopQueue.splice(0);
-                track = this.queue[0];
+                queueData.resetIndex();
+                track = queueData.currTrack();
             }
             else{
                 try{
@@ -216,23 +210,24 @@ export class OpusPlayer{
             }
         }
 
-        this.playIfIdling(client);
+        this.playIfIdling(client, queueData);
     }
 
-    async playIfIdling(client: ExtendedClient){
-        if(this.subscription.player.state.status != AudioPlayerStatus.Paused && this.subscription.player.state.status != AudioPlayerStatus.Playing && this.queue.length > 0){
-            this.playFromQueue(client);
+    async playIfIdling(client: ExtendedClient, queueData: MQueueData){
+        if(this.subscription.player.state.status != AudioPlayerStatus.Paused && this.subscription.player.state.status != AudioPlayerStatus.Playing && queueData.queue.length > 0){
+            this.playFromQueue(client, queueData);
         }
     }
 
-    async playFromQueue(client: ExtendedClient){
+    async playFromQueue(client: ExtendedClient, queueData: MQueueData){
         try{
-            let newVolume = this.queue[0].resource ? this.queue[0].resource.volume.volume : this.volume;
+            let newVolume = queueData.currTrack().resource ? queueData.currTrack().resource.volume.volume : this.volume;
 
-            this.queue[0].resource = await this.queue[0].createAudioResource();
-            this.queue[0].resource.volume.setVolume(newVolume);    
+            queueData.currTrack().resource = await queueData.currTrack().createAudioResource();
+            queueData.currTrack().resource.volume.setVolume(newVolume);
+            queueData.save();
 
-            this.subscription.player.play(this.queue[0].resource);
+            this.subscription.player.play(queueData.currTrack().resource);
         }
         catch(err){
             console.log(err);
@@ -240,9 +235,12 @@ export class OpusPlayer{
         }
     }
 
+    async getQueueData(){
+        return MQueueData.getQueueData(this.id);
+    }
+
     async disableQueueRepeat(){
         this.queueLoopTimes = 0;
-        this.loopQueue.splice(0);
     }
 
     async enableQueueRepeat(times = -1){
@@ -268,13 +266,15 @@ export class OpusPlayer{
     }
 
     async playingStatusEmbed(){
-        return this.queue[0]?.createEmbedImage()
+        const queueData = await MQueueData.getQueueData(this.id);
+
+        return queueData.currTrack()?.createEmbedImage()
             .addFields(
-                { name: 'Queue', value: `${this.queue.length}`, inline: true },
+                { name: 'Queue', value: `${queueData.queue.length}`, inline: true },
                 { name: 'Paused', value: `${formatBool(this.subscription.player.state.status == AudioPlayerStatus.Paused)}`, inline: true },
                 { name: 'Track Loop', value: `${formatBool(this.isLoopingTrack())} (${ this.trackLoopTimes == -1 ? `∞` : this.trackLoopTimes })`, inline: true },
                 { name: 'Queue Loop', value: `${formatBool(this.isLoopingQueue())} (${ this.queueLoopTimes == -1 ? `∞` : this.queueLoopTimes })`, inline: true },
-                { name: 'Volume', value: `${this.queue[0].getVolume()}`, inline: true },
+                { name: 'Volume', value: `${queueData.currTrack().getVolume()}`, inline: true },
         );
     }
 
