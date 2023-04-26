@@ -5,6 +5,6 @@ import { sequelize } from "../database/dbObjects";
 export async function initProperties(bot: ExtendedClient) {
     sequelize.sync({ force: true }).then(async () => {    
         console.log("Database synced");
-        sequelize.close();
+        // sequelize.close();
     }).catch(console.error);
 }

@@ -1,10 +1,12 @@
 require('dotenv').config();
 import { PlayerSubscription } from "@discordjs/voice";
 import { GuildTextBasedChannel, GuildMember, Message } from "discord.js";
-import { Sequelize, DataTypes, Model, InferAttributes, InferCreationAttributes } from "sequelize";
-import { Track } from "../structures/opus/Track";
+import { Sequelize, DataTypes, Model, InferAttributes, InferCreationAttributes, NonAttribute } from "sequelize";
+import type { OpusPlayer } from "../structures/opus/Player";
+import type { Track } from "../structures/opus/Track";
 
 export enum DB_OBJECTS {
+    MPlayerList = 'MPlayerList',
     MPlayerData = 'MPlayerData',
     MQueueData = 'MQueueData',
     MQueuePage = 'MQueuePage',
@@ -19,6 +21,67 @@ export const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERN
 });
 
 // models initialization
+
+export class MPlayerList extends Model<
+InferAttributes<MPlayerList>,
+InferCreationAttributes<MPlayerList>> {
+    declare guild_id: string;
+    declare mPlayer: OpusPlayer;
+
+    static async getPlayerData(guildId: string){
+        return await MPlayerList.findByPk(guildId);
+    }
+
+    static async getPlayer(guildId: string){
+        let mPlayer: OpusPlayer;
+        const playerData = await MPlayerList.getPlayerData(guildId);
+        
+        if(playerData){
+            mPlayer = playerData.mPlayer;
+        }
+        
+        return mPlayer;
+    }
+
+    // get Player(): NonAttribute<OpusPlayer>{
+    //     return this.mPlayer;
+    // }
+
+    static async addPlayer(mPlayer: OpusPlayer){
+        let dPlayer = await MPlayerList.getPlayerData(mPlayer.id);
+
+        if(!dPlayer){
+            dPlayer = await MPlayerList.create({ guild_id: mPlayer.id });
+        }
+
+        dPlayer.mPlayer = mPlayer;
+        dPlayer.save();
+    }
+
+    static async removePlayerData(guildId: string){
+        let dPlayer = await MPlayerList.getPlayerData(guildId);
+
+        if(dPlayer){
+            await MPlayerList.destroy({ where: {guild_id: guildId} });
+            dPlayer.save();
+        }
+    }
+};
+MPlayerList.init({
+    guild_id: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+        allowNull: false,
+    },
+    mPlayer: {
+        type: DataTypes.JSON,
+    },
+}, {
+    sequelize,
+    tableName: DB_OBJECTS.MPlayerList,
+});
+
+
 export class MPlayerData extends Model<
 InferAttributes<MPlayerData>,
 InferCreationAttributes<MPlayerData>> {
@@ -79,7 +142,7 @@ MPlayerData.init({
 export class MQueueData extends Model<
 InferAttributes<MQueueData>,
 InferCreationAttributes<MQueueData>> {
-    declare guild_id: string;
+    // declare guild_id: string;
     declare index: number;
     declare queue: Array<Track>;
 
@@ -87,7 +150,7 @@ InferCreationAttributes<MQueueData>> {
         let queueData: MQueueData = await MQueueData.findByPk(guildId);
     
         if (!queueData) {
-            queueData = await MQueueData.create({ guild_id: guildId, queue: new Array<Track> });
+            queueData = await MQueueData.create({ queue: new Array<Track> });
         }
         return queueData;
     };
@@ -101,19 +164,19 @@ InferCreationAttributes<MQueueData>> {
     }
 };
 MQueueData.init({
-    guild_id: {
-        type: DataTypes.STRING,
-        references: {
-            model: MPlayerData,
-            key: 'guild_id',
-        }
-    },
+    // guild_id: {
+    //     type: DataTypes.STRING,
+    //     references: {
+    //         model: MPlayerList,
+    //         key: 'guild_id',
+    //     }
+    // },
     index:{
         type: DataTypes.INTEGER,
         defaultValue: 0,
     },
     queue:{
-        type: DataTypes.ARRAY(DataTypes.JSON)
+        type: DataTypes.ARRAY(DataTypes.JSON),
     },
 }, {
     sequelize,
@@ -139,7 +202,6 @@ MQueuePage.init({
     sequelize,
     tableName: DB_OBJECTS.MQueuePage,
 });
-
 
 export class MVotingData extends Model<
 InferAttributes<MVotingData>,
@@ -171,14 +233,14 @@ MVotingData.init({
 });
 
 // associations
-MPlayerData.hasOne(MQueueData);
-// MPlayerData.hasOne(MQueueData, { foreignKey: 'guild_id', as: 'MPlayer' });
-MQueueData.belongsTo(MPlayerData);
+// MPlayerList.hasOne(MQueueData);
+// // MPlayerData.hasOne(MQueueData, { foreignKey: 'guild_id', as: 'MPlayer' });
+// MQueueData.belongsTo(MPlayerList, { as: 'MPlayer' });
 // MQueueData.belongsTo(MPlayerData, { foreignKey: 'guild_id' });
 // MQueueData.belongsTo(MPlayerData, { foreignKey: 'guild_id', as: 'queueData' });
 
-MPlayerData.hasMany(MQueuePage, { foreignKey: 'author_id' });
-MQueuePage.belongsTo(MPlayerData);
+// MPlayerList.hasMany(MQueuePage, { foreignKey: 'author_id' });
+// MQueuePage.belongsTo(MPlayerList);
 
-MPlayerData.hasMany(MQueuePage, { foreignKey: 'command' });
-MVotingData.belongsTo(MPlayerData);
+// MPlayerList.hasMany(MQueuePage, { foreignKey: 'command' });
+// MVotingData.belongsTo(MPlayerList);

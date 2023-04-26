@@ -1,5 +1,6 @@
 import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice";
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
+import { MPlayerList } from "../../database/dbObjects";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
 import { baseEmbed, formatBool } from "../Utils";
@@ -85,6 +86,7 @@ export class OpusPlayer{
                 catch(err) { console.log(err); }
                 finally{
                     this.subscription.unsubscribe();
+                    // MPlayerList.removePlayerData(this.id);
                     client.music.delete(this.id);
                 }
             });
@@ -143,6 +145,7 @@ export class OpusPlayer{
         this.volume = 1;
         this.currQueuePage = new Collection();
 
+        // MPlayerList.addPlayer(this);
         client.music.set(this.id, this);
     }
 

@@ -9,6 +9,7 @@ import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
 import { VoiceConnectionStatus } from "@discordjs/voice";
 import { OpusPlayer } from "../structures/opus/Player";
+import { MPlayerList } from "../database/dbObjects";
 
 export default new Event('interactionCreate', async (interaction) => {
     const member = interaction.member as GuildMember
@@ -32,6 +33,7 @@ export default new Event('interactionCreate', async (interaction) => {
             // command type check
             switch(command.tag){
                 case COMMAND_TAGS.music:
+                    // mPlayer = await MPlayerList.getPlayer(interaction.guildId);
                     mPlayer = client.music.get(interaction.guildId);
                     const { channel } = member.voice;
 
@@ -104,6 +106,8 @@ export default new Event('interactionCreate', async (interaction) => {
             await interaction.deferUpdate();
 
             mPlayer = client.music.get(interaction.guildId);
+            // mPlayer = await MPlayerList.getPlayer(interaction.guildId);
+
             if(!mPlayer){
                 return interaction.message.edit({ content: `${client.replyMsgAuthor(member, `This music session is already over`)}`, embeds: [], components: [] });
             }
@@ -133,6 +137,8 @@ export default new Event('interactionCreate', async (interaction) => {
             }
 
             mPlayer = client.music.get(interaction.guildId);
+            // mPlayer = await MPlayerList.getPlayer(interaction.guildId);
+
             if(!mPlayer) {
                 return await interaction.message.delete().catch(err => {});
             }

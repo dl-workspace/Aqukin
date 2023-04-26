@@ -4,6 +4,7 @@ import { glob } from "glob";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Events";
 import { OpusPlayer } from "./opus/Player";
+import { MPlayerList } from "../database/dbObjects";
 
 export class ExtendedClient extends Client{
     commands: Collection<string, CommandType>;
@@ -83,6 +84,19 @@ export class ExtendedClient extends Client{
 
     private async alive(client: ExtendedClient){
         setInterval(async () => {
+            // (await MPlayerList.findAll()).forEach(async instance => {
+            //     const { mPlayer } = instance;
+            //     const { connection } = mPlayer.subscription;
+            //     client.channels.fetch(connection.joinConfig.channelId).then(async (voiceChannel : VoiceChannel) => {
+            //         const memberList = voiceChannel.members.filter(mem => !mem.user.bot);
+
+            //         if(memberList.size === 0){
+            //             clearTimeout(mPlayer.disconnectTimer);
+            //             mPlayer.disconnect();
+            //             mPlayer.textChannel.send({ content: this.replyMsg(`Since there are no listener left`) });
+            //         }
+            //     }).catch(err => console.log(err));
+            // })
             client.music.forEach(async mPlayer => {
                 const { connection } = mPlayer.subscription;
                 client.channels.fetch(connection.joinConfig.channelId).then(async (voiceChannel : VoiceChannel) => {
