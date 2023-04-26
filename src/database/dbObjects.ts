@@ -89,6 +89,8 @@ InferCreationAttributes<MPlayerData>> {
     declare volume: number;
     declare trackLoop: number;
     declare queueLoop: number;
+    
+    declare queue: Array<Track>;
 
     declare textChannel: GuildTextBasedChannel;
     declare subscription: PlayerSubscription;
@@ -96,9 +98,35 @@ InferCreationAttributes<MPlayerData>> {
     declare disconnectTimer?: NodeJS.Timeout;
     declare destroyTimer?: NodeJS.Timeout;
 
-    async getData(guildId: string){
+    static async getPlayerData(guildId: string){
         return await MPlayerData.findByPk(guildId);
     }
+
+    static async addPlayer(mPlayer: OpusPlayer){
+        const dPlayer = await MPlayerData.create({ 
+            guild_id: mPlayer.id, 
+            volume: mPlayer.volume, 
+            trackLoop: mPlayer.trackLoopTimes, 
+            queueLoop: mPlayer.queueLoopTimes,
+            queue: mPlayer.queue,
+            textChannel: mPlayer.textChannel,
+            subscription: mPlayer.subscription,
+            statusMsg: mPlayer.statusMsg,
+            disconnectTimer: mPlayer.disconnectTimer,
+            destroyTimer: mPlayer.destroyTimer,
+        });
+        dPlayer.save();
+    }
+
+    static async removePlayerData(guildId: string){
+        let dPlayer = await MPlayerData.getPlayerData(guildId);
+
+        if(dPlayer){
+            await MPlayerData.destroy({ where: {guild_id: guildId} });
+            dPlayer.save();
+        }
+    }
+
 };
 MPlayerData.init({
     guild_id: {
@@ -117,6 +145,10 @@ MPlayerData.init({
     queueLoop:{
         type: DataTypes.INTEGER,
         defaultValue: 0,
+    },
+
+    queue: {
+        type: DataTypes.ARRAY(DataTypes.JSON),
     },
 
     textChannel:{
