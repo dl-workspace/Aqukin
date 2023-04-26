@@ -4,7 +4,7 @@ import { glob } from "glob";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Events";
 import { OpusPlayer } from "./opus/Player";
-import { MPlayerList } from "../database/dbObjects";
+import { MPlayerData, MPlayerList } from "../database/dbObjects";
 
 export class ExtendedClient extends Client{
     commands: Collection<string, CommandType>;
@@ -97,6 +97,7 @@ export class ExtendedClient extends Client{
             //         }
             //     }).catch(err => console.log(err));
             // })
+
             client.music.forEach(async mPlayer => {
                 const { connection } = mPlayer.subscription;
                 client.channels.fetch(connection.joinConfig.channelId).then(async (voiceChannel : VoiceChannel) => {

@@ -126,7 +126,6 @@ InferCreationAttributes<MPlayerData>> {
             dPlayer.save();
         }
     }
-
 };
 MPlayerData.init({
     guild_id: {
@@ -174,11 +173,11 @@ MPlayerData.init({
 export class MQueueData extends Model<
 InferAttributes<MQueueData>,
 InferCreationAttributes<MQueueData>> {
-    // declare guild_id: string;
+    declare guild_id: string;
     declare index: number;
     declare queue: Array<Track>;
 
-    async getQueueData(guildId: string) {
+    static async getQueueData(guildId: string) {
         let queueData: MQueueData = await MQueueData.findByPk(guildId);
     
         if (!queueData) {
@@ -187,7 +186,11 @@ InferCreationAttributes<MQueueData>> {
         return queueData;
     };
 
-    async getCurrTrack(guildId: string){
+    static async removeQueueData(guildId: string) {
+        await MPlayerData.destroy({ where: { guild_id: guildId } });
+    }
+
+    static async getCurrTrack(guildId: string){
         let queueData: MQueueData = await MQueueData.findByPk(guildId);
 
         if (queueData) { 
@@ -196,13 +199,15 @@ InferCreationAttributes<MQueueData>> {
     }
 };
 MQueueData.init({
-    // guild_id: {
-    //     type: DataTypes.STRING,
-    //     references: {
-    //         model: MPlayerList,
-    //         key: 'guild_id',
-    //     }
-    // },
+    guild_id: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+        allowNull: false,
+        // references: {
+        //     model: MPlayerList,
+        //     key: 'guild_id',
+        // }
+    },
     index:{
         type: DataTypes.INTEGER,
         defaultValue: 0,

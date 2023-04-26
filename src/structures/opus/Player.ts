@@ -1,6 +1,6 @@
 import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice";
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
-import { MPlayerList } from "../../database/dbObjects";
+import { MPlayerList, MQueueData } from "../../database/dbObjects";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
 import { baseEmbed, formatBool } from "../Utils";
