@@ -8,7 +8,7 @@ enum EMOJI_OPTIONS{
 export default new Command({
     name: COMMANDS.emoji,
     tag: COMMAND_TAGS.utils,
-    description: 'Send a specified guild emoji on the user behalf',
+    description: 'Send a specified custom server emoji on the user\'s behalf',
     userPermissions: [PermissionFlagsBits.SendMessages],
     options: [{
         type: ApplicationCommandOptionType.String,

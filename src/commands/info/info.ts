@@ -23,7 +23,7 @@ export default new Command({
         options: [{
             type: ApplicationCommandOptionType.User,
             name: INFO_OPTIONS.mention,
-            description: 'the user to get info',
+            description: 'the user whom info you wish to know about',
         }]
     },
     {

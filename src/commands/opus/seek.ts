@@ -5,7 +5,7 @@ import { convertInput, formatDuration } from "../../structures/Utils";
 export default new Command({
     name: COMMANDS.seek,
     tag: COMMAND_TAGS.music,
-    description: `Seek to a specified timestamp (hh:mm:ss) of the current track`,
+    description: `Move the current track to a specified timestamp (hh:mm:ss) location`,
     userPermissions: [PermissionFlagsBits.SendMessages],
     options: [{
         type: ApplicationCommandOptionType.String,
