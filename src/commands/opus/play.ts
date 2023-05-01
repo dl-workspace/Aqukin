@@ -64,6 +64,7 @@ export default new Command({
     execute: async({ client, interaction, args, mPlayer }) => {
         if(!mPlayer){
             mPlayer = new OpusPlayer({ client, interaction, args });
+            await mPlayer.initQueueData();
         }
 
         const queueData = await mPlayer.getQueueData();

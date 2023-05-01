@@ -5,7 +5,6 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "start": "ts-node src/index.ts",
     "dev": "ts-node-dev src/index.ts",
     "serve": "node dist/index.js",
     "build": "tsc",

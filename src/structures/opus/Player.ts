@@ -138,14 +138,15 @@ export class OpusPlayer{
         this.queueLoopTimes = 0;
         this.volume = 1;
         this.currQueuePage = new Collection();
-        // MQueueData.createQueueData(this.id);
-
-        // MPlayerList.addPlayer(this);
         client.music.set(this.id, this);
     }
 
     getConnection(){
         return getVoiceConnection(this.id);
+    }
+
+    async initQueueData(){
+        return await MQueueData.createQueueData(this.id);
     }
 
     async disconnect(){
