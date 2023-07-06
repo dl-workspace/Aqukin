@@ -2,11 +2,11 @@ import { ActionRowBuilder, ApplicationCommandOptionType, GuildMember, MessageAct
 import ytdl from "ytdl-core";
 import ytpl from "ytpl";
 import ytsr from "ytsr";
-import { MQueueData } from "../../database/dbObjects";
+import { MQueueData } from "../../database/models/MQueueData";
+import { TrackInfo } from "../../database/models/TrackInfo";
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
-import { Track } from "../../structures/opus/Track";
 import { baseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
 import { ExecuteOptions } from "../../typings/command";
 
@@ -68,15 +68,17 @@ export default new Command({
         }
 
         const queueData = await mPlayer.getQueueData();
-        let result: Track[];
+        let result: TrackInfo[];
 
         switch(args.getSubcommand()){
             case PLAY_OPTIONS.queue:
-                result = await processQuery({ client, interaction, args }, queueData.queue.length);
+                result = await processQuery({ client, interaction, args }, queueData.size);
 
                 if(result.length > 0){
-                    queueData.queue.push(...result);
-                    queueData.save();
+                    // queueData.queue.push(...result);
+                    for(let trackInfo of result){
+                        queueData.queueTrack(trackInfo);
+                    }
                     mPlayer.updatePlayingStatusMsg();
                     mPlayer.playIfIdling(client, queueData);
                 }
@@ -88,8 +90,9 @@ export default new Command({
                 result = await processQuery({ client, interaction, args }, index);
 
                 if(result.length > 0){
-                    queueData.queue.splice(index, 0, ...result);
-                    queueData.save();
+                    for(let trackInfo of result){
+                        queueData.addTrack(index, trackInfo);
+                    }
                     mPlayer.updatePlayingStatusMsg();
                     mPlayer.playIfIdling(client, queueData);
                 }
@@ -103,14 +106,13 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, index
     const { member } = interaction;
     const memberName = member.nickname || member.user.username;
     const query = args.get(PLAY_OPTIONS.query).value as string;
-    let result: Track[] = [];
+    let result: TrackInfo[] = [];
 
     // if the queury is a youtube video link
     if(ytdl.validateURL(query)) {  
         await ytdl.getBasicInfo(query).then(async trackInfo => {
             //console.log(trackInfo);
-            const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
-            const track = new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, member);
+            const track = infoTrack(trackInfo, member);
             result.push(track);
 
             interaction.followUp({ content: statusReply(client, member, index), embeds: [track.createEmbedThumbnail()] });
@@ -124,12 +126,13 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, index
 
             let playListDuration = 0;
     
-            playlist.items.forEach(async track => {
+            playlist.items.forEach(async trackInfo => {
                 //console.log(trackInfo);
-                if(track.durationSec){
-                    const trackDuration = track.durationSec * 1000;
-                    result.push(new Track(track.id, track.url, track.title, trackDuration, member));
-                    playListDuration += trackDuration;
+                if(trackInfo.durationSec){
+                    const { id, url, title } = trackInfo;
+                    const duration = trackInfo.durationSec * 1000;
+                    result.push(TrackInfo.buildTrack({ track_id: id, url, title, duration, requester : member }));
+                    playListDuration += duration;
                 }
             });
 
@@ -188,10 +191,13 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, index
     return result;
 }
 
-async function createTrack(url: string, author: GuildMember){
-    const trackInfo = await ytdl.getBasicInfo(url);
-    const { videoId, title, lengthSeconds } = trackInfo.player_response.videoDetails;
-    return new Track(videoId, trackInfo.videoDetails.video_url, title, Number(lengthSeconds)*1000, author);
+function infoTrack(info : ytdl.videoInfo, requester: GuildMember, index?: number){
+    const { videoId, title, lengthSeconds } = info.player_response.videoDetails;
+    return TrackInfo.buildTrack({ track_id: videoId, url: info.videoDetails.video_url, title, duration: Number(lengthSeconds)*1000, requester }, index);
+}
+
+async function createTrack(url: string, requester: GuildMember){
+    return infoTrack(await ytdl.getBasicInfo(url), requester, 0);    
 }
 
 interface IHandlingSelectTrackInteractionDelegate{
@@ -228,10 +234,10 @@ function statusReply(client: ExtendedClient, member: GuildMember, index: number)
 }
 
 async function insertIndex(args: number, queueData: MQueueData) {
-    let index: number = args || queueData.index + 1;
+    let index: number = args || queueData.currIndex + 1;
 
-    if(index+1 > queueData.queue.length){
-        index = queueData.queue.length;
+    if(index+1 > queueData.size){
+        index = queueData.size;
     }
 
     return index;

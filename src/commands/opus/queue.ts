@@ -1,4 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageActionRowComponentBuilder, PermissionFlagsBits } from "discord.js";
+import { TrackInfo } from "../../database/models/TrackInfo";
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { Track } from "../../structures/opus/Track";
@@ -23,7 +24,7 @@ export default new Command({
     execute: async({ client, interaction, args, mPlayer }) => {
         const queueData = await mPlayer.getQueueData();
 
-        if(queueData.queue.length > 0){
+        if(queueData.size > 0){
             let currPage = 0;
             mPlayer.currQueuePage.set(interaction.user.id, currPage);
     
@@ -62,7 +63,7 @@ export default new Command({
 });
 
 /* This function is for generating an embed with the queue information */
-export async function generateQueueEmbed(i: number, queue: Track[], client: ExtendedClient) {
+export async function generateQueueEmbed(i: number, queue: TrackInfo[], client: ExtendedClient) {
     try{
         let info: String;
         let start = QUEUE_EMBED_PAGE_STEP*i+1;
@@ -73,7 +74,7 @@ export async function generateQueueEmbed(i: number, queue: Track[], client: Exte
         // checks if there's anything next in queue
         if (next.length !== 0){
             let j = start;
-            info = next.map(track => `${j++}) [${track.title}](${track.url}) | \`${formatDuration(track.duration)}\` | requested by ${track.getRequester()}`).join("\n\n");
+            info = next.map(track => `${j++}) [${track.title}](${track.url}) | \`${formatDuration(track.duration)}\` | requested by ${track.getRequesterName()}`).join("\n\n");
         } // end of if
         else { info = "Currently no track is next in queueヾ (= `ω´ =) ノ”"; } // else next in queue is empty
     
@@ -81,7 +82,7 @@ export async function generateQueueEmbed(i: number, queue: Track[], client: Exte
         if(i==0 || !info.startsWith("Currently")){
             const embed = baseEmbed()
                 .setTitle(`Page ${i+1}/${Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)}`)
-                .setDescription(`⚓ Currently playing ▶️\n [${queue[0].title}](${queue[0].url}) | \`${formatDuration(queue[0].duration)}\` | requested by ${queue[0].getRequester()}\n\n⚓ Next in queue ⏭️\n${info}`);
+                .setDescription(`⚓ Currently playing ▶️\n [${queue[0].title}](${queue[0].url}) | \`${formatDuration(queue[0].duration)}\` | requested by ${queue[0].getRequesterName()}\n\n⚓ Next in queue ⏭️\n${info}`);
             return embed;
         }
     }

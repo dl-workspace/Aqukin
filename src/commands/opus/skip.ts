@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { MQueueData } from "../../database/dbObjects";
+import { MQueueData } from "../../database/dbObjects-old";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({

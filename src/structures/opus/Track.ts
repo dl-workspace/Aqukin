@@ -9,6 +9,7 @@ export class Track {
     title: string;
     duration: number;
     requester: GuildMember;
+    requesterId: string;
     seek?: number;
     resource?: AudioResource;
 

@@ -11,7 +11,7 @@ export default new Command({
         type: ApplicationCommandOptionType.String,
         name: 'timestamp',
         description: 'timestamp (hh:mm:ss)',
-        minValue: 0,
+        // minValue: 0,
         required: true,
     }],
 

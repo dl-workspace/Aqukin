@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import { TrackInfo } from "../../database/models/TrackInfo";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { Track } from "../../structures/opus/Track";
 
 enum REMOVE_OPTIONS{
     // subcomands
@@ -136,6 +136,6 @@ export default new Command({
     }
 });
 
-async function removeDuplicate(queue: Array<Track>){
-    return [...new Map(queue.map(track => [track.id, track])).values()];
+async function removeDuplicate(queue: Array<TrackInfo>){
+    return [...new Map(queue.map(track => [track.track_id, track])).values()];
 } // end of removeDuplicate(...) helper function

@@ -1,10 +1,9 @@
 import { AudioPlayer, CreateAudioPlayerOptions, joinVoiceChannel, PlayerSubscription, VoiceConnectionStatus, entersState, AudioPlayerStatus, getVoiceConnection } from "@discordjs/voice";
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
-import { MPlayerList, MQueueData } from "../../database/dbObjects";
+import { MQueueData } from "../../database/models/MQueueData";
 import { ExecuteOptions } from "../../typings/command";
 import { ExtendedClient } from "../Client";
 import { baseEmbed, formatBool } from "../Utils";
-import { Track } from "./Track";
 
 const enum TIMERS{
     reconnect = 5_000,
@@ -82,7 +81,7 @@ export class OpusPlayer{
                 catch(err) { console.log(err); }
                 finally{
                     this.subscription.unsubscribe();
-                    // MPlayerList.removePlayerData(this.id);
+                    MQueueData.removeQueueData(this.id);
                     client.music.delete(this.id);
                 }
             });
@@ -95,14 +94,16 @@ export class OpusPlayer{
             .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
                 try{
                     const queueData = await MQueueData.getQueueData(this.id);
-                    if(!queueData.currTrack()) { return; }
+                    const currTrack = await queueData.currTrack();
+                    if(!currTrack) { return; }
 
                     clearTimeout(this.disconnectTimer);
 
                     if(oldState.status === AudioPlayerStatus.Buffering){                        
-                        if(queueData.currTrack().seek != undefined){
-                            queueData.currTrack().seek = undefined;
-                            queueData.save();
+                        if(currTrack.seek != undefined){
+                            currTrack.seek = undefined;
+                            currTrack.save();
+                            // queueData.save();
                         }
                         else{
                             this.statusMsg = await this.textChannel.send({ content: `${client.user.username} is now playing`, embeds: [await this.playingStatusEmbed()] });
@@ -113,6 +114,7 @@ export class OpusPlayer{
             })
             .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
                 const queueData = await MQueueData.getQueueData(this.id);
+                const currTrack = await queueData.currTrack();
 
                 try{
                     if(this.isLoopingTrack()) {
@@ -122,7 +124,7 @@ export class OpusPlayer{
                     }
                     else{
                         queueData.increaseIndex();
-                        this.textChannel.send({ embeds: [queueData.currTrack().creatEmbedFinished()] });
+                        this.textChannel.send({ embeds: [currTrack.creatEmbedFinished()] });
                     }
 
                     await this.deleteStatusMsg();
@@ -138,6 +140,7 @@ export class OpusPlayer{
         this.queueLoopTimes = 0;
         this.volume = 1;
         this.currQueuePage = new Collection();
+        MQueueData.createQueueData(this.id);
         client.music.set(this.id, this);
     }
 
@@ -215,20 +218,21 @@ export class OpusPlayer{
     }
 
     async playIfIdling(client: ExtendedClient, queueData: MQueueData){
-        if(this.subscription.player.state.status != AudioPlayerStatus.Paused && this.subscription.player.state.status != AudioPlayerStatus.Playing && queueData.queue.length > 0){
+        if(this.subscription.player.state.status != AudioPlayerStatus.Paused && this.subscription.player.state.status != AudioPlayerStatus.Playing && queueData.size > 0){
             this.playFromQueue(client, queueData);
         }
     }
 
     async playFromQueue(client: ExtendedClient, queueData: MQueueData){
         try{
-            let newVolume = queueData.currTrack().resource ? queueData.currTrack().resource.volume.volume : this.volume;
+            const currTrack = await queueData.currTrack();
+            let newVolume = currTrack.resource ? currTrack.resource.volume.volume : this.volume;
 
-            queueData.currTrack().resource = await queueData.currTrack().createAudioResource();
-            queueData.currTrack().resource.volume.setVolume(newVolume);
+            currTrack.resource = await currTrack.createAudioResource();
+            currTrack.resource.volume.setVolume(newVolume);
             queueData.save();
 
-            this.subscription.player.play(queueData.currTrack().resource);
+            this.subscription.player.play(currTrack.resource);
         }
         catch(err){
             console.log(err);
@@ -268,14 +272,15 @@ export class OpusPlayer{
 
     async playingStatusEmbed(){
         const queueData = await MQueueData.getQueueData(this.id);
+        const currTrack = await queueData.currTrack();
 
-        return queueData.currTrack()?.createEmbedImage()
+        return currTrack?.createEmbedImage()
             .addFields(
-                { name: 'Queue', value: `${queueData.queue.length}`, inline: true },
+                { name: 'Queue', value: `${queueData.size}`, inline: true },
                 { name: 'Paused', value: `${formatBool(this.subscription.player.state.status == AudioPlayerStatus.Paused)}`, inline: true },
                 { name: 'Track Loop', value: `${formatBool(this.isLoopingTrack())} (${ this.trackLoopTimes == -1 ? `∞` : this.trackLoopTimes })`, inline: true },
                 { name: 'Queue Loop', value: `${formatBool(this.isLoopingQueue())} (${ this.queueLoopTimes == -1 ? `∞` : this.queueLoopTimes })`, inline: true },
-                { name: 'Volume', value: `${queueData.currTrack().getVolume()}`, inline: true },
+                { name: 'Volume', value: `${currTrack.getVolume()}`, inline: true },
         );
     }
 

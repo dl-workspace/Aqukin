@@ -9,7 +9,7 @@ import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import { BUTTON_QUEUE_EMBED, generateQueueEmbed, QUEUE_EMBED_PAGE_STEP } from "../commands/opus/queue";
 import { VoiceConnectionStatus } from "@discordjs/voice";
 import { OpusPlayer } from "../structures/opus/Player";
-import { MPlayerList, MQueueData } from "../database/dbObjects";
+import { MQueueData } from "../database/models/MQueueData";
 
 export default new Event('interactionCreate', async (interaction) => {
     const member = interaction.member as GuildMember
@@ -160,7 +160,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.start) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
-                    const queue = await MQueueData.getQueue(mPlayer.id);
+                    const { queue } = await MQueueData.getQueueData(mPlayer.id);
 
                     if(currPage > 0){
                         mPlayer.currQueuePage.set(member.id, 0);
@@ -172,7 +172,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.next) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
-                    const queue = await MQueueData.getQueue(mPlayer.id);
+                    const { queue } = await MQueueData.getQueueData(mPlayer.id);
                     const ceil = Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
                     if(currPage < ceil) { 
@@ -186,7 +186,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.back) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
-                    const queue = await MQueueData.getQueue(mPlayer.id);
+                    const { queue } = await MQueueData.getQueueData(mPlayer.id);
 
                     if(currPage > 0) { 
                         currPage--; 
@@ -199,7 +199,7 @@ export default new Event('interactionCreate', async (interaction) => {
 
                 case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.end) == 0:{
                     let currPage = mPlayer.currQueuePage.get(member.id);
-                    const queue = await MQueueData.getQueue(mPlayer.id);
+                    const { queue } = await MQueueData.getQueueData(mPlayer.id);
                     const ceil = Math.ceil((queue.length-1)/QUEUE_EMBED_PAGE_STEP)-1;
 
                     if(currPage < ceil){

@@ -4,11 +4,11 @@ import { glob } from "glob";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Events";
 import { OpusPlayer } from "./opus/Player";
-import { MPlayerData, MPlayerList } from "../database/dbObjects";
+import { sequelize } from "../database/dbObjects-old";
 
 export class ExtendedClient extends Client{
+    music: Collection<string , OpusPlayer>;
     commands: Collection<string, CommandType>;
-    music: Collection<string, OpusPlayer>;
 
     media = { 
         embedColour: [ 0xBC06C4, 0x1DE2FE ],
@@ -23,7 +23,6 @@ export class ExtendedClient extends Client{
     
     constructor(){
         super({ intents: 32767 });
-        this.music = new Collection();
         this.commands = new Collection();
     }
 
@@ -97,19 +96,6 @@ export class ExtendedClient extends Client{
             //         }
             //     }).catch(err => console.log(err));
             // })
-
-            client.music.forEach(async mPlayer => {
-                const { connection } = mPlayer.subscription;
-                client.channels.fetch(connection.joinConfig.channelId).then(async (voiceChannel : VoiceChannel) => {
-                    const memberList = voiceChannel.members.filter(mem => !mem.user.bot);
-
-                    if(memberList.size === 0){
-                        clearTimeout(mPlayer.disconnectTimer);
-                        mPlayer.disconnect();
-                        mPlayer.textChannel.send({ content: this.replyMsg(`Since there are no listener left`) });
-                    }
-                }).catch(err => console.log(err));
-            });
         }, 560000);
     }
 
