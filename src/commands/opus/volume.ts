@@ -42,15 +42,16 @@ export default new Command({
         const type = args.get(VOLUME_OPTIONS.type)?.value as number || 1;
         let extraReply = '';
         const queueData = await mPlayer.getQueueData();
+        const track = await queueData.currTrack();
 
         if(type == 2) { 
             mPlayer.volume = value;
             extraReply = ` \`player's\``
         }
-        queueData.currTrack().setVolume(value);
+        track.setVolume(value);
         queueData.save();
 
         mPlayer.updatePlayingStatusMsg();
-        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has set the${extraReply} volume to \`${queueData.currTrack().getVolume()}\``) });
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has set the${extraReply} volume to \`${track.getVolume()}\``) });
     }
 });
