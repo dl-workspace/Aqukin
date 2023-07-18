@@ -2,7 +2,6 @@ import { ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageActionRowComponent
 import { TrackInfo } from "../../database/models/TrackInfo";
 import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { Track } from "../../structures/opus/Track";
 import { baseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
 
 export enum BUTTON_QUEUE_EMBED {

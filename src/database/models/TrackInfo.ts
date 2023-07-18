@@ -3,7 +3,6 @@ import { AudioResource, createAudioResource } from "@discordjs/voice";
 import { GuildMember } from "discord.js";
 import { Model, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
 import ytdl from "ytdl-core";
-import volume from "../../commands/opus/volume";
 import { baseEmbed, formatDuration } from "../../structures/Utils";
 import { MQueueData } from "./MQueueData";
 
