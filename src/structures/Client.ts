@@ -4,7 +4,7 @@ import { glob } from "glob";
 import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Events";
 import { OpusPlayer } from "./opus/Player";
-import { sequelize } from "../database/dbObjects-old";
+import { sequelize } from "../database/dbObjects";
 
 export class ExtendedClient extends Client{
     music: Collection<string , OpusPlayer>;
@@ -23,6 +23,7 @@ export class ExtendedClient extends Client{
     
     constructor(){
         super({ intents: 32767 });
+        this.music = new Collection();
         this.commands = new Collection();
     }
 

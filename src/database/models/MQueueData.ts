@@ -5,7 +5,6 @@ import { ITrackInfo, TrackInfo } from "./TrackInfo";
 export class MQueueData extends Model<
 InferAttributes<MQueueData>,
 InferCreationAttributes<MQueueData>> {
-    declare id: string;
     declare guild_id: string;
     declare currIndex: number;
     declare size: number;
@@ -14,7 +13,7 @@ InferCreationAttributes<MQueueData>> {
     declare queue?: NonAttribute<TrackInfo[]>;
     
     // declare static associations: {
-    //     projects: Association<MQueueData, TrackInfo>;
+    //     queue: Association<MQueueData, TrackInfo>;
     // };
 
     static async createQueueData(guild_id: string){

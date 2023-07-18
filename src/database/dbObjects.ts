@@ -18,10 +18,9 @@ export const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERN
 TrackInfo.init({
     track_id: {
         type: DataTypes.STRING,
-        primaryKey: true,
     },
     index: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
     },
     url:{
         type: DataTypes.STRING,
@@ -30,13 +29,13 @@ TrackInfo.init({
         type: DataTypes.STRING,
     },
     duration:{
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
     },
     requester:{
         type: DataTypes.JSON,
     },
     seek:{
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         defaultValue: 0.
     },
 
@@ -46,19 +45,16 @@ TrackInfo.init({
 });
 
 MQueueData.init({
-    id: {
-        type: DataTypes.STRING,
-    },
     guild_id: {
         type: DataTypes.STRING,
         primaryKey: true,
     },
     currIndex: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         defaultValue: 0,
     },
     size: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         defaultValue: 0,
     },
 }, {
@@ -68,7 +64,6 @@ MQueueData.init({
 
 // TrackInfo.belongsTo(MQueueData, { foreignKey: "guild_id" });
 MQueueData.hasMany(TrackInfo, {
-    sourceKey: 'id',
     foreignKey: 'guild_id',
     as: 'queue',
 });
