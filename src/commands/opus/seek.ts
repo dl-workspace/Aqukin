@@ -17,6 +17,7 @@ export default new Command({
 
     execute: async({ client, interaction, args, mPlayer }) => {
         const queueData = await mPlayer.getQueueData();
+        const track = await queueData.currTrack();
 
         if(queueData.currTrack() == undefined){
             return interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `no track is currently being played`) });
@@ -24,11 +25,11 @@ export default new Command({
 
         const timestamp = convertInput(args.get('timestamp')?.value as string);
 
-        if(timestamp >= queueData.currTrack().duration){
-            interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `the timestamp should be less than the track length \`${formatDuration(queueData.currTrack().duration)}\``) });
+        if(timestamp >= track.duration){
+            interaction.followUp({ content: client.replyMsgErrorAuthor(interaction.member, `the timestamp should be less than the track length \`${formatDuration(track.duration)}\``) });
         }
         else{
-            queueData.currTrack().seek = timestamp;
+            track.seek = timestamp;
             queueData.save();
             mPlayer.playFromQueue(client, queueData);
             interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `will now move the current track to position \`${formatDuration(timestamp)}\``) });

@@ -1,5 +1,4 @@
 import { PermissionFlagsBits } from "discord.js";
-import { MQueueData } from "../../database/dbObjects-old";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 
 export default new Command({
@@ -9,11 +8,13 @@ export default new Command({
     userPermissions: [PermissionFlagsBits.SendMessages],
     
     execute: async({ client, interaction, args, mPlayer }) => {
+        const track = await (await mPlayer.getQueueData()).currTrack();
+
         // mPlayer.disableQueueRepeat();
         mPlayer.disableTrackRepeat();
         mPlayer.subscription.player.unpause();
         mPlayer.subscription.player.stop();
 
-        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has skipped track \`${(await MQueueData.getCurrTrack(mPlayer.id)).title}\``) });
+        interaction.followUp({ content: client.replyMsgAuthor(interaction.member, `${client.user.username} has skipped track \`${track.title}\``) });
     }
 });
