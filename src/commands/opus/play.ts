@@ -77,7 +77,7 @@ export default new Command({
                 if(result.length > 0){
                     // queueData.queue.push(...result);
                     for(let trackInfo of result){
-                        queueData.queueTrack(trackInfo);
+                        await queueData.queueTrack(trackInfo);
                     }
                     mPlayer.updatePlayingStatusMsg();
                     mPlayer.playIfIdling(client, queueData);
@@ -91,7 +91,7 @@ export default new Command({
 
                 if(result.length > 0){
                     for(let trackInfo of result){
-                        queueData.addTrack(index, trackInfo);
+                        await queueData.addTrack(index, trackInfo);
                     }
                     mPlayer.updatePlayingStatusMsg();
                     mPlayer.playIfIdling(client, queueData);

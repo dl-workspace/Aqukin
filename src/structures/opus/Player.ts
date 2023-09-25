@@ -140,7 +140,7 @@ export class OpusPlayer{
         this.queueLoopTimes = 0;
         this.volume = 1;
         this.currQueuePage = new Collection();
-        MQueueData.createQueueData(this.id);
+        // MQueueData.createQueueData(this.id);
         client.music.set(this.id, this);
     }
 
@@ -241,23 +241,23 @@ export class OpusPlayer{
     }
 
     async getQueueData(){
-        return MQueueData.getQueueData(this.id);
+        return await MQueueData.getQueueData(this.id);
     }
 
-    async disableQueueRepeat(){
+    disableQueueRepeat(){
         this.queueLoopTimes = 0;
     }
 
-    async enableQueueRepeat(times = -1){
+    enableQueueRepeat(times = -1){
         this.trackLoopTimes = 0;
         this.queueLoopTimes = times;
     }
 
-    async disableTrackRepeat(){
+    disableTrackRepeat(){
         this.trackLoopTimes = 0;
     }
 
-    async enableTrackRepeat(times = -1){
+    enableTrackRepeat(times = -1){
         this.disableQueueRepeat();
         this.trackLoopTimes = times;
     }

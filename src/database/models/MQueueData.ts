@@ -21,12 +21,19 @@ InferCreationAttributes<MQueueData>> {
     }
 
     static async getQueueData(guild_id: string){
-        return await MQueueData.findByPk(
+        const data = await MQueueData.findByPk(
             guild_id, {
                 include: [MQueueData.associations.queue],
                 rejectOnEmpty: true,
             }
         );
+
+        // const data = await MQueueData.findOne({
+        //     where: { guild_id: `${guild_id}` }
+        // });
+
+        console.log(guild_id, data);
+        return data;
     }
 
     static async removeQueueData(guild_id: string){
@@ -42,42 +49,44 @@ InferCreationAttributes<MQueueData>> {
         return await this.getTrackInfos({ where: { index: this.currIndex }});
     }
 
-    increaseIndex(){
-        this.increment('currIndex');
+    async increaseIndex(){
+        await this.increment('currIndex');
     }
 
-    resetIndex(){
+    async resetIndex(){
         this.currIndex = 0;
-        this.save();
+        await this.save();
     }
 
     async queueTrack(track : TrackInfo){
         track.setIndex(this.size++);
-        this.save();
+        await track.save();
+        await this.save();
     }
 
     async addTrack(index: number, track : TrackInfo){
         // this.queue.splice(index, 1, track);
         track.setIndex(index);
         this.size++;
-        this.save();
+        await track.save();
+        await this.save();
     }
 
     async removeTrack(index: number){
         await TrackInfo.removeTrack(index);
         this.size--;
-        this.save();
+        await this.save();
     }
 
-    removeTrackRange(start: number, end: number){
+    async removeTrackRange(start: number, end: number){
         // this.queue.splice(start, end);
         this.size -= end-start;
-        this.save();
+        await this.save();
     }
 
-    removeTrackAll(){
+    async removeTrackAll(){
         // this.addTrack(0, this.currTrack());
         this.size = 0;
-        this.resetIndex();
+        await this.resetIndex();
     }
 };

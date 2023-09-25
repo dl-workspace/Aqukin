@@ -41,7 +41,7 @@ export class ExtendedClient extends Client{
     }
 
     private async registerEvents(){
-        const eventFiles = await glob(`${__dirname}/../events/*{.ts,.js}`);
+        const eventFiles = glob.sync(`${__dirname}/../events/*{.ts,.js}`);
         
         eventFiles.forEach(async filePath => {
             const event: Event<keyof ClientEvents> = await this.importFile(filePath);
@@ -62,7 +62,7 @@ export class ExtendedClient extends Client{
 
     private async registerCommands(){
         const slashCommands: ApplicationCommandDataResolvable[] = [];
-        const commandFiles = await glob(`${__dirname}/../commands/*/*{.ts,.js}`);
+        const commandFiles = glob.sync(`${__dirname}/../commands/*/*{.ts,.js}`);
 
         // console.log({ commandFiles });
 
