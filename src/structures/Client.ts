@@ -117,5 +117,4 @@ export class ExtendedClient extends Client{
     replyMsgErrorAuthor(author: GuildMember, content: string){
         return `I'm sorry **${this.getAuthorName(author)}**-sama, but ${this.replyMsgError(content)}`;
     }
-
 }
