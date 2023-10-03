@@ -6,7 +6,7 @@ import { ExtendedClient } from "../../structures/Client";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
 import { OpusPlayer } from "../../structures/opus/Player";
 import { Track } from "../../structures/opus/Track";
-import { baseEmbed, formatDuration, generateInteractionComponentId } from "../../structures/Utils";
+import { baseEmbed, formatDuration, generateInteractionComponentId, getUserNameMaster } from "../../structures/Utils";
 import { ExecuteOptions } from "../../typings/command";
 
 export enum PLAY_OPTIONS{
@@ -96,7 +96,6 @@ export default new Command({
 
 async function processQuery({ client, interaction, args }: ExecuteOptions, index: number){
     const { member } = interaction;
-    const memberName = member.nickname || member.user.username;
     const query = args.get(PLAY_OPTIONS.query).value as string;
     let result: Track[] = [];
 
@@ -133,7 +132,7 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, index
                 .setDescription(`[${playlist.title}](${playlist.url})`)
                 .setImage(playlist.bestThumbnail.url)
                 .addFields(
-                    { name: 'Requested By', value: `${memberName}-sama`, inline: true },
+                    { name: 'Requested By', value: `${getUserNameMaster(member)}`, inline: true },
                     { name: 'Lenght', value: `${formatDuration(playListDuration)}`, inline: true },
                     { name: 'Size', value: `${result.length}`, inline: true },
                 );
@@ -170,13 +169,13 @@ async function processQuery({ client, interaction, args }: ExecuteOptions, index
                 .addComponents(
                     new StringSelectMenuBuilder()
                         .setCustomId(generateInteractionComponentId(member.id, PLAY_OPTIONS.track_select, index))
-                        .setPlaceholder(`${memberName}-sama, please select an option`)
+                        .setPlaceholder(`${getUserNameMaster(member)}, please select an option`)
                         .addOptions(menuOptBuilder)
                 );
 
             handleSelectTrackInteraction = args.getSubcommand() == PLAY_OPTIONS.insert ? selectTrackInsert :  selectTrackPush;
 
-            interaction.followUp({ content: `**${memberName}**-sama`, embeds: [embed], components: [actionRow] });
+            interaction.followUp({ content: `**${getUserNameMaster(member)}**`, embeds: [embed], components: [actionRow] });
         }).catch(err => { interaction.followUp({ content: `${err}` }) });
     } // end of else the given is keyword
 
