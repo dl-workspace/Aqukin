@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, GuildMember } from "discord.js";
 import { client } from "..";
 
 export function baseEmbed(){
@@ -7,6 +7,14 @@ export function baseEmbed(){
         // .setAuthor({ name: client.user.username, iconURL: client.user.displayAvatarURL() })
         // .setTimestamp()
         .setFooter({ text: 'FREEDOM SMILE (^)o(^)b', iconURL: client.user.displayAvatarURL() });
+}
+
+export function getUserName(user: GuildMember){
+    return user.displayName || user.user.username;
+}
+
+export function getUserNameMaster(user: GuildMember){
+    return `${getUserName(user)}-sama`;
 }
 
 export function formatBool(value: boolean){

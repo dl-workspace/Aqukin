@@ -1,6 +1,6 @@
 import { GuildMember } from "discord.js";
 import ytdl from "ytdl-core";
-import { baseEmbed, formatDuration } from "../Utils";
+import { baseEmbed, formatDuration, getUserNameMaster } from "../Utils";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
 
 export class Track {
@@ -71,7 +71,7 @@ export class Track {
     }
 
     getRequester(){
-        return `${this.requester.nickname || this.requester.user.username}-sama`;
+        return getUserNameMaster(this.requester);
     }
 
     remainingTime(){
