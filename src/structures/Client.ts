@@ -106,11 +106,16 @@ export class ExtendedClient extends Client{
         return `${content} ${this.media.kaomoji.error.random()}`
     }
 
+    getAuthorName(author: GuildMember){
+        return author.displayName || author.user.username;
+    }
+
     replyMsgAuthor(author: GuildMember, content: string){
-        return `**${author.nickname || author.user.username}**-sama, ${this.replyMsg(content)}`;
+        return `**${this.getAuthorName(author)}**-sama, ${this.replyMsg(content)}`;
     }
 
     replyMsgErrorAuthor(author: GuildMember, content: string){
-        return `I'm sorry **${author.nickname || author.user.username}**-sama, but ${this.replyMsgError(content)}`;
+        return `I'm sorry **${this.getAuthorName(author)}**-sama, but ${this.replyMsgError(content)}`;
     }
+
 }
