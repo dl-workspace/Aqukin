@@ -5,6 +5,7 @@ import { RegisterCommandsOptions } from "../typings/client";
 import { Event } from "./Events";
 import { OpusPlayer } from "./opus/Player";
 import { sequelize } from "../database/dbObjects";
+import { getUserNameMaster } from "./Utils";
 
 export class ExtendedClient extends Client{
     music: Collection<string , OpusPlayer>;
@@ -108,15 +109,11 @@ export class ExtendedClient extends Client{
         return `${content} ${this.media.kaomoji.error.random()}`
     }
 
-    getAuthorName(author: GuildMember){
-        return author.displayName || author.user.username;
-    }
-
     replyMsgAuthor(author: GuildMember, content: string){
-        return `**${this.getAuthorName(author)}**-sama, ${this.replyMsg(content)}`;
+        return `**${getUserNameMaster(author)}**, ${this.replyMsg(content)}`;
     }
 
     replyMsgErrorAuthor(author: GuildMember, content: string){
-        return `I'm sorry **${this.getAuthorName(author)}**-sama, but ${this.replyMsgError(content)}`;
+        return `I'm sorry **${getUserNameMaster(author)}**, but ${this.replyMsgError(content)}`;
     }
 }

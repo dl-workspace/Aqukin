@@ -3,7 +3,7 @@ import { AudioResource, createAudioResource } from "@discordjs/voice";
 import { GuildMember } from "discord.js";
 import { Model, InferAttributes, InferCreationAttributes, ForeignKey } from "sequelize";
 import ytdl from "ytdl-core";
-import { baseEmbed, formatDuration } from "../../structures/Utils";
+import { baseEmbed, formatDuration, getUserNameMaster } from "../../structures/Utils";
 import { MQueueData } from "./MQueueData";
 
 export interface ITrackInfo{
@@ -92,7 +92,7 @@ InferCreationAttributes<TrackInfo>> implements ITrackInfo {
     }
 
     getRequesterName(){
-        return `${this.requester.nickname || this.requester.user.username}-sama`;
+        return getUserNameMaster(this.requester);
     }
 
     getVolume(){
