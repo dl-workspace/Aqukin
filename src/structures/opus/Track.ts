@@ -1,5 +1,5 @@
 import { GuildMember } from "discord.js";
-import ytdl from "ytdl-core";
+import ytdl from "@distube/ytdl-core";
 import { baseEmbed, formatDuration, getUserNameMaster } from "../Utils";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
 
