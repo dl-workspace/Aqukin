@@ -22,6 +22,7 @@ import {
   getUserNameMaster,
 } from "../../structures/Utils";
 import { ExecuteOptions } from "../../typings/command";
+import { TrackRequester } from "../../structures/opus/TrackRequester";
 
 export enum PLAY_OPTIONS {
   // commands
@@ -125,6 +126,7 @@ async function processQuery(
   index: number
 ) {
   const { member } = interaction;
+  const requester = new TrackRequester(member.id, member.guild.id);
   const query = args.get(PLAY_OPTIONS.query).value as string;
   let result: Track[] = [];
 
@@ -141,13 +143,13 @@ async function processQuery(
           trackInfo.videoDetails.video_url,
           title,
           Number(lengthSeconds) * 1000,
-          member
+          requester
         );
         result.push(track);
 
         interaction.followUp({
           content: statusReply(client, member, index),
-          embeds: [track.createEmbedThumbnail()],
+          embeds: [await track.createEmbedThumbnail()],
         });
       })
       .catch((err) => {
@@ -168,7 +170,13 @@ async function processQuery(
           if (track.duration) {
             const trackDuration = Number(track.duration) * 1000;
             result.push(
-              new Track(track.id, track.url, track.title, trackDuration, member)
+              new Track(
+                track.id,
+                track.url,
+                track.title,
+                trackDuration,
+                requester
+              )
             );
             playListDuration += trackDuration;
           }
@@ -255,7 +263,7 @@ async function processQuery(
             new StringSelectMenuBuilder()
               .setCustomId(
                 generateInteractionComponentId(
-                  member.id,
+                  requester.id,
                   PLAY_OPTIONS.track_select,
                   index
                 )
@@ -285,7 +293,7 @@ async function processQuery(
   return result;
 }
 
-async function createTrack(url: string, author: GuildMember) {
+async function createTrack(url: string, author: TrackRequester) {
   const trackInfo = await ytdl.getBasicInfo(url);
   const { videoId, title, lengthSeconds } =
     trackInfo.player_response.videoDetails;
@@ -303,6 +311,7 @@ interface IHandlingSelectTrackInteractionDelegate {
     client: ExtendedClient,
     mPlayer: OpusPlayer,
     member: GuildMember,
+    requester: TrackRequester,
     interaction: StringSelectMenuInteraction,
     index: number
   ): void;
@@ -314,15 +323,16 @@ async function selectTrackPush(
   client: ExtendedClient,
   mPlayer: OpusPlayer,
   member: GuildMember,
+  requester: TrackRequester,
   interaction: StringSelectMenuInteraction,
   index: number
 ) {
-  const track = await createTrack(interaction.values[0], member);
+  const track = await createTrack(interaction.values[0], requester);
 
   mPlayer.queue.push(track);
   interaction.editReply({
     content: statusReply(client, member, index),
-    embeds: [track.createEmbedThumbnail()],
+    embeds: [await track.createEmbedThumbnail()],
     components: [],
   });
 
@@ -334,16 +344,17 @@ async function selectTrackInsert(
   client: ExtendedClient,
   mPlayer: OpusPlayer,
   member: GuildMember,
+  requester: TrackRequester,
   interaction: StringSelectMenuInteraction,
   index: number
 ) {
-  const track = await createTrack(interaction.values[0], member);
+  const track = await createTrack(interaction.values[0], requester);
   index = await insertIndex(index, mPlayer.queue.length);
 
   mPlayer.queue.splice(index, 0, track);
   interaction.editReply({
     content: statusReply(client, member, index),
-    embeds: [track.createEmbedThumbnail()],
+    embeds: [await track.createEmbedThumbnail()],
     components: [],
   });
 
@@ -353,11 +364,11 @@ async function selectTrackInsert(
 
 function statusReply(
   client: ExtendedClient,
-  member: GuildMember,
+  requester: GuildMember,
   index: number
 ) {
   return client.replyMsgAuthor(
-    member,
+    requester,
     `${client.user.username} has inserted to position \`${index}\``
   );
 }

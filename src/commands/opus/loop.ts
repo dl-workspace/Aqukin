@@ -16,6 +16,7 @@ import {
 } from "../../structures/Utils";
 import { ExtendedInteraction } from "../../typings/command";
 import { OpusPlayer } from "../../structures/opus/Player";
+import { getUserName } from "../../structures/Utils";
 
 export enum LOOP_OPTIONS {
   // commands
@@ -69,9 +70,7 @@ export default new Command({
   ],
 
   execute: async ({ client, interaction, args, mPlayer }) => {
-    let reply = `**${
-      interaction.member.nickname || interaction.user.username
-    }**-sama, `;
+    let reply = `**${getUserName(interaction.member)}**-sama, `;
     const times = (args.get(LOOP_OPTIONS.times)?.value as number) || -1;
 
     switch (args.getSubcommand()) {
