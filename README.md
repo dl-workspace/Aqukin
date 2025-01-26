@@ -7,5 +7,5 @@ Your (un)reliable Super Idol Master Gamer Maid♥, a [Discord](https://discord.c
 For the list of commands or more info on setting Aqukin up, please refer to the [Wiki pages](https://github.com/dl-workspace/Aqukin/wiki)
 
 <p align="center">
-  <img src="https://github.com/dl-workspace/Aqukin-old/blob/master/src/utilities/media/background.png">
+  <img src="https://github.com/dl-workspace/Aqukin-old/blob/master/src/utilities/media/background.png"> 
 </p>
