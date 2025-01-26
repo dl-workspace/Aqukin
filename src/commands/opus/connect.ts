@@ -11,6 +11,8 @@ export default new Command({
   userPermissions: [PermissionFlagsBits.SendMessages],
 
   execute: async ({ client, interaction, args, mPlayer }) => {
+    const { member } = interaction;
+
     if (mPlayer) {
       if (
         mPlayer.subscription.connection.state.status !==
@@ -18,15 +20,15 @@ export default new Command({
       ) {
         interaction.followUp({
           content: client.replyMsgErrorAuthor(
-            interaction.member,
+            member,
             `${client.user.username} is already connected to a different voice channel`
           ),
         });
       } else {
-        if (await mPlayer.reconnect(interaction.member.voice.channelId)) {
+        if (await mPlayer.reconnect(member.voice.channelId)) {
           interaction.followUp({
             content: client.replyMsgAuthor(
-              interaction.member,
+              member,
               `${client.user.username} has re-established voice connection`
             ),
           });
@@ -39,7 +41,7 @@ export default new Command({
       mPlayer.timeOut();
       interaction.followUp({
         content: client.replyMsgAuthor(
-          interaction.member,
+          member,
           `${client.user.username} has established voice connection`
         ),
       });

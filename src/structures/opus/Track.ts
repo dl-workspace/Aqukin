@@ -2,13 +2,15 @@ import { GuildMember } from "discord.js";
 import ytdl from "@distube/ytdl-core";
 import { baseEmbed, formatDuration, getUserNameMaster } from "../Utils";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
+import { TrackRequester } from "./TrackRequester";
+import { client } from "../..";
 
 export class Track {
   id: string;
   url: string;
   title: string;
   duration: number;
-  requester: GuildMember;
+  requester: TrackRequester;
   seek?: number;
   resource?: AudioResource;
 
@@ -17,7 +19,7 @@ export class Track {
     url: string,
     title: string,
     duration: number,
-    requester: GuildMember
+    requester: TrackRequester
   ) {
     this.id = id;
     this.url = url;
@@ -57,11 +59,15 @@ export class Track {
     return baseEmbed().setDescription(`[${this.title}](${this.url})`);
   }
 
-  private createEmbed() {
+  private async createEmbed() {
     return this.baseEmbedMusic()
       .setTitle(`Track`)
       .addFields(
-        { name: "Requested By", value: this.getRequester(), inline: true },
+        {
+          name: "Requested By",
+          value: await this.getRequester(),
+          inline: true,
+        },
         {
           name: "Lenght",
           value: `${
@@ -72,24 +78,28 @@ export class Track {
       );
   }
 
-  createEmbedThumbnail() {
-    return this.createEmbed().setThumbnail(
+  async createEmbedThumbnail() {
+    let embed = await this.createEmbed();
+    return embed.setThumbnail(
       `https://i.ytimg.com/vi/${this.id}/hqdefault.jpg`
     );
   }
 
-  createEmbedImage() {
-    return this.createEmbed().setImage(
-      `https://i.ytimg.com/vi/${this.id}/hqdefault.jpg`
-    );
+  async createEmbedImage() {
+    let embed = await this.createEmbed();
+    return embed.setImage(`https://i.ytimg.com/vi/${this.id}/hqdefault.jpg`);
   }
 
   creatEmbedFinished() {
     return this.baseEmbedMusic().setTitle("Previous Track");
   }
 
-  getRequester() {
-    return getUserNameMaster(this.requester);
+  async getRequester() {
+    const member = await client.getGuildMember(
+      this.requester.guildId,
+      this.requester.id
+    );
+    return getUserNameMaster(member);
   }
 
   remainingTime() {
