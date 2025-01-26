@@ -64,20 +64,14 @@ export class OpusPlayer {
     playerOptions?: CreateAudioPlayerOptions
   ) {
     try {
-      // Fetch the guild member using client method
-      const member = await client.getGuildMember(
-        interaction.guildId,
-        interaction.requester.id
-      );
-      if (!member) {
-        console.error("Member not found!");
-        return;
-      }
+      // console.log(interaction);
+
+      const { member } = interaction;
 
       // Establish the connection
       const connection = joinVoiceChannel({
         channelId: member.voice.channelId,
-        guildId: this.id,
+        guildId: member.guild.id,
         adapterCreator: interaction.guild.voiceAdapterCreator,
       })
         .on("error", (err) => {

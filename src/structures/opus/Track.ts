@@ -96,8 +96,8 @@ export class Track {
 
   async getRequester() {
     const member = await client.getGuildMember(
-      this.requester.id,
-      this.requester.guildId
+      this.requester.guildId,
+      this.requester.id
     );
     return getUserNameMaster(member);
   }

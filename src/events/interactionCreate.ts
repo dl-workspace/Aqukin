@@ -2,6 +2,7 @@ import {
   CommandInteractionOptionResolver,
   GuildMember,
   PermissionFlagsBits,
+  MessageFlags,
 } from "discord.js";
 import { client } from "..";
 import { COMMANDS, COMMAND_TAGS } from "../structures/Command";
@@ -44,7 +45,7 @@ export default new Event("interactionCreate", async (interaction) => {
               member,
               `${client.user.username} sees that you don't have the permission to use this command`
             ),
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
           });
         }
       }
@@ -61,7 +62,7 @@ export default new Event("interactionCreate", async (interaction) => {
                 member,
                 `you need to be in a voice channel to use this command`
               ),
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -95,7 +96,7 @@ export default new Event("interactionCreate", async (interaction) => {
                       member,
                       `you need to be in the same voice channel with ${client.user.username} to use this command`
                     ),
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                   });
                 } else {
                   if (command.name != COMMANDS.play) {
@@ -115,7 +116,7 @@ export default new Event("interactionCreate", async (interaction) => {
                               member,
                               `${client.user.username} would require others permission to execute this command`
                             ),
-                            ephemeral: true,
+                            flags: MessageFlags.Ephemeral,
                           });
                         } else if (
                           mPlayer.queue[0]?.requester.id != member.id
@@ -125,7 +126,7 @@ export default new Event("interactionCreate", async (interaction) => {
                               member,
                               `you can only use this command on your own requested track`
                             ),
-                            ephemeral: true,
+                            flags: MessageFlags.Ephemeral,
                           });
                         }
                       }
@@ -139,14 +140,15 @@ export default new Event("interactionCreate", async (interaction) => {
                   member,
                   `${client.user.username} is not currently streaming any audio`
                 ),
-                ephemeral: true,
+                flags: MessageFlags.Ephemeral,
               });
             }
           }
           break;
       }
 
-      await interaction.deferReply({ ephemeral: command.ephemeral });
+      const flags = command.ephemeral ? MessageFlags.Ephemeral : undefined;
+      await interaction.deferReply({ flags });
 
       await command.execute({
         client,
@@ -178,7 +180,7 @@ export default new Event("interactionCreate", async (interaction) => {
             member,
             `this select menu is not for you`
           ),
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -239,7 +241,7 @@ export default new Event("interactionCreate", async (interaction) => {
             member,
             `this button is not for you`
           ),
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
