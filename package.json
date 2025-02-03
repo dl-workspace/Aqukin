@@ -23,14 +23,14 @@
     "@distube/ytdl-core": "^4.16.0",
     "@distube/ytpl": "^1.2.1",
     "@distube/ytsr": "^2.0.4",
+    "axios": "^1.7.9",
     "discord.js": "^14.17.3",
     "dotenv": "^16.4.7",
     "ffmpeg-static": "^5.2.0",
     "glob": "^11.0.1",
     "mongodb": "^6.13.0",
     "sodium": "^3.0.2",
-    "winston": "^3.17.0",
-    "winston-graylog2": "^2.1.2"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
