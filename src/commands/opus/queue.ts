@@ -13,7 +13,7 @@ import {
   formatDuration,
   generateInteractionComponentId,
 } from "../../middlewares/utils";
-import logger from "../../middlewares/logger";
+import logger from "../../middlewares/logger/logger";
 
 export enum BUTTON_QUEUE_EMBED {
   start = "queueEmbed_start",
@@ -150,7 +150,6 @@ export async function generateQueueEmbed(
       return embed;
     }
   } catch (err) {
-    console.log(err);
     logger.error(err);
   }
 } // end of gerenateQueueEmbed(...) helper function

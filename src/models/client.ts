@@ -12,7 +12,7 @@ import { glob } from "glob";
 import { Event } from "./events";
 import { OpusPlayer } from "./opus/player";
 import { getUserNameMaster } from "../middlewares/utils";
-import logger from "../middlewares/logger";
+import logger from "../middlewares/logger/logger";
 
 export interface RegisterCommandsOptions {
   guildId?: string;
@@ -97,24 +97,16 @@ export class ExtendedClient extends Client {
   }: RegisterCommandsOptions) {
     if (guildId) {
       this.guilds.cache.get(guildId)?.commands.set(commands);
-
-      const msg = `Registering commands to ${guildId}`;
-      console.log(msg);
-      logger.info(msg);
+      logger.info(`Registering commands to ${guildId}`);
     } else {
       this.application?.commands.set(commands);
-
-      const msg = `Registering global commands`;
-      console.log(msg);
-      logger.info(msg);
+      logger.info(`Registering commands globally`);
     }
   }
 
   private async registerCommands() {
     const slashCommands: ApplicationCommandDataResolvable[] = [];
     const commandFiles = await glob(`${__dirname}/../commands/*/*{.ts,.js}`);
-
-    // console.log({ commandFiles });
 
     commandFiles.forEach(async (filePath) => {
       const command: CommandType = await this.importFile(filePath);
@@ -129,7 +121,7 @@ export class ExtendedClient extends Client {
     this.on("ready", () => {
       this.registerCommandsHelper({
         commands: slashCommands,
-        // guildId: process.env.GUILD_ID
+        guildId: process.env.GUILD_ID,
       });
     });
   }
@@ -154,7 +146,6 @@ export class ExtendedClient extends Client {
             }
           })
           .catch((err) => {
-            console.log(err);
             logger.error(err);
           });
       });
@@ -188,9 +179,7 @@ export class ExtendedClient extends Client {
     // Attempt to get the guild from the cache
     const guild = this.guilds.cache.get(guildId);
     if (!guild) {
-      const msg = `Guild with ID ${guildId} not found`;
-      console.log(msg);
-      logger.error(msg);
+      logger.error(`Guild with ID ${guildId} not found`);
       return null;
     }
     return guild;

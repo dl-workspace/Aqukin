@@ -21,7 +21,7 @@ import {
 import { VoiceConnectionStatus } from "@discordjs/voice";
 import { OpusPlayer } from "../models/opus/player";
 import { TrackRequester } from "../models/opus/trackRequester";
-import logger from "../middlewares/logger";
+import logger from "../middlewares/logger/logger";
 
 export default new Event("interactionCreate", async (interaction) => {
   const member = interaction.member as GuildMember;
@@ -157,7 +157,6 @@ export default new Event("interactionCreate", async (interaction) => {
         mPlayer,
       });
     } catch (err) {
-      console.log(err);
       logger.error(err);
       await interaction
         .editReply({
@@ -219,7 +218,6 @@ export default new Event("interactionCreate", async (interaction) => {
           break;
       }
     } catch (err) {
-      console.log(err);
       logger.error(err);
       await interaction
         .editReply({
@@ -341,7 +339,6 @@ export default new Event("interactionCreate", async (interaction) => {
           break;
       }
     } catch (err) {
-      console.log(err);
       logger.error(err);
       await interaction
         .editReply({

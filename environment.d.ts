@@ -10,8 +10,8 @@ declare global {
       INVITE_LINK: string;
       ENVIRONMENT: "dev" | "prod" | "debug";
 
-      LOGGER_IP: string;
-      LOGGER_LEVEL: "debug" | "info" | "warn" | "error";
+      LOGGER_URL: string;
+      LOG_LEVEL: "debug" | "info" | "warn" | "error";
     }
   }
 }

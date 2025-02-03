@@ -139,7 +139,6 @@ async function processQuery(
     await ytdl
       .getBasicInfo(query)
       .then(async (trackInfo) => {
-        //console.log(trackInfo);
         const { videoId, title, lengthSeconds } =
           trackInfo.player_response.videoDetails;
         const track = new Track(
@@ -165,12 +164,9 @@ async function processQuery(
     // limit can be Infinity
     await ytpl(query, { limit: 1000 })
       .then(async (playlist) => {
-        // console.log(playlist);
-
         let playListDuration = 0;
 
         playlist.items.forEach(async (track) => {
-          //console.log(trackInfo);
           if (track.duration) {
             const trackDuration = Number(track.duration) * 1000;
             result.push(
