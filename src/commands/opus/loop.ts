@@ -8,15 +8,19 @@ import {
   MessageActionRowComponentBuilder,
   PermissionFlagsBits,
 } from "discord.js";
-import { ExtendedClient } from "../../structures/Client";
-import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
+import { ExtendedClient } from "../../models/client";
+import {
+  Command,
+  COMMANDS,
+  COMMAND_TAGS,
+  ExtendedInteraction,
+} from "../../models/command";
 import {
   baseEmbed,
   generateInteractionComponentId,
-} from "../../structures/Utils";
-import { ExtendedInteraction } from "../../typings/command";
-import { OpusPlayer } from "../../structures/opus/Player";
-import { getUserName } from "../../structures/Utils";
+} from "../../middlewares/utils";
+import { OpusPlayer } from "../../models/opus/player";
+import { getUserName } from "../../middlewares/utils";
 
 export enum LOOP_OPTIONS {
   // commands

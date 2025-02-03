@@ -5,14 +5,13 @@ import {
   MessageFlags,
 } from "discord.js";
 import { client } from "..";
-import { COMMANDS, COMMAND_TAGS } from "../structures/Command";
-import { Event } from "../structures/Events";
-import { ExtendedInteraction } from "../typings/command";
+import { COMMANDS, COMMAND_TAGS, ExtendedInteraction } from "../models/command";
+import { Event } from "../models/events";
 import {
   handleSelectTrackInteraction,
   PLAY_OPTIONS,
 } from "../commands/opus/play";
-import { ExtendedClient } from "../structures/Client";
+import { ExtendedClient } from "../models/client";
 import { LOOP_OPTIONS, loopTrack, loopQueue } from "../commands/opus/loop";
 import {
   BUTTON_QUEUE_EMBED,
@@ -20,8 +19,9 @@ import {
   QUEUE_EMBED_PAGE_STEP,
 } from "../commands/opus/queue";
 import { VoiceConnectionStatus } from "@discordjs/voice";
-import { OpusPlayer } from "../structures/opus/Player";
-import { TrackRequester } from "../structures/opus/TrackRequester";
+import { OpusPlayer } from "../models/opus/player";
+import { TrackRequester } from "../models/opus/trackRequester";
+import logger from "../middlewares/logger";
 
 export default new Event("interactionCreate", async (interaction) => {
   const member = interaction.member as GuildMember;
@@ -158,6 +158,7 @@ export default new Event("interactionCreate", async (interaction) => {
       });
     } catch (err) {
       console.log(err);
+      logger.error(err);
       await interaction
         .editReply({
           content: client.replyMsgErrorAuthor(
@@ -219,6 +220,7 @@ export default new Event("interactionCreate", async (interaction) => {
       }
     } catch (err) {
       console.log(err);
+      logger.error(err);
       await interaction
         .editReply({
           content: client.replyMsgErrorAuthor(
@@ -340,6 +342,7 @@ export default new Event("interactionCreate", async (interaction) => {
       }
     } catch (err) {
       console.log(err);
+      logger.error(err);
       await interaction
         .editReply({
           content: client.replyMsgErrorAuthor(

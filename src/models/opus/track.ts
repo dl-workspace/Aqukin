@@ -1,7 +1,11 @@
 import ytdl from "@distube/ytdl-core";
-import { baseEmbed, formatDuration, getUserNameMaster } from "../Utils";
+import {
+  baseEmbed,
+  formatDuration,
+  getUserNameMaster,
+} from "../../middlewares/utils";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
-import { TrackRequester } from "./TrackRequester";
+import { TrackRequester } from "./trackRequester";
 import { client } from "../..";
 
 export class Track {

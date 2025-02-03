@@ -1,7 +1,7 @@
 import { VoiceConnectionStatus } from "@discordjs/voice";
 import { PermissionFlagsBits } from "discord.js";
-import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { OpusPlayer } from "../../structures/opus/Player";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../models/command";
+import { OpusPlayer } from "../../models/opus/player";
 
 export default new Command({
   name: COMMANDS.connect,

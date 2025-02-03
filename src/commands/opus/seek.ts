@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
-import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { convertInput, formatDuration } from "../../structures/Utils";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../models/command";
+import { convertInput, formatDuration } from "../../middlewares/utils";
 
 export default new Command({
   name: COMMANDS.seek,
