@@ -5,14 +5,15 @@ import {
   MessageActionRowComponentBuilder,
   PermissionFlagsBits,
 } from "discord.js";
-import { ExtendedClient } from "../../structures/Client";
-import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { Track } from "../../structures/opus/Track";
+import { ExtendedClient } from "../../models/client";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../models/command";
+import { Track } from "../../models/opus/track";
 import {
   baseEmbed,
   formatDuration,
   generateInteractionComponentId,
-} from "../../structures/Utils";
+} from "../../middlewares/utils";
+import logger from "../../middlewares/logger/logger";
 
 export enum BUTTON_QUEUE_EMBED {
   start = "queueEmbed_start",
@@ -149,6 +150,6 @@ export async function generateQueueEmbed(
       return embed;
     }
   } catch (err) {
-    console.log(err);
+    logger.error(err);
   }
 } // end of gerenateQueueEmbed(...) helper function

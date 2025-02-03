@@ -9,10 +9,11 @@ import {
   getVoiceConnection,
 } from "@discordjs/voice";
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
-import { ExecuteOptions } from "../../typings/command";
-import { ExtendedClient } from "../Client";
-import { baseEmbed, formatBool } from "../Utils";
-import { Track } from "./Track";
+import { ExecuteOptions } from "../command";
+import { ExtendedClient } from "../client";
+import { Track } from "./track";
+import { baseEmbed, formatBool } from "../../middlewares/utils";
+import logger from "../../middlewares/logger/logger";
 
 const enum TIMERS {
   reconnect = 5_000,
@@ -64,8 +65,6 @@ export class OpusPlayer {
     playerOptions?: CreateAudioPlayerOptions
   ) {
     try {
-      // console.log(interaction);
-
       const { member } = interaction;
 
       // Establish the connection
@@ -75,17 +74,17 @@ export class OpusPlayer {
         adapterCreator: interaction.guild.voiceAdapterCreator,
       })
         .on("error", (err) => {
-          console.log(err);
+          logger.error(err);
           this.textChannel.send({ content: `${err}` });
         })
         .on(VoiceConnectionStatus.Signalling, async (oldState, newState) => {
-          console.log("connection signalling");
+          logger.info("connection Signalling");
         })
         .on(VoiceConnectionStatus.Connecting, async (oldState, newState) => {
-          console.log("connection Connecting");
+          logger.info("connection Connecting");
         })
         .on(VoiceConnectionStatus.Ready, async (oldState, newState) => {
-          console.log("connection Ready");
+          logger.info("connection Ready");
         })
         .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
           try {
@@ -116,7 +115,7 @@ export class OpusPlayer {
                 try {
                   connection.destroy();
                 } catch (err) {
-                  console.log(err);
+                  logger.error(err);
                 }
               }
             }, 10_000);
@@ -131,7 +130,7 @@ export class OpusPlayer {
 
             await this.deleteStatusMsg();
           } catch (err) {
-            console.log(err);
+            logger.error(err);
           } finally {
             this.subscription.unsubscribe();
             client.music.delete(this.id);
@@ -163,7 +162,7 @@ export class OpusPlayer {
               }
             }
           } catch (err) {
-            console.log(err);
+            logger.error(err);
           }
         })
         .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
@@ -184,7 +183,7 @@ export class OpusPlayer {
 
             await this.deleteStatusMsg();
           } catch (err) {
-            console.log(err);
+            logger.log(err);
           } finally {
             this.queue.shift();
             await this.processQueue(client);
@@ -271,7 +270,7 @@ export class OpusPlayer {
             content: client.replyMsg("The queue has ended~"),
           });
         } catch (err) {
-          console.log(err);
+          logger.log(err);
         }
         return;
       }
@@ -301,7 +300,7 @@ export class OpusPlayer {
 
       this.subscription.player.play(this.queue[0].resource);
     } catch (err) {
-      console.log(err);
+      logger.error(err);
       this.textChannel.send({ content: `${err}` });
     }
   }

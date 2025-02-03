@@ -8,7 +8,10 @@ declare global {
       GUILD_ID: string;
       OWNER_ID: string;
       INVITE_LINK: string;
-      environment: "dev" | "prod" | "debug";
+      ENVIRONMENT: "dev" | "prod" | "debug";
+
+      LOGGER_URL: string;
+      LOG_LEVEL: "debug" | "info" | "warn" | "error";
     }
   }
 }

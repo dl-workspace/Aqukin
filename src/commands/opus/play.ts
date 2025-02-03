@@ -11,18 +11,22 @@ import {
 import ytdl from "@distube/ytdl-core";
 import ytpl from "@distube/ytpl";
 import ytsr from "@distube/ytsr";
-import { ExtendedClient } from "../../structures/Client";
-import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { OpusPlayer } from "../../structures/opus/Player";
-import { Track } from "../../structures/opus/Track";
+import {
+  Command,
+  COMMANDS,
+  COMMAND_TAGS,
+  ExecuteOptions,
+} from "../../models/command";
+import { ExtendedClient } from "../../models/client";
+import { OpusPlayer } from "../../models/opus/player";
+import { Track } from "../../models/opus/track";
+import { TrackRequester } from "../../models/opus/trackRequester";
 import {
   baseEmbed,
   formatDuration,
   generateInteractionComponentId,
   getUserNameMaster,
-} from "../../structures/Utils";
-import { ExecuteOptions } from "../../typings/command";
-import { TrackRequester } from "../../structures/opus/TrackRequester";
+} from "../../middlewares/utils";
 
 export enum PLAY_OPTIONS {
   // commands
@@ -135,7 +139,6 @@ async function processQuery(
     await ytdl
       .getBasicInfo(query)
       .then(async (trackInfo) => {
-        //console.log(trackInfo);
         const { videoId, title, lengthSeconds } =
           trackInfo.player_response.videoDetails;
         const track = new Track(
@@ -161,12 +164,9 @@ async function processQuery(
     // limit can be Infinity
     await ytpl(query, { limit: 1000 })
       .then(async (playlist) => {
-        // console.log(playlist);
-
         let playListDuration = 0;
 
         playlist.items.forEach(async (track) => {
-          //console.log(trackInfo);
           if (track.duration) {
             const trackDuration = Number(track.duration) * 1000;
             result.push(

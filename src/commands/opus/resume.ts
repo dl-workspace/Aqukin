@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { AudioPlayerStatus } from "@discordjs/voice";
-import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../models/command";
 
 export default new Command({
   name: COMMANDS.resume,
