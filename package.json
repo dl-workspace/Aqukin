@@ -28,7 +28,7 @@
     "ffmpeg-static": "^5.2.0",
     "glob": "^11.0.1",
     "mongodb": "^6.13.0",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
     "libsodium-wrappers": "^0.7.15",
     "mongodb": "^6.12.0",
     "opusscript": "^0.0.8"
