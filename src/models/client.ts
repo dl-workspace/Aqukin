@@ -7,12 +7,17 @@ import {
   GuildMember,
   VoiceChannel,
 } from "discord.js";
-import { CommandType } from "../typings/command";
+import { CommandType } from "./command";
 import { glob } from "glob";
-import { RegisterCommandsOptions } from "../typings/client";
-import { Event } from "./Events";
-import { OpusPlayer } from "./opus/Player";
-import { getUserNameMaster } from "./Utils";
+import { Event } from "./events";
+import { OpusPlayer } from "./opus/player";
+import { getUserNameMaster } from "../middlewares/utils";
+import logger from "../middlewares/logger";
+
+export interface RegisterCommandsOptions {
+  guildId?: string;
+  commands: ApplicationCommandDataResolvable[];
+}
 
 export class ExtendedClient extends Client {
   commands: Collection<string, CommandType>;
@@ -92,10 +97,16 @@ export class ExtendedClient extends Client {
   }: RegisterCommandsOptions) {
     if (guildId) {
       this.guilds.cache.get(guildId)?.commands.set(commands);
-      console.log(`Registering commands to ${guildId}`);
+
+      const msg = `Registering commands to ${guildId}`;
+      console.log(msg);
+      logger.info(msg);
     } else {
       this.application?.commands.set(commands);
-      console.log(`Registering global commands`);
+
+      const msg = `Registering global commands`;
+      console.log(msg);
+      logger.info(msg);
     }
   }
 
@@ -142,7 +153,10 @@ export class ExtendedClient extends Client {
               });
             }
           })
-          .catch((err) => console.log(err));
+          .catch((err) => {
+            console.log(err);
+            logger.error(err);
+          });
       });
     }, 560000);
   }
@@ -174,7 +188,9 @@ export class ExtendedClient extends Client {
     // Attempt to get the guild from the cache
     const guild = this.guilds.cache.get(guildId);
     if (!guild) {
-      console.log(`Guild with ID ${guildId} not found.`);
+      const msg = `Guild with ID ${guildId} not found`;
+      console.log(msg);
+      logger.error(msg);
       return null;
     }
     return guild;

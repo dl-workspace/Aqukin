@@ -9,9 +9,9 @@ import {
   PermissionFlagsBits,
   User,
 } from "discord.js";
-import { Command, COMMANDS, COMMAND_TAGS } from "../../structures/Command";
-import { baseEmbed } from "../../structures/Utils";
-import { ExecuteOptions } from "../../typings/command";
+import { Command, COMMANDS, COMMAND_TAGS } from "../../models/command";
+import { baseEmbed } from "../../middlewares/utils";
+import { ExecuteOptions } from "../../models/command";
 
 export enum INFO_OPTIONS {
   user = "user",
