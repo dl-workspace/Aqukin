@@ -9,6 +9,7 @@ export default new Command({
 
   execute: async ({ client, interaction, args, mPlayer }) => {
     await shuffle(mPlayer.queue);
+    await mPlayer.saveToCache();
     interaction.followUp({
       content: client.replyMsgAuthor(
         interaction.member,

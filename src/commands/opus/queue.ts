@@ -121,10 +121,10 @@ export async function generateQueueEmbed(
       let j = start;
       info = next
         .map(
-          (track) =>
+          async (track) =>
             `${j++}) [${track.title}](${track.url}) | \`${formatDuration(
               track.duration
-            )}\` | requested by ${track.getRequester()}`
+            )}\` | requested by ${await track.getRequester()}`
         )
         .join("\n\n");
     } // end of if
@@ -145,7 +145,7 @@ export async function generateQueueEmbed(
             queue[0].url
           }) | \`${formatDuration(
             queue[0].duration
-          )}\` | requested by ${queue[0].getRequester()}\n\n⚓ Next in queue ⏭️\n${info}`
+          )}\` | requested by ${await queue[0].getRequester()}\n\n⚓ Next in queue ⏭️\n${info}`
         );
       return embed;
     }

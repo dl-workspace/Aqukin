@@ -4,11 +4,12 @@ import {
   formatDuration,
   getUserNameMaster,
 } from "../../middlewares/utils";
+import { client } from "../..";
 import { createAudioResource, AudioResource } from "@discordjs/voice";
 import { TrackRequester } from "./trackRequester";
-import { client } from "../..";
+import { ITrackData } from "../../cache/schema";
 
-export class Track {
+export class Track implements ITrackData {
   id: string;
   url: string;
   title: string;

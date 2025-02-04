@@ -105,6 +105,7 @@ export default new Command({
         } else {
           const trackName = mPlayer.queue[value].title;
           mPlayer.queue.splice(value, 1);
+          await mPlayer.saveToCache();
           mPlayer.updatePlayingStatusMsg();
           interaction.followUp({
             content: client.replyMsgAuthor(
@@ -144,6 +145,7 @@ export default new Command({
           });
         } else {
           const { length } = mPlayer.queue.splice(start, end - start + 1);
+          await mPlayer.saveToCache();
           mPlayer.updatePlayingStatusMsg();
           interaction.followUp({
             content: client.replyMsgAuthor(
@@ -163,6 +165,7 @@ export default new Command({
 
         if (mPlayer.queue.length > 1) {
           mPlayer.queue.splice(1);
+          await mPlayer.saveToCache();
           reply = client.replyMsgAuthor(
             interaction.member,
             `${client.user.username} has cleared the queue`
@@ -176,7 +179,7 @@ export default new Command({
 
       case REMOVE_OPTIONS.duplicate: {
         mPlayer.queue = await removeDuplicate(mPlayer.queue);
-
+        await mPlayer.saveToCache();
         mPlayer.updatePlayingStatusMsg();
         interaction.followUp({
           content: client.replyMsgAuthor(
