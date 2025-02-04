@@ -7,6 +7,9 @@ declare global {
 
       GUILD_ID: string;
       OWNER_ID: string;
+
+      REDIS_URI: string;
+
       INVITE_LINK: string;
       ENVIRONMENT: "dev" | "prod" | "debug";
 

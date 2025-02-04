@@ -1,3 +1,4 @@
+// ./models/opus/player.ts
 import {
   AudioPlayer,
   CreateAudioPlayerOptions,
@@ -11,8 +12,10 @@ import {
 import { Collection, GuildTextBasedChannel, Message } from "discord.js";
 import { ExecuteOptions } from "../command";
 import { ExtendedClient } from "../client";
+import { IGuildPlayer, ITrackData } from "../../cache/schema";
+import { findPlayer, createPlayer, savePlayer } from "../../cache/repository";
 import { Track } from "./track";
-import { baseEmbed, formatBool } from "../../middlewares/utils";
+import { formatBool } from "../../middlewares/utils";
 import logger from "../../middlewares/logger/logger";
 
 const enum TIMERS {
@@ -21,16 +24,17 @@ const enum TIMERS {
   disconnect = 300_000,
 }
 
-export class OpusPlayer {
-  id: string;
-  textChannel: GuildTextBasedChannel;
-  subscription: PlayerSubscription;
-  trackLoopTimes: number;
-  queueLoopTimes: number;
+export class OpusPlayer implements IGuildPlayer {
+  guildId: string;
   queue: Track[];
   loopQueue: Track[];
+  trackLoopTimes: number;
+  queueLoopTimes: number;
   volume: number;
-  currQueuePage: Collection<String, number>;
+
+  textChannel: GuildTextBasedChannel;
+  subscription: PlayerSubscription;
+  currQueuePage: Collection<string, number>;
   statusMsg?: Message;
   disconnectTimer?: NodeJS.Timeout;
   destroyTimer?: NodeJS.Timeout;
@@ -39,35 +43,82 @@ export class OpusPlayer {
     { client, interaction, args }: ExecuteOptions,
     playerOptions?: CreateAudioPlayerOptions
   ) {
-    // Initialize properties
-    this.id = interaction.guildId;
+    this.guildId = interaction.guildId;
     this.textChannel = interaction.channel;
-    this.trackLoopTimes = 0;
-    this.queueLoopTimes = 0;
     this.queue = [];
     this.loopQueue = [];
+    this.trackLoopTimes = 0;
+    this.queueLoopTimes = 0;
     this.volume = 1;
     this.currQueuePage = new Collection();
 
-    // Initialize the OpusPlayer with async logic
-    this.initialize(client, interaction, playerOptions);
+    // Load existing player doc from Redis or create a new one
+    this.loadFromCache().then(() => {
+      this.initialize(client, interaction, playerOptions);
+    });
+  }
+
+  private async loadFromCache() {
+    let doc = await findPlayer(this.guildId);
+    if (!doc) {
+      doc = await createPlayer(this.guildId);
+    }
+    this.assignFromDoc(doc);
   }
 
   /**
-   * Initializes the OpusPlayer with asynchronous operations.
-   * @param client The client instance
-   * @param interaction The interaction object
-   * @param playerOptions Optional player options
+   * Save current state to Redis
    */
-  async initialize(
+  async saveToCache() {
+    const mappedQueue: ITrackData[] = this.queue.map((track) => ({
+      id: track.id,
+      url: track.url,
+      title: track.title,
+      duration: track.duration,
+      requester: { id: track.requester.id, guildId: track.requester.guildId },
+      seek: track.seek,
+    }));
+
+    const mappedLoopQueue: ITrackData[] = this.loopQueue.map((track) => ({
+      id: track.id,
+      url: track.url,
+      title: track.title,
+      duration: track.duration,
+      requester: { id: track.requester.id, guildId: track.requester.guildId },
+      seek: track.seek,
+    }));
+
+    const data: IGuildPlayer = {
+      guildId: this.guildId,
+      queue: mappedQueue,
+      loopQueue: mappedLoopQueue,
+      trackLoopTimes: this.trackLoopTimes,
+      queueLoopTimes: this.queueLoopTimes,
+      volume: this.volume,
+    };
+
+    await savePlayer(data);
+  }
+
+  private assignFromDoc(doc: IGuildPlayer) {
+    this.trackLoopTimes = doc.trackLoopTimes;
+    this.queueLoopTimes = doc.queueLoopTimes;
+    this.volume = doc.volume;
+    this.queue = doc.queue.map(
+      (t) => new Track(t.id, t.url, t.title, t.duration, t.requester)
+    );
+    this.loopQueue = doc.loopQueue.map(
+      (t) => new Track(t.id, t.url, t.title, t.duration, t.requester)
+    );
+  }
+
+  private async initialize(
     client: ExtendedClient,
     interaction: any,
     playerOptions?: CreateAudioPlayerOptions
   ) {
     try {
       const { member } = interaction;
-
-      // Establish the connection
       const connection = joinVoiceChannel({
         channelId: member.voice.channelId,
         guildId: member.guild.id,
@@ -75,102 +126,61 @@ export class OpusPlayer {
       })
         .on("error", (err) => {
           logger.error(err);
-          this.textChannel.send({ content: `${err}` });
+          this.textChannel.send({ content: String(err) });
         })
-        .on(VoiceConnectionStatus.Signalling, async (oldState, newState) => {
-          logger.info("connection Signalling");
-        })
-        .on(VoiceConnectionStatus.Connecting, async (oldState, newState) => {
-          logger.info("connection Connecting");
-        })
-        .on(VoiceConnectionStatus.Ready, async (oldState, newState) => {
-          logger.info("connection Ready");
-        })
-        .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
+        .on(VoiceConnectionStatus.Disconnected, async () => {
           try {
             await Promise.race([
               entersState(connection, VoiceConnectionStatus.Signalling, 20_000),
               entersState(connection, VoiceConnectionStatus.Connecting, 20_000),
             ]);
-          } catch (err) {
+          } catch {
             clearTimeout(this.disconnectTimer);
-
-            const embed = baseEmbed()
-              .setTitle(
-                `${client.user.username} will now leave, matta ne~ ヾ(＾ ∆ ＾)`
-              )
-              .setDescription(
-                `To re-establish this music session, within \`20 seconds\`, use the \`connect\` command while you are in a \`voice chat\``
-              )
-              .setThumbnail(
-                "https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169"
-              );
-            this.textChannel.send({ embeds: [embed] });
-
-            // Real disconnect, destroy the connection
             this.destroyTimer = setTimeout(() => {
               if (
                 connection.state.status === VoiceConnectionStatus.Disconnected
               ) {
-                try {
-                  connection.destroy();
-                } catch (err) {
-                  logger.error(err);
-                }
+                connection.destroy();
               }
             }, 10_000);
           }
         })
-        .on(VoiceConnectionStatus.Destroyed, async (oldState, newState) => {
+        .on(VoiceConnectionStatus.Destroyed, async () => {
           try {
             this.subscription.player.stop();
-            this.queue.splice(0);
-            this.loopQueue.splice(0);
+            this.queue = [];
+            this.loopQueue = [];
             this.currQueuePage.clear();
-
             await this.deleteStatusMsg();
-          } catch (err) {
-            logger.error(err);
           } finally {
             this.subscription.unsubscribe();
-            client.music.delete(this.id);
+            client.music.delete(this.guildId);
           }
         });
 
-      // Initialize the audio player
       const player = new AudioPlayer(playerOptions)
         .on("error", (err) => {
-          console.error(err);
-          this.textChannel.send({ content: `${err}` });
+          logger.error(err);
+          this.textChannel.send({ content: String(err) });
         })
         .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
-          try {
-            if (!this.queue[0]) {
-              return;
+          if (!this.queue[0]) return;
+          clearTimeout(this.disconnectTimer);
+          if (oldState.status === AudioPlayerStatus.Buffering) {
+            if (this.queue[0].seek !== undefined) {
+              this.queue[0].seek = undefined;
+            } else {
+              this.statusMsg = await this.textChannel.send({
+                content: `${client.user.username} is now playing`,
+                embeds: [await this.playingStatusEmbed()],
+              });
             }
-
-            clearTimeout(this.disconnectTimer);
-
-            if (oldState.status === AudioPlayerStatus.Buffering) {
-              if (this.queue[0].seek != undefined) {
-                this.queue[0].seek = undefined;
-              } else {
-                this.statusMsg = await this.textChannel.send({
-                  content: `${client.user.username} is now playing`,
-                  embeds: [await this.playingStatusEmbed()],
-                });
-              }
-            }
-          } catch (err) {
-            logger.error(err);
           }
         })
         .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
           try {
             if (this.isLoopingTrack()) {
-              if (this.trackLoopTimes > 0) {
-                this.trackLoopTimes--;
-              }
+              if (this.trackLoopTimes > 0) this.trackLoopTimes--;
               this.queue.splice(1, 0, this.queue[0]);
             } else {
               if (this.isLoopingQueue()) {
@@ -180,196 +190,177 @@ export class OpusPlayer {
                 embeds: [this.queue[0].creatEmbedFinished()],
               });
             }
-
             await this.deleteStatusMsg();
-          } catch (err) {
-            logger.log(err);
           } finally {
             this.queue.shift();
+            await this.saveToCache();
             await this.processQueue(client);
           }
         });
 
-      // Subscribe the player to the connection
       this.subscription = connection.subscribe(player);
-
-      // Save the OpusPlayer instance
-      client.music.set(this.id, this);
+      client.music.set(this.guildId, this);
     } catch (error) {
-      console.error(`Error during initialization: ${error.message}`);
+      logger.error(`Error during initialization: ${error}`);
     }
   }
 
   getConnection() {
-    return getVoiceConnection(this.id);
+    return getVoiceConnection(this.guildId);
   }
 
   async disconnect() {
     const { channelId } = this.subscription.connection.joinConfig;
-
     if (this.subscription.connection.disconnect()) {
       this.subscription.connection.joinConfig.channelId = channelId;
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   async reconnect(channelId?: string) {
-    let result = false;
-
     if (
-      this.subscription.connection.state.status ===
+      this.subscription.connection.state.status !==
       VoiceConnectionStatus.Disconnected
-    ) {
-      clearTimeout(this.destroyTimer);
+    )
+      return false;
 
-      if (channelId) {
-        this.subscription.connection.joinConfig.channelId = channelId;
-      }
-
-      result = this.subscription.connection.rejoin();
-      this.subscription = this.subscription.connection.subscribe(
-        this.subscription.player
-      );
+    clearTimeout(this.destroyTimer);
+    if (channelId) {
+      this.subscription.connection.joinConfig.channelId = channelId;
     }
-
+    const result = this.subscription.connection.rejoin();
+    this.subscription = this.subscription.connection.subscribe(
+      this.subscription.player
+    );
     return result;
   }
 
   async timeOut() {
     clearTimeout(this.disconnectTimer);
-
     this.disconnectTimer = setTimeout(() => {
       if (this.subscription.player.state.status === AudioPlayerStatus.Idle) {
-        try {
-          this.textChannel.send({
-            content: `Since no track has been played for the past 5 minutes`,
-          });
-          this.disconnect();
-        } catch (err) {}
+        this.textChannel.send({
+          content: `Since no track has been played for the past 5 minutes`,
+        });
+        this.disconnect();
       }
     }, TIMERS.disconnect);
   }
 
   async processQueue(client: ExtendedClient) {
     let track = this.queue[0];
-
     if (!track) {
       if (this.isLoopingQueue()) {
-        if (this.queueLoopTimes > 0) {
-          this.queueLoopTimes--;
-        }
+        if (this.queueLoopTimes > 0) this.queueLoopTimes--;
         this.queue.push(...this.loopQueue);
-        this.loopQueue.splice(0);
+        this.loopQueue = [];
+        await this.saveToCache();
         track = this.queue[0];
       } else {
-        try {
-          this.timeOut();
-          this.textChannel.send({
-            content: client.replyMsg("The queue has ended~"),
-          });
-        } catch (err) {
-          logger.log(err);
-        }
+        this.timeOut();
+        this.textChannel.send({
+          content: client.replyMsg("The queue has ended~"),
+        });
         return;
       }
     }
-
     this.playIfIdling(client);
   }
 
   async playIfIdling(client: ExtendedClient) {
     if (
-      this.subscription.player.state.status != AudioPlayerStatus.Paused &&
-      this.subscription.player.state.status != AudioPlayerStatus.Playing &&
+      this.subscription.player.state.status !== AudioPlayerStatus.Paused &&
+      this.subscription.player.state.status !== AudioPlayerStatus.Playing &&
       this.queue.length > 0
     ) {
-      this.playFromQueue(client);
+      await this.playFromQueue(client);
     }
   }
 
   async playFromQueue(client: ExtendedClient) {
     try {
-      let newVolume = this.queue[0].resource
+      const newVolume = this.queue[0].resource
         ? this.queue[0].resource.volume.volume
         : this.volume;
-
       this.queue[0].resource = await this.queue[0].createAudioResource();
       this.queue[0].resource.volume.setVolume(newVolume);
-
       this.subscription.player.play(this.queue[0].resource);
     } catch (err) {
       logger.error(err);
-      this.textChannel.send({ content: `${err}` });
+      this.textChannel.send({ content: String(err) });
     }
   }
 
   async disableQueueRepeat() {
     this.queueLoopTimes = 0;
     this.loopQueue.splice(0);
+    await this.saveToCache();
   }
 
   async enableQueueRepeat(times = -1) {
     this.trackLoopTimes = 0;
     this.queueLoopTimes = times;
+    await this.saveToCache();
   }
 
   async disableTrackRepeat() {
     this.trackLoopTimes = 0;
+    await this.saveToCache();
   }
 
   async enableTrackRepeat(times = -1) {
-    this.disableQueueRepeat();
+    this.queueLoopTimes = 0;
     this.trackLoopTimes = times;
+    await this.saveToCache();
   }
 
   isLoopingTrack() {
-    return this.trackLoopTimes != 0;
+    return this.trackLoopTimes !== 0;
   }
 
   isLoopingQueue() {
-    return this.queueLoopTimes != 0;
+    return this.queueLoopTimes !== 0;
   }
 
   async playingStatusEmbed() {
-    let embed = await this.queue[0]?.createEmbedImage();
+    if (!this.queue[0]) return null;
+    const embed = await this.queue[0].createEmbedImage();
     return embed.addFields(
-      { name: "Queue", value: `${this.queue.length}`, inline: true },
+      { name: "Queue", value: String(this.queue.length), inline: true },
       {
         name: "Paused",
-        value: `${formatBool(
-          this.subscription.player.state.status == AudioPlayerStatus.Paused
-        )}`,
+        value: formatBool(
+          this.subscription.player.state.status === AudioPlayerStatus.Paused
+        ),
         inline: true,
       },
       {
         name: "Track Loop",
         value: `${formatBool(this.isLoopingTrack())} (${
-          this.trackLoopTimes == -1 ? `∞` : this.trackLoopTimes
+          this.trackLoopTimes === -1 ? "∞" : this.trackLoopTimes
         })`,
         inline: true,
       },
       {
         name: "Queue Loop",
         value: `${formatBool(this.isLoopingQueue())} (${
-          this.queueLoopTimes == -1 ? `∞` : this.queueLoopTimes
+          this.queueLoopTimes === -1 ? "∞" : this.queueLoopTimes
         })`,
         inline: true,
       },
-      { name: "Volume", value: `${this.queue[0].getVolume()}`, inline: true }
+      { name: "Volume", value: String(this.queue[0].getVolume()), inline: true }
     );
   }
 
   async updatePlayingStatusMsg() {
     const embed = await this.playingStatusEmbed();
-
     if (embed) {
-      await this.statusMsg?.edit({ embeds: [embed] }).catch((err) => {});
+      await this.statusMsg?.edit({ embeds: [embed] }).catch(() => {});
     }
   }
 
   async deleteStatusMsg() {
-    await this.statusMsg?.delete().catch((err) => {});
+    await this.statusMsg?.delete().catch(() => {});
   }
 }
