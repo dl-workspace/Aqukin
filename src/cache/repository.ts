@@ -1,33 +1,27 @@
 // ./database/repository.ts
 
-import { redis } from "./client";
+import { redis, redisAvailable } from "./client";
+import { findFallback, saveFallback } from "./fallbackClient";
 import { IGuildPlayer, ITrackData } from "./schema";
 
-/**
- * This function generates the Redis key (namespace) for storing the guild's player.
- */
 function redisKey(guildId: string) {
   return `guild:${guildId}:player`;
 }
 
-/**
- * Attempts to find an existing guild player in Redis.
- * @param guildId
- * @returns IGuildPlayer or null if not found
- */
+/** Retrieves IGuildPlayer from either Redis or fallback store. */
 export async function findPlayer(
   guildId: string
 ): Promise<IGuildPlayer | null> {
+  if (!redisAvailable) {
+    const fallbackDoc = findFallback(guildId);
+    return fallbackDoc || null;
+  }
   const data = await redis.get(redisKey(guildId));
   if (!data) return null;
   return JSON.parse(data) as IGuildPlayer;
 }
 
-/**
- * Creates a default empty IGuildPlayer entry in Redis for a given guild.
- * @param guildId
- * @returns the newly created IGuildPlayer
- */
+/** Creates default IGuildPlayer in either Redis or fallback store. */
 export async function createPlayer(guildId: string): Promise<IGuildPlayer> {
   const defaultDoc: IGuildPlayer = {
     guildId,
@@ -37,34 +31,31 @@ export async function createPlayer(guildId: string): Promise<IGuildPlayer> {
     queueLoopTimes: 0,
     volume: 1,
   };
+  if (!redisAvailable) {
+    saveFallback(defaultDoc);
+    return defaultDoc;
+  }
   await redis.set(redisKey(guildId), JSON.stringify(defaultDoc));
   return defaultDoc;
 }
 
-/**
- * Overwrites the entire IGuildPlayer document in Redis.
- * @param data
- */
+/** Overwrites IGuildPlayer in either Redis or fallback store. */
 export async function savePlayer(data: IGuildPlayer): Promise<void> {
+  if (!redisAvailable) {
+    saveFallback(data);
+    return;
+  }
   await redis.set(redisKey(data.guildId), JSON.stringify(data));
 }
 
-/**
- * Replaces the `queue` array in the IGuildPlayer document.
- * @param guildId
- * @param newQueue
- */
+/** Helper to replace the entire queue array. */
 export async function updateQueue(guildId: string, newQueue: ITrackData[]) {
   const player = (await findPlayer(guildId)) || (await createPlayer(guildId));
   player.queue = newQueue;
   await savePlayer(player);
 }
 
-/**
- * Replaces the `loopQueue` array in the IGuildPlayer document.
- * @param guildId
- * @param newLoopQueue
- */
+/** Helper to replace the entire loopQueue array. */
 export async function updateLoopQueue(
   guildId: string,
   newLoopQueue: ITrackData[]
@@ -74,33 +65,21 @@ export async function updateLoopQueue(
   await savePlayer(player);
 }
 
-/**
- * Sets `trackLoopTimes`.
- * @param guildId
- * @param times
- */
+/** Helper to update trackLoopTimes. */
 export async function updateTrackLoopTimes(guildId: string, times: number) {
   const player = (await findPlayer(guildId)) || (await createPlayer(guildId));
   player.trackLoopTimes = times;
   await savePlayer(player);
 }
 
-/**
- * Sets `queueLoopTimes`.
- * @param guildId
- * @param times
- */
+/** Helper to update queueLoopTimes. */
 export async function updateQueueLoopTimes(guildId: string, times: number) {
   const player = (await findPlayer(guildId)) || (await createPlayer(guildId));
   player.queueLoopTimes = times;
   await savePlayer(player);
 }
 
-/**
- * Sets `volume`.
- * @param guildId
- * @param volume
- */
+/** Helper to update volume. */
 export async function updateVolume(guildId: string, volume: number) {
   const player = (await findPlayer(guildId)) || (await createPlayer(guildId));
   player.volume = volume;
