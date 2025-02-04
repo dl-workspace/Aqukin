@@ -1,4 +1,6 @@
-export class TrackRequester {
+import { ITrackRequester } from "../../cache/schema";
+
+export class TrackRequester implements ITrackRequester {
   id: string;
   guildId: string;
 

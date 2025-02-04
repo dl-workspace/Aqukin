@@ -1,4 +1,5 @@
 require("dotenv").config();
+import { connectRedis } from "./cache/client";
 import { ExtendedClient } from "./models/client";
 
 declare global {
@@ -20,5 +21,11 @@ Array.prototype.standardDeviation = async function () {
   );
 };
 
-export const client = new ExtendedClient();
-client.start();
+const client = new ExtendedClient();
+
+(async () => {
+  await connectRedis();
+  client.start();
+})();
+
+export { client };

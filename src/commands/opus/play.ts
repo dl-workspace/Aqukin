@@ -101,6 +101,7 @@ export default new Command({
 
         if (result.length > 0) {
           mPlayer.queue.push(...result);
+          await mPlayer.saveToCache();
           mPlayer.updatePlayingStatusMsg();
           mPlayer.playIfIdling(client);
         }
@@ -116,6 +117,7 @@ export default new Command({
 
         if (result.length > 0) {
           mPlayer.queue.splice(index, 0, ...result);
+          await mPlayer.saveToCache();
           mPlayer.updatePlayingStatusMsg();
           mPlayer.playIfIdling(client);
         }
