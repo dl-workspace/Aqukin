@@ -1,5 +1,5 @@
 import winston from "winston";
-import GraylogHTTPTransport from "./graylogTransport"; // Import the custom transport
+import GraylogHTTPTransport from "./graylogTransport";
 
 const logger = winston.createLogger({
   transports: [
