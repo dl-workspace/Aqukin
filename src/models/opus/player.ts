@@ -1,4 +1,3 @@
-// ./models/opus/player.ts
 import {
   AudioPlayer,
   CreateAudioPlayerOptions,
