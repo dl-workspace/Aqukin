@@ -91,9 +91,12 @@ export default new Command({
             .setStyle(ButtonStyle.Danger),
         ]);
 
-      interaction.followUp({ embeds: [queueEmbed], components: [actionRow] });
+      await interaction.followUp({
+        embeds: [queueEmbed],
+        components: [actionRow],
+      });
     } else {
-      interaction.followUp({
+      await interaction.followUp({
         content: client.replyMsgAuthor(
           interaction.member,
           `the queue is empty`
@@ -119,18 +122,19 @@ export async function generateQueueEmbed(
     // checks if there's anything next in queue
     if (next.length !== 0) {
       let j = start;
-      info = next
-        .map(
-          async (track) =>
-            `${j++}) [${track.title}](${track.url}) | \`${formatDuration(
-              track.duration
-            )}\` | requested by ${await track.getRequester()}`
-        )
-        .join("\n\n");
-    } // end of if
-    else {
+
+      const nextTracksPromise = next.map(async (track) => {
+        const requester = await track.getRequester();
+        return `${j++}) [${track.title}](${track.url}) | \`${formatDuration(
+          track.duration
+        )}\` | requested by ${requester}`;
+      });
+
+      const nextTracks = await Promise.all(nextTracksPromise);
+      info = nextTracks.join("\n\n");
+    } else {
       info = "Currently no track is next in queueヾ (= `ω´ =) ノ”";
-    } // else next in queue is empty
+    }
 
     // construct the embed(s)
     if (i == 0 || !info.startsWith("Currently")) {
@@ -152,4 +156,4 @@ export async function generateQueueEmbed(
   } catch (err) {
     logger.error(err);
   }
-} // end of gerenateQueueEmbed(...) helper function
+}
