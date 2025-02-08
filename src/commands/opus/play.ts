@@ -23,6 +23,7 @@ import { Track } from "../../models/opus/track";
 import { TrackRequester } from "../../models/opus/trackRequester";
 import {
   baseEmbed,
+  convertInput,
   formatDuration,
   generateInteractionComponentId,
   getUserNameMaster,
@@ -170,7 +171,7 @@ async function processQuery(
 
         playlist.items.forEach(async (track) => {
           if (track.duration) {
-            const trackDuration = Number(track.duration) * 1000;
+            const trackDuration = convertInput(track.duration);
             result.push(
               new Track(
                 track.id,
