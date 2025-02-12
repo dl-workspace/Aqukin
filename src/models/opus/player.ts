@@ -14,12 +14,12 @@ import { ExtendedClient } from "../client";
 import { IGuildPlayer, ITrackData } from "../../cache/schema";
 import { findPlayer, createPlayer, savePlayer } from "../../cache/repository";
 import { Track } from "./track";
-import { formatBool } from "../../middlewares/utils";
+import { baseEmbed, formatBool } from "../../middlewares/utils";
 import logger from "../../middlewares/logger/logger";
 
 const enum TIMERS {
-  reconnect = 5_000,
-  destroy = 20_000,
+  reconnect = 10_000,
+  destroy = 30_000,
   disconnect = 300_000,
 }
 
@@ -130,18 +130,37 @@ export class OpusPlayer implements IGuildPlayer {
         .on(VoiceConnectionStatus.Disconnected, async () => {
           try {
             await Promise.race([
-              entersState(connection, VoiceConnectionStatus.Signalling, 20_000),
-              entersState(connection, VoiceConnectionStatus.Connecting, 20_000),
+              entersState(
+                connection,
+                VoiceConnectionStatus.Signalling,
+                TIMERS.reconnect
+              ),
+              entersState(
+                connection,
+                VoiceConnectionStatus.Connecting,
+                TIMERS.reconnect
+              ),
             ]);
           } catch {
             clearTimeout(this.disconnectTimer);
+
+            const embed = baseEmbed()
+              .setTitle(`Matta ne~ ヾ(＾ ∇ ＾)`)
+              .setDescription(
+                `To re-establish this music session, within \`30 seconds\`, use the \`connect\` command while you are in a \`voice chat\``
+              )
+              .setThumbnail(
+                "https://media1.tenor.com/images/2acd2355ad05655cb2a536f44660fd23/tenor.gif?itemid=17267169"
+              );
+            this.textChannel.send({ embeds: [embed] });
+
             this.destroyTimer = setTimeout(() => {
               if (
                 connection.state.status === VoiceConnectionStatus.Disconnected
               ) {
                 connection.destroy();
               }
-            }, 10_000);
+            }, TIMERS.destroy);
           }
         })
         .on(VoiceConnectionStatus.Destroyed, async () => {
@@ -158,9 +177,25 @@ export class OpusPlayer implements IGuildPlayer {
         });
 
       const player = new AudioPlayer(playerOptions)
-        .on("error", (err) => {
+        .on("error", async (err) => {
           logger.error(err);
-          this.textChannel.send({ content: String(err) });
+          this.textChannel.send({
+            content:
+              String(err) +
+              `. ${client.user.username} will restart the current track`,
+          });
+
+          const currentTrack = this.queue[0];
+          if (currentTrack && currentTrack.isNotLiveStream()) {
+            currentTrack.seek = currentTrack.resource?.playbackDuration || 0;
+            try {
+              currentTrack.resource = await currentTrack.createAudioResource();
+              this.subscription.player.play(currentTrack.resource);
+              return;
+            } catch (err2) {
+              logger.error("Resume attempt failed:", err2);
+            }
+          }
         })
         .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
           if (!this.queue[0]) return;
@@ -175,6 +210,10 @@ export class OpusPlayer implements IGuildPlayer {
               });
             }
           }
+
+          setTimeout(() => {
+            player.emit("error", new Error("Simulated disruption"));
+          }, 15000);
         })
         .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
           try {
@@ -235,12 +274,12 @@ export class OpusPlayer implements IGuildPlayer {
     return result;
   }
 
-  async timeOut() {
+  async timeOut(client: ExtendedClient) {
     clearTimeout(this.disconnectTimer);
     this.disconnectTimer = setTimeout(() => {
       if (this.subscription.player.state.status === AudioPlayerStatus.Idle) {
         this.textChannel.send({
-          content: `Since no track has been played for the past 5 minutes`,
+          content: `Since no track has been played for the past 5 minutes, ${client.user.username} will now leave`,
         });
         this.disconnect();
       }
@@ -257,7 +296,7 @@ export class OpusPlayer implements IGuildPlayer {
         await this.saveToCache();
         track = this.queue[0];
       } else {
-        this.timeOut();
+        this.timeOut(client);
         this.textChannel.send({
           content: client.replyMsg("The queue has ended~"),
         });

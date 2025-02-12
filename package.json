@@ -19,11 +19,11 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/voice": "^0.18.0",
-    "@distube/ytdl-core": "^4.16.0",
+    "@distube/ytdl-core": "^4.16.3",
     "@distube/ytpl": "^1.2.1",
     "@distube/ytsr": "^2.0.4",
     "axios": "^1.7.9",
-    "discord.js": "^14.17.3",
+    "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "ffmpeg-static": "^5.2.0",
     "glob": "^11.0.1",
@@ -34,8 +34,7 @@
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
-    "@types/mongoose": "^5.11.96",
-    "@types/node": "^22.13.0",
+    "@types/node": "^22.13.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.7.3"
