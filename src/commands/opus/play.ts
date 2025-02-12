@@ -372,7 +372,7 @@ function statusReply(
 ) {
   return client.replyMsgAuthor(
     requester,
-    `${client.user.username} has inserted to position \`${index}\``
+    `${client.user.username} has inserted to position \`${index + 1}\``
   );
 }
 

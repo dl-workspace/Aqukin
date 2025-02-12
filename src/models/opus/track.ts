@@ -34,16 +34,14 @@ export class Track implements ITrackData {
 
   async createAudioResource(): Promise<AudioResource> {
     return new Promise((resolve, reject) => {
-      // const ytdlOptions: ytdl.downloadOptions | ytdl.videoFormat = {
       const ytdlOptions: ytdl.downloadOptions = {
         filter: "audio",
         quality: "highestaudio",
         highWaterMark: 1 << 62,
-        liveBuffer: 1 << 62,
-        // bitrate: 128,
+        liveBuffer: 1 << 25,
         dlChunkSize: 0,
         begin: this.seek || 0,
-        // range: { start: this.seek/1000 },
+        // range: { start: Math.round(this.seek / 1000 || 0 },
       };
 
       const stream = ytdl(this.url, ytdlOptions);
@@ -57,6 +55,10 @@ export class Track implements ITrackData {
         createAudioResource(stream, { metadata: this, inlineVolume: true })
       );
     });
+  }
+
+  isNotLiveStream() {
+    return this.duration > 0;
   }
 
   private baseEmbedMusic() {
@@ -75,7 +77,7 @@ export class Track implements ITrackData {
         {
           name: "Lenght",
           value: `${
-            this.duration > 0 ? formatDuration(this.duration) : `Live`
+            this.isNotLiveStream() ? formatDuration(this.duration) : `Live`
           }`,
           inline: true,
         }

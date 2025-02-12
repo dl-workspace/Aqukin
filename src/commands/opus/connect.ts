@@ -38,7 +38,7 @@ export default new Command({
       }
     } else {
       mPlayer = new OpusPlayer({ client, interaction, args });
-      mPlayer.timeOut();
+      mPlayer.timeOut(client);
       interaction.followUp({
         content: client.replyMsgAuthor(
           member,
