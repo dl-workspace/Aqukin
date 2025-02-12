@@ -210,10 +210,6 @@ export class OpusPlayer implements IGuildPlayer {
               });
             }
           }
-
-          setTimeout(() => {
-            player.emit("error", new Error("Simulated disruption"));
-          }, 15000);
         })
         .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
           try {
