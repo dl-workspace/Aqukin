@@ -179,23 +179,18 @@ export class OpusPlayer implements IGuildPlayer {
       const player = new AudioPlayer(playerOptions)
         .on("error", async (err) => {
           logger.error(err);
+
+          const currentTrack = this.queue[0];
+          if (currentTrack && currentTrack.isNotLiveStream()) {
+            currentTrack.seek = currentTrack.resource?.playbackDuration || 0;
+            this.queue.splice(1, 0, currentTrack);
+          }
+
           this.textChannel.send({
             content:
               String(err) +
               `. ${client.user.username} will restart the current track`,
           });
-
-          const currentTrack = this.queue[0];
-          if (currentTrack && currentTrack.isNotLiveStream()) {
-            currentTrack.seek = currentTrack.resource?.playbackDuration || 0;
-            try {
-              currentTrack.resource = await currentTrack.createAudioResource();
-              this.subscription.player.play(currentTrack.resource);
-              return;
-            } catch (err2) {
-              logger.error("Resume attempt failed:", err2);
-            }
-          }
         })
         .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
           if (!this.queue[0]) return;
