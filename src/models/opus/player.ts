@@ -184,6 +184,7 @@ export class OpusPlayer implements IGuildPlayer {
           if (currentTrack && currentTrack.isNotLiveStream()) {
             currentTrack.seek = currentTrack.resource?.playbackDuration || 0;
             this.queue.splice(1, 0, currentTrack);
+            await this.saveToCache();
           }
 
           this.textChannel.send({
