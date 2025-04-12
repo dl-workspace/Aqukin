@@ -23,6 +23,8 @@ const enum TIMERS {
   disconnect = 300_000,
 }
 
+const MAX_RETRIES = 3;
+
 export class OpusPlayer implements IGuildPlayer {
   guildId: string;
   queue: Track[];
@@ -76,6 +78,7 @@ export class OpusPlayer implements IGuildPlayer {
       duration: track.duration,
       requester: { id: track.requester.id, guildId: track.requester.guildId },
       seek: track.seek,
+      retries: track.retries,
     }));
 
     const mappedLoopQueue: ITrackData[] = this.loopQueue.map((track) => ({
@@ -85,6 +88,7 @@ export class OpusPlayer implements IGuildPlayer {
       duration: track.duration,
       requester: { id: track.requester.id, guildId: track.requester.guildId },
       seek: track.seek,
+      retries: track.retries,
     }));
 
     const data: IGuildPlayer = {
@@ -182,16 +186,28 @@ export class OpusPlayer implements IGuildPlayer {
 
           const currentTrack = this.queue[0];
           if (currentTrack && currentTrack.isNotLiveStream()) {
-            currentTrack.seek = currentTrack.resource?.playbackDuration || 0;
-            this.queue.splice(1, 0, currentTrack);
-            await this.saveToCache();
-          }
+            currentTrack.retries = (currentTrack.retries || 0) + 1;
 
-          this.textChannel.send({
-            content:
-              String(err) +
-              `. ${client.user.username} will restart the current track`,
-          });
+            if (currentTrack.retries <= MAX_RETRIES) {
+              currentTrack.seek = currentTrack.resource?.playbackDuration || 0;
+              this.queue.splice(1, 0, currentTrack);
+              await this.saveToCache();
+
+              this.textChannel.send({
+                content:
+                  String(err) +
+                  `. ${client.user.username} will restart the current track (attempt ${currentTrack.retries}/${MAX_RETRIES})`,
+              });
+            } else {
+              this.textChannel.send({
+                content: `Failed to play "${currentTrack.title}" after ${MAX_RETRIES} attempts. Skipping track.`,
+              });
+            }
+          } else {
+            this.textChannel.send({
+              content: String(err),
+            });
+          }
         })
         .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
           if (!this.queue[0]) return;

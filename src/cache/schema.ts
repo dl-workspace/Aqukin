@@ -10,6 +10,7 @@ export interface ITrackData {
   duration: number;
   requester: ITrackRequester;
   seek?: number;
+  retries?: number;
 }
 
 export interface IGuildPlayer {
