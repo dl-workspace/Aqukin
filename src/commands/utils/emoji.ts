@@ -1,4 +1,8 @@
-import { ApplicationCommandOptionType, PermissionFlagsBits } from "discord.js";
+import {
+  ApplicationCommandOptionType,
+  MessageFlags,
+  PermissionFlagsBits,
+} from "discord.js";
 import { Command, COMMANDS, COMMAND_TAGS } from "../../models/command";
 
 enum EMOJI_OPTIONS {
@@ -32,7 +36,7 @@ export default new Command({
           interaction.member,
           `${client.user.username} coudln't find any emoji named \`${input}\``
         ),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     }
 

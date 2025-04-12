@@ -137,7 +137,7 @@ async function processQuery(
   const query = args.get(PLAY_OPTIONS.query).value as string;
   let result: Track[] = [];
 
-  // if the queury is a youtube video link
+  // if the query is a youtube video link
   if (ytdl.validateURL(query)) {
     await ytdl
       .getBasicInfo(query)
@@ -162,7 +162,7 @@ async function processQuery(
         interaction.followUp({ content: `${err}` });
       });
   }
-  // if the queury is a youtube playlist link
+  // if the query is a youtube playlist link
   else if (ytpl.validateID(query)) {
     // limit can be Infinity
     await ytpl(query, { limit: 1000 })

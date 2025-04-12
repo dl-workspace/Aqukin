@@ -5,7 +5,11 @@ import {
   getUserNameMaster,
 } from "../../middlewares/utils";
 import { client } from "../..";
-import { createAudioResource, AudioResource } from "@discordjs/voice";
+import {
+  createAudioResource,
+  AudioResource,
+  StreamType,
+} from "@discordjs/voice";
 import { TrackRequester } from "./trackRequester";
 import { ITrackData } from "../../cache/schema";
 
@@ -17,6 +21,7 @@ export class Track implements ITrackData {
   requester: TrackRequester;
   seek?: number;
   resource?: AudioResource;
+  retries?: number = 0;
 
   constructor(
     id: string,
@@ -30,19 +35,25 @@ export class Track implements ITrackData {
     this.title = title;
     this.duration = duration;
     this.requester = requester;
+    this.retries = 0;
   }
 
   async createAudioResource(): Promise<AudioResource> {
     return new Promise((resolve, reject) => {
+      const seekSeconds =
+        this.seek !== undefined ? Math.floor(this.seek / 1000) : 0;
+
       const ytdlOptions: ytdl.downloadOptions = {
-        filter: "audio",
+        filter: "audioonly",
         quality: "highestaudio",
         highWaterMark: 1 << 62,
         liveBuffer: 1 << 25,
         dlChunkSize: 0,
-        begin: this.seek || 0,
-        // range: { start: Math.round(this.seek / 1000 || 0 },
       };
+
+      if (seekSeconds > 0) {
+        ytdlOptions.begin = seekSeconds;
+      }
 
       const stream = ytdl(this.url, ytdlOptions);
 
@@ -52,7 +63,11 @@ export class Track implements ITrackData {
       }
 
       resolve(
-        createAudioResource(stream, { metadata: this, inlineVolume: true })
+        createAudioResource(stream, {
+          metadata: this,
+          inlineVolume: true,
+          inputType: StreamType.Arbitrary,
+        })
       );
     });
   }
