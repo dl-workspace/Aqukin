@@ -19,22 +19,22 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/voice": "^0.18.0",
-    "@distube/ytdl-core": "^4.16.9",
+    "@distube/ytdl-core": "github:distubejs/ytdl-core#pull/251/head",
     "@distube/ytpl": "^1.2.1",
     "@distube/ytsr": "^2.0.4",
     "axios": "^1.9.0",
-    "discord.js": "^14.19.1",
+    "discord.js": "^14.19.2",
     "dotenv": "^16.5.0",
     "ffmpeg-static": "^5.2.0",
     "glob": "^11.0.2",
-    "redis": "^4.7.0",
-    "winston": "^3.17.0",
     "libsodium-wrappers": "^0.7.15",
-    "opusscript": "^0.1.1"
+    "opusscript": "^0.1.1",
+    "redis": "^4.7.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
-    "@types/node": "^22.15.2",
+    "@types/node": "^22.15.3",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.8.3"
