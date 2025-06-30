@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/voice": "^0.18.0",
-    "@distube/ytdl-core": "github:distubejs/ytdl-core#pull/251/head",
+    "@distube/ytdl-core": "github:distubejs/ytdl-core",
     "@distube/ytpl": "^1.2.3",
     "@distube/ytsr": "^2.0.4",
     "axios": "^1.10.0",
