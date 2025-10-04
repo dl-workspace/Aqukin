@@ -19,9 +19,9 @@
   "license": "MIT",
   "dependencies": {
     "@discordjs/voice": "^0.19.0",
-    "@distube/ytdl-core": "github:distubejs/ytdl-core",
     "@distube/ytpl": "^1.2.3",
     "@distube/ytsr": "^2.0.4",
+    "@snazzah/davey": "^0.1.7",
     "axios": "^1.12.2",
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.3",
@@ -30,7 +30,8 @@
     "libsodium-wrappers": "^0.7.15",
     "opusscript": "^0.1.1",
     "redis": "^5.8.3",
-    "winston": "^3.18.3"
+    "winston": "^3.18.3",
+    "ytdlp-nodejs": "^2.3.4"
   },
   "devDependencies": {
     "@types/glob": "^9.0.0",

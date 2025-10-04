@@ -8,9 +8,9 @@ import {
   StringSelectMenuInteraction,
   StringSelectMenuOptionBuilder,
 } from "discord.js";
-import ytdl from "@distube/ytdl-core";
 import ytpl from "@distube/ytpl";
 import ytsr from "@distube/ytsr";
+import { youtubeService } from "../../services/youtube";
 import {
   Command,
   COMMANDS,
@@ -138,17 +138,15 @@ async function processQuery(
   let result: Track[] = [];
 
   // if the query is a youtube video link
-  if (ytdl.validateURL(query)) {
-    await ytdl
+  if (youtubeService.validateURL(query)) {
+    await youtubeService
       .getBasicInfo(query)
-      .then(async (trackInfo) => {
-        const { videoId, title, lengthSeconds } =
-          trackInfo.player_response.videoDetails;
+      .then(async (videoInfo) => {
         const track = new Track(
-          videoId,
-          trackInfo.videoDetails.video_url,
-          title,
-          Number(lengthSeconds) * 1000,
+          videoInfo.id,
+          videoInfo.url,
+          videoInfo.title,
+          videoInfo.duration * 1000, // Convert seconds to milliseconds
           requester
         );
         result.push(track);
@@ -297,14 +295,12 @@ async function processQuery(
 }
 
 async function createTrack(url: string, author: TrackRequester) {
-  const trackInfo = await ytdl.getBasicInfo(url);
-  const { videoId, title, lengthSeconds } =
-    trackInfo.player_response.videoDetails;
+  const videoInfo = await youtubeService.getBasicInfo(url);
   return new Track(
-    videoId,
-    trackInfo.videoDetails.video_url,
-    title,
-    Number(lengthSeconds) * 1000,
+    videoInfo.id,
+    videoInfo.url,
+    videoInfo.title,
+    videoInfo.duration * 1000, // Convert seconds to milliseconds
     author
   );
 }

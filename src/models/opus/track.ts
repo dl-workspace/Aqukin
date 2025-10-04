@@ -1,4 +1,3 @@
-import ytdl from "@distube/ytdl-core";
 import {
   baseEmbed,
   formatDuration,
@@ -12,6 +11,8 @@ import {
 } from "@discordjs/voice";
 import { TrackRequester } from "./trackRequester";
 import { ITrackData } from "../../cache/schema";
+import { youtubeService } from "../../services/youtube";
+import logger from "../../middlewares/logger/logger";
 
 export class Track implements ITrackData {
   id: string;
@@ -39,37 +40,37 @@ export class Track implements ITrackData {
   }
 
   async createAudioResource(): Promise<AudioResource> {
-    return new Promise((resolve, reject) => {
+    try {
       const seekSeconds =
         this.seek !== undefined ? Math.floor(this.seek / 1000) : 0;
 
-      const ytdlOptions: ytdl.downloadOptions = {
-        filter: "audioonly",
-        quality: "highestaudio",
-        highWaterMark: 1 << 62,
-        liveBuffer: 1 << 25,
-        dlChunkSize: 0,
-      };
+      logger.info(
+        `Creating audio stream for ${this.title}${
+          seekSeconds > 0 ? ` (seeking to ${seekSeconds}s)` : ""
+        }`
+      );
 
-      if (seekSeconds > 0) {
-        ytdlOptions.begin = seekSeconds;
-      }
-
-      const stream = ytdl(this.url, ytdlOptions);
+      // Use yt-dlp to create audio stream
+      const stream = await youtubeService.createAudioStream(
+        this.url,
+        seekSeconds
+      );
 
       if (!stream) {
-        reject(new Error("No stdout"));
-        return;
+        throw new Error("No audio stream returned from YouTube service");
       }
 
-      resolve(
-        createAudioResource(stream, {
-          metadata: this,
-          inlineVolume: true,
-          inputType: StreamType.Arbitrary,
-        })
-      );
-    });
+      return createAudioResource(stream, {
+        metadata: this,
+        inlineVolume: true,
+        // Let Discord.js probe the stream format automatically
+        // This ensures proper handling of various audio formats from YouTube
+        inputType: StreamType.Arbitrary,
+      });
+    } catch (error) {
+      logger.error(`Failed to create audio resource: ${error}`);
+      throw error;
+    }
   }
 
   isNotLiveStream() {
