@@ -50,7 +50,6 @@ export class Track implements ITrackData {
         }`
       );
 
-      // Use yt-dlp to create audio stream
       const stream = await youtubeService.createAudioStream(
         this.url,
         seekSeconds
@@ -63,8 +62,6 @@ export class Track implements ITrackData {
       return createAudioResource(stream, {
         metadata: this,
         inlineVolume: true,
-        // Let Discord.js probe the stream format automatically
-        // This ensures proper handling of various audio formats from YouTube
         inputType: StreamType.Arbitrary,
       });
     } catch (error) {
