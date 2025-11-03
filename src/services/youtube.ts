@@ -107,6 +107,16 @@ class YouTubeService {
         // Don't re-encode, just copy the stream
         // This prevents double processing and timing issues
         noPostOverwrites: true,
+
+        // Fix for HTTP 403 Forbidden errors
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        referer: "https://www.youtube.com/",
+        noCheckCertificates: true,
+        
+        // Use Android client for better reliability
+        extractorArgs: {
+          youtube: ["player_client=android"]
+        },
       };
 
       // Add seek if specified
