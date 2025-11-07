@@ -8,8 +8,6 @@ import {
   StringSelectMenuInteraction,
   StringSelectMenuOptionBuilder,
 } from "discord.js";
-import ytpl from "@distube/ytpl";
-import ytsr from "@distube/ytsr";
 import { youtubeService } from "../../services/youtube";
 import {
   Command,
@@ -23,7 +21,6 @@ import { Track } from "../../models/opus/track";
 import { TrackRequester } from "../../models/opus/trackRequester";
 import {
   baseEmbed,
-  convertInput,
   formatDuration,
   generateInteractionComponentId,
   getUserNameMaster,
@@ -137,8 +134,57 @@ async function processQuery(
   const query = args.get(PLAY_OPTIONS.query).value as string;
   let result: Track[] = [];
 
+  // Check for playlist FIRST (before single video check)
+  // URLs like youtube.com/watch?v=ID&list=PLAYLIST contain both video and playlist
+  if (youtubeService.validatePlaylistURL(query)) {
+    await youtubeService
+      .getPlaylistInfo(query, 1000)
+      .then(async (playlistInfo) => {
+        let playListDuration = 0;
+
+        playlistInfo.videos.forEach((video) => {
+          const trackDuration = video.duration * 1000; // Convert to milliseconds
+          result.push(
+            new Track(
+              video.id,
+              video.url,
+              video.title,
+              trackDuration,
+              requester
+            )
+          );
+          playListDuration += trackDuration;
+        });
+
+        const embed = baseEmbed()
+          .setTitle(`Playlist`)
+          .setDescription(`[${playlistInfo.title}](${playlistInfo.url})`)
+          .setImage(playlistInfo.videos[0]?.thumbnail || "")
+          .addFields(
+            {
+              name: "Requested By",
+              value: `${getUserNameMaster(member)}`,
+              inline: true,
+            },
+            {
+              name: "Length",
+              value: `${formatDuration(playListDuration)}`,
+              inline: true,
+            },
+            { name: "Size", value: `${result.length}`, inline: true }
+          );
+
+        interaction.followUp({
+          content: statusReply(client, member, index),
+          embeds: [embed],
+        });
+      })
+      .catch((err) => {
+        interaction.followUp({ content: `${err}` });
+      });
+  }
   // if the query is a youtube video link
-  if (youtubeService.validateURL(query)) {
+  else if (youtubeService.validateURL(query)) {
     await youtubeService
       .getBasicInfo(query)
       .then(async (videoInfo) => {
@@ -160,65 +206,12 @@ async function processQuery(
         interaction.followUp({ content: `${err}` });
       });
   }
-  // if the query is a youtube playlist link
-  else if (ytpl.validateID(query)) {
-    // limit can be Infinity
-    await ytpl(query, { limit: 1000 })
-      .then(async (playlist) => {
-        let playListDuration = 0;
-
-        playlist.items.forEach(async (track) => {
-          if (track.duration) {
-            const trackDuration = convertInput(track.duration);
-            result.push(
-              new Track(
-                track.id,
-                track.url,
-                track.title,
-                trackDuration,
-                requester
-              )
-            );
-            playListDuration += trackDuration;
-          }
-        });
-
-        const embed = baseEmbed()
-          .setTitle(`Playlist`)
-          .setDescription(`[${playlist.title}](${playlist.url})`)
-          .setImage(playlist.items[0].thumbnail)
-          .addFields(
-            {
-              name: "Requested By",
-              value: `${getUserNameMaster(member)}`,
-              inline: true,
-            },
-            {
-              name: "Lenght",
-              value: `${formatDuration(playListDuration)}`,
-              inline: true,
-            },
-            { name: "Size", value: `${result.length}`, inline: true }
-          );
-
-        interaction.followUp({
-          content: statusReply(client, member, index),
-          embeds: [embed],
-        });
-      })
-      .catch((err) => {
-        interaction.followUp({ content: `${err}` });
-      });
-  }
   // else try searching youtube with the given query
   else {
-    await ytsr(query, { limit: 7 })
-      .then(async (results) => {
-        const tracks = results.items.filter(
-          (i) => i.type == "video"
-        ) as ytsr.Video[];
-
-        if (tracks.length === 0) {
+    await youtubeService
+      .search(query, 7)
+      .then(async (videos) => {
+        if (videos.length === 0) {
           interaction.followUp({
             content: client.replyMsgErrorAuthor(
               member,
@@ -239,15 +232,16 @@ async function processQuery(
           }),
         ];
 
-        tracks.forEach(async (track) => {
-          tracksInfo += `${++i}) [${track.name}](${track.url}) | length \`${
-            track.duration
-          }\` \n\n`;
+        videos.forEach((video) => {
+          const durationStr = video.duration > 0 
+            ? formatDuration(video.duration * 1000) 
+            : "Live";
+          tracksInfo += `${++i}) [${video.title}](${video.url}) | length \`${durationStr}\` \n\n`;
           menuOptBuilder.push(
             new StringSelectMenuOptionBuilder({
               label: `Track ${i}`,
-              description: `${track.name}`,
-              value: `${track.url}`,
+              description: video.title.length > 100 ? video.title.substring(0, 97) + "..." : video.title,
+              value: `${video.url}`,
             })
           );
         });
