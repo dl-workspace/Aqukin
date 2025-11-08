@@ -9,6 +9,7 @@ import {
   StringSelectMenuOptionBuilder,
 } from "discord.js";
 import { youtubeService } from "../../services/youtube";
+import logger from "../../middlewares/logger/logger";
 import {
   Command,
   COMMANDS,
@@ -156,10 +157,13 @@ async function processQuery(
           playListDuration += trackDuration;
         });
 
+        const playlistTitle = playlistInfo.title.length > 200 
+          ? playlistInfo.title.substring(0, 197) + "..." 
+          : playlistInfo.title;
+
         const embed = baseEmbed()
           .setTitle(`Playlist`)
-          .setDescription(`[${playlistInfo.title}](${playlistInfo.url})`)
-          .setImage(playlistInfo.videos[0]?.thumbnail || "")
+          .setDescription(`[${playlistTitle}](${playlistInfo.url})`)
           .addFields(
             {
               name: "Requested By",
@@ -174,13 +178,20 @@ async function processQuery(
             { name: "Size", value: `${result.length}`, inline: true }
           );
 
-        interaction.followUp({
+        if (playlistInfo.videos[0]?.thumbnail) {
+          embed.setImage(playlistInfo.videos[0].thumbnail);
+        }
+
+        await interaction.followUp({
           content: statusReply(client, member, index),
           embeds: [embed],
+        }).catch((error) => {
+          logger.error(`Failed to send playlist embed: ${error}`);
         });
       })
       .catch((err) => {
-        interaction.followUp({ content: `${err}` });
+        logger.error(`Failed to get playlist info: ${err}`);
+        interaction.followUp({ content: `Error loading playlist: ${err.message || err}` }).catch(() => {});
       });
   }
   // if the query is a youtube video link
@@ -197,13 +208,16 @@ async function processQuery(
         );
         result.push(track);
 
-        interaction.followUp({
+        await interaction.followUp({
           content: statusReply(client, member, index),
           embeds: [await track.createEmbedThumbnail()],
+        }).catch((error) => {
+          logger.error(`Failed to send video embed: ${error}`);
         });
       })
       .catch((err) => {
-        interaction.followUp({ content: `${err}` });
+        logger.error(`Failed to get video info: ${err}`);
+        interaction.followUp({ content: `Error loading video: ${err.message || err}` }).catch(() => {});
       });
   }
   // else try searching youtube with the given query
