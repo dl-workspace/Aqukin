@@ -204,8 +204,12 @@ export class OpusPlayer implements IGuildPlayer {
               });
             }
           } else {
+            const errorMsg = String(err);
+            const truncatedMsg = errorMsg.length > 1900 
+              ? errorMsg.substring(0, 1900) + "... (error truncated)" 
+              : errorMsg;
             this.textChannel.send({
-              content: String(err),
+              content: truncatedMsg,
             });
           }
         })
@@ -334,7 +338,11 @@ export class OpusPlayer implements IGuildPlayer {
       this.subscription.player.play(this.queue[0].resource);
     } catch (err) {
       logger.error(err);
-      this.textChannel.send({ content: String(err) });
+      const errorMsg = String(err);
+      const truncatedMsg = errorMsg.length > 1900 
+        ? errorMsg.substring(0, 1900) + "... (error truncated)" 
+        : errorMsg;
+      this.textChannel.send({ content: truncatedMsg });
     }
   }
 
