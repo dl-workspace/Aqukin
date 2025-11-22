@@ -87,9 +87,14 @@ export default new Event("interactionCreate", async (interaction) => {
                   });
                 }
               } else {
+                const isForceDisconnect = command.name === COMMANDS.disconnect && 
+                  interaction.options.getBoolean("force") === true &&
+                  interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
+
                 if (
                   mPlayer.subscription.connection.joinConfig.channelId !==
-                  channel.id
+                  channel.id &&
+                  !isForceDisconnect
                 ) {
                   return interaction.reply({
                     content: client.replyMsgErrorAuthor(
