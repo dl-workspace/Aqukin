@@ -1,4 +1,4 @@
-FROM node:23.6.1
+FROM node:25.1.0
 WORKDIR /usr/src/app/aqukin
 COPY . .
 
