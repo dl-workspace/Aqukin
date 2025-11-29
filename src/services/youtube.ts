@@ -54,8 +54,16 @@ class YouTubeService {
    */
   async getBasicInfo(url: string): Promise<YouTubeVideoInfo> {
     try {
-      // Use yt-dlp to get video info in JSON format
-      const info = await this.ytDlp.getInfoAsync(url);
+      let cleanUrl = url;
+      try {
+        const parsedUrl = new URL(url.startsWith('http') ? url : `https://${url}`);
+        if (parsedUrl.searchParams.has('v')) {
+          const videoId = parsedUrl.searchParams.get('v');
+          cleanUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        }
+      } catch {}
+
+      const info = await this.ytDlp.getInfoAsync(cleanUrl);
 
       // Handle playlist vs single video
       if (info._type === "playlist") {
@@ -227,8 +235,39 @@ class YouTubeService {
    * @returns true if valid playlist URL
    */
   validatePlaylistURL(url: string): boolean {
-    const playlistRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(playlist|watch).*(list=[\w-]+)/;
-    return playlistRegex.test(url);
+    try {
+      const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      const parsed = new URL(normalizedUrl);
+      const hostname = parsed.hostname.replace(/^www\./, "").toLowerCase();
+      const allowedHosts = new Set([
+        "youtube.com",
+        "m.youtube.com",
+        "music.youtube.com",
+        "youtu.be",
+      ]);
+
+      if (!allowedHosts.has(hostname)) {
+        return false;
+      }
+
+      if (!parsed.searchParams.get("list")) {
+        return false;
+      }
+
+      const normalizedPath = parsed.pathname.replace(/^\/+/g, "").toLowerCase();
+      const playlistPathPrefixes = [
+        "playlist",
+        "videoseries",
+        "embed/videoseries",
+        "watch_videos",
+      ];
+
+      return playlistPathPrefixes.some((prefix) =>
+        normalizedPath.startsWith(prefix)
+      );
+    } catch {
+      return false;
+    }
   }
 
   async getVersion(): Promise<string> {
