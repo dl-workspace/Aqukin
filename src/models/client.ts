@@ -128,10 +128,12 @@ export class ExtendedClient extends Client {
 
   private async alive(client: ExtendedClient) {
     setInterval(async () => {
-      client.music.forEach(async (mPlayer) => {
+      client.music.forEach(async (mPlayer, guildId) => {
         const { connection } = mPlayer.subscription;
+        const channelId = connection.joinConfig.channelId;
+        
         client.channels
-          .fetch(connection.joinConfig.channelId)
+          .fetch(channelId)
           .then(async (voiceChannel: VoiceChannel) => {
             const memberList = voiceChannel.members.filter(
               (mem) => !mem.user.bot
@@ -141,12 +143,35 @@ export class ExtendedClient extends Client {
               clearTimeout(mPlayer.disconnectTimer);
               mPlayer.disconnect();
               mPlayer.textChannel.send({
-                content: this.replyMsg(`Since there are no listener left`),
+                content: this.replyMsg(`Since there are no listeners left`),
               });
             }
           })
-          .catch((err) => {
-            logger.error(err);
+          .catch(async (err) => {
+            logger.error(`Channel fetch failed for ${channelId} in guild ${guildId}: ${err}`);
+            
+            // Channel likely deleted, clean up the player
+            clearTimeout(mPlayer.disconnectTimer);
+            clearTimeout(mPlayer.destroyTimer);
+            
+            try {
+              connection.destroy();
+            } catch (destroyErr) {
+              logger.error(`Error destroying connection: ${destroyErr}`);
+              // Force cleanup
+              try {
+                mPlayer.subscription.player.stop();
+                mPlayer.queue = [];
+                mPlayer.loopQueue = [];
+                mPlayer.currQueuePage.clear();
+                await mPlayer.deleteStatusMsg();
+                mPlayer.subscription.unsubscribe();
+              } catch (cleanupErr) {
+                logger.error(`Error during force cleanup: ${cleanupErr}`);
+              } finally {
+                client.music.delete(guildId);
+              }
+            }
           });
       });
     }, 560000);
