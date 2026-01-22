@@ -56,7 +56,12 @@ export default new Event("interactionCreate", async (interaction) => {
           mPlayer = client.music.get(interaction.guildId);
           const { channel } = member.voice;
 
-          if (!channel) {
+          // Check for admin force disconnect - bypasses all voice channel checks
+          const isForceDisconnect = command.name === COMMANDS.disconnect && 
+            interaction.options.getBoolean("force") === true &&
+            interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
+
+          if (!channel && !isForceDisconnect) {
             return interaction.reply({
               content: client.replyMsgErrorAuthor(
                 member,
@@ -75,10 +80,10 @@ export default new Event("interactionCreate", async (interaction) => {
                 if (
                   command.name == COMMANDS.play &&
                   mPlayer.subscription.connection.joinConfig.channelId ===
-                    channel.id
+                    channel?.id
                 ) {
                   await mPlayer.reconnect();
-                } else {
+                } else if (!isForceDisconnect) {
                   return interaction.reply({
                     content: client.replyMsgErrorAuthor(
                       member,
@@ -87,11 +92,8 @@ export default new Event("interactionCreate", async (interaction) => {
                   });
                 }
               } else {
-                const isForceDisconnect = command.name === COMMANDS.disconnect && 
-                  interaction.options.getBoolean("force") === true &&
-                  interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
-
                 if (
+                  channel &&
                   mPlayer.subscription.connection.joinConfig.channelId !==
                   channel.id &&
                   !isForceDisconnect
@@ -104,8 +106,8 @@ export default new Event("interactionCreate", async (interaction) => {
                     flags: MessageFlags.Ephemeral,
                   });
                 } else {
-                  if (command.name != COMMANDS.play) {
-                    if (channel.members.size > 2) {
+                  if (command.name != COMMANDS.play && !isForceDisconnect) {
+                    if (channel && channel.members.size > 2) {
                       if (
                         !interaction.memberPermissions.has(
                           PermissionFlagsBits.Administrator

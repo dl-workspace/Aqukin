@@ -18,14 +18,41 @@ export default new Command({
   execute: async ({ client, interaction, args, mPlayer }) => {
     const force = args.getBoolean("force") ?? false;
 
-    if (force && !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.followUp({
-        content: client.replyMsgErrorAuthor(
-          interaction.member,
-          `only administrators can use the force option`
-        ),
-      });
+    if (force) {
+      if (!interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) {
+        return interaction.followUp({
+          content: client.replyMsgErrorAuthor(
+            interaction.member,
+            `only administrators can use the force option`
+          ),
+        });
+      }
+
+      // Force destroy the connection to clean up stuck state
+      try {
+        mPlayer.subscription.connection.destroy();
+        interaction.followUp({
+          content: client.replyMsgAuthor(interaction.member, `force disconnected as requested`),
+        });
+      } catch (err) {
+        // If destroy fails, manually clean up
+        try {
+          mPlayer.subscription.player.stop();
+          mPlayer.queue = [];
+          mPlayer.loopQueue = [];
+          mPlayer.currQueuePage.clear();
+          await mPlayer.deleteStatusMsg();
+          mPlayer.subscription.unsubscribe();
+        } finally {
+          client.music.delete(interaction.guildId);
+        }
+        interaction.followUp({
+          content: client.replyMsgAuthor(interaction.member, `force cleaned up the stuck session`),
+        });
+      }
+      return;
     }
+
     if (await mPlayer.disconnect()) {
       interaction.followUp({
         content: client.replyMsgAuthor(interaction.member, `as requested`),
