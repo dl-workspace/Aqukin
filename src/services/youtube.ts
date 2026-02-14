@@ -1,4 +1,4 @@
-import { YtDlp, type VideoInfo } from "ytdlp-nodejs";
+import { YtDlp, type VideoInfo, type ExecBuilderResult } from "ytdlp-nodejs";
 import { Readable } from "stream";
 import logger from "../middlewares/logger/logger";
 
@@ -128,17 +128,13 @@ class YouTubeService {
         }`
       );
 
-      const childProcess = this.ytDlp.download(url, options);
+      const streamBuilder = this.ytDlp.stream(url)
+        .options(options)
+        .on("error", (error) => {
+          logger.error(`yt-dlp process error: ${error}`);
+        });
 
-      childProcess.on("error", (error) => {
-        logger.error(`yt-dlp process error: ${error}`);
-      });
-
-      childProcess.stderr.on("data", (data) => {
-        logger.error(`yt-dlp stderr: ${data.toString()}`);
-      });
-
-      return childProcess.stdout as Readable;
+      return streamBuilder.getStream() as Readable;
     } catch (error) {
       logger.error(`Failed to create audio stream: ${error}`);
       throw new Error(`Could not create audio stream: ${error.message}`);
@@ -275,8 +271,8 @@ class YouTubeService {
       // Execute yt-dlp with --version flag
       const result = await this.ytDlp.execAsync("--version", {
         printVersion: true,
-      });
-      return result.trim();
+      }) as ExecBuilderResult;
+      return result.stdout.trim();
     } catch (error) {
       return "unknown";
     }

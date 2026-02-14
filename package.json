@@ -21,19 +21,19 @@
     "@discordjs/opus": "^0.10.0",
     "@discordjs/voice": "^0.19.0",
     "@snazzah/davey": "^0.1.9",
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "discord.js": "^14.25.1",
-    "dotenv": "^17.2.3",
+    "dotenv": "^17.3.1",
     "ffmpeg-static": "^5.3.0",
-    "glob": "^13.0.0",
+    "glob": "^13.0.3",
     "redis": "^5.10.0",
     "sodium-native": "^5.0.10",
     "winston": "^3.19.0",
-    "ytdlp-nodejs": "^3.3.9"
+    "ytdlp-nodejs": "^3.4.4"
   },
   "devDependencies": {
     "@types/glob": "^9.0.0",
-    "@types/node": "^25.0.10",
+    "@types/node": "^25.2.3",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
