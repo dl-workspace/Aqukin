@@ -25,8 +25,8 @@
     "discord.js": "^14.25.1",
     "dotenv": "^17.3.1",
     "ffmpeg-static": "^5.3.0",
-    "glob": "^13.0.3",
-    "redis": "^5.10.0",
+    "glob": "^13.0.4",
+    "redis": "^5.11.0",
     "sodium-native": "^5.0.10",
     "winston": "^3.19.0",
     "ytdlp-nodejs": "^3.4.4"
