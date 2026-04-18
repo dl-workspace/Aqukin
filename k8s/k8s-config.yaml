@@ -73,7 +73,7 @@ spec:
               key: LOG_LEVEL
         volumeMounts:
         - name: aqukin-secret-volume
-          mountPath: /usr/src/app/aqukin
+          mountPath: /usr/src/app/aqukin/.env
           readOnly: true
       volumes:
       - name: aqukin-secret-volume
