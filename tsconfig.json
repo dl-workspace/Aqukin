@@ -4,6 +4,7 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "target": "ESNext",
+        "rootDir": "src",
         "outDir": "dist",
         "sourceMap": false,
         "esModuleInterop": true,
@@ -15,6 +16,7 @@
         "resolveJsonModule": true,
         "importHelpers": true,
     },
+    "files": ["environment.d.ts"],
     "include": ["src", "environment.d.ts"],
     "exclude": ["node_modules", "**/*.spec.ts"]
 }
