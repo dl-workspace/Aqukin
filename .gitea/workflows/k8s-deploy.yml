@@ -1,0 +1,25 @@
+name: Kubernetes Deployment
+
+# This is an example showing how to use the k8s-deploy-ssh reusable workflow
+# Copy this to your repository's .gitea/workflows/ directory and customize
+
+on:
+  workflow_run:
+    workflows: ["Docker Build with Auto-Versioning"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy-basic:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    uses: Viescloud-llc/workflows/.gitea/workflows/k8s-deploy-ssh.yml@main
+    with:
+      server_ip: ${{ vars.K8S_MASTER_IPV4 }}
+      k8s_path: './k8s'
+    secrets:
+      ssh_username: ${{ secrets.K8S_MASTER_SSH_USERNAME }}
+      ssh_password: ${{ secrets.K8S_MASTER_SSH_PASSWORD }}
+      secrets_replace: '{{ token }}=${{ secrets.BOT_TOKEN }}

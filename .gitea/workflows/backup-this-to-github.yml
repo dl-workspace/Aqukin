@@ -1,0 +1,28 @@
+name: Backup this Repository to GitHub
+
+on:
+  # Manual trigger - syncs all branches by default
+  workflow_dispatch:
+    inputs:
+      github_repo_url:
+        description: 'GitHub repository URL'
+        required: false
+        default: 'https://github.com/dl-workspace/Aqukin.git'
+
+  # # Scheduled backup - syncs all branches daily at 2 AM
+  # schedule:
+  #   - cron: '0 2 * * *'
+
+  # # On push - syncs only the pushed branch
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  backup-to-github:
+    uses: Viescloud-llc/workflows/.gitea/workflows/backup-to-github.yml@main
+    with:
+      github_repo_url: ${{ inputs.github_repo_url || 'https://github.com/dl-workspace/Aqukin.git' }}
+      # Auto-detects: schedule/manual=all branches, push=current branch only
+    secrets:
+      github_token: ${{ secrets.DEALOUX_GITHUB_TOKEN }}

@@ -1,0 +1,23 @@
+name: Docker Build with Auto-Versioning
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-auto-version:
+    uses: Viescloud-llc/workflows/.gitea/workflows/docker-build-deploy.yml@main
+    with:
+      registry_url: 'docker.io'
+      image_name: 'dealoux/aqukin'
+      auto_tag_versioning: true
+      auto_tag_version_prefix: ''
+      max_auto_tag_minor_version_number: 9
+      max_auto_tag_patches_version_number: 9
+      min_auto_tag_major_version_number: 1
+      tags: 'latest'
+    secrets:
+      registry_username: ${{ secrets.DOCKER_HUB_USERNAME }}
+      registry_password: ${{ secrets.DOCKER_HUB_TOKEN }}

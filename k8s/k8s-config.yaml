@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: Aqukin-deployment
+  namespace: Aqukin
+  labels:
+    app: Aqukin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: Aqukin
+  template:
+    metadata:
+      labels:
+        app: Aqukin
+    spec:
+      containers:
+      - name: Aqukin-deployment
+        image: dealoux/something:latest
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        env:
+        - name: TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: token
+        volumeMounts:
+        - name: Aqukin-secret-volume
+          mountPath: /usr/src/app/aqukin
+          readOnly: true
+      volumes:
+      - name: Aqukin-secret-volume
+        secret:
+          secretName: Aqukin-secret
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: Aqukin-secret
+  namespace: Aqukin
+  labels:
+    app: Aqukin
+type: Opaque
+stringData:
+  token: '{{ token }}'
