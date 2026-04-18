@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: Aqukin-deployment
-  namespace: Aqukin
+  name: aqukin-deployment
+  namespace: aqukin
   labels:
-    app: Aqukin
+    app: aqukin
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: Aqukin
+      app: aqukin
   template:
     metadata:
       labels:
-        app: Aqukin
+        app: aqukin
     spec:
       containers:
-      - name: Aqukin-deployment
+      - name: aqukin-deployment
         image: dealoux/aqukin:latest
         ports:
         - containerPort: 80
@@ -29,56 +29,56 @@ spec:
         - name: BOT_TOKEN
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: BOT_TOKEN
         - name: PUBLIC_KEY
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: PUBLIC_KEY
         - name: APP_ID
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: APP_ID
         - name: REDIS_URI
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: REDIS_URI
         - name: GUILD_ID
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: GUILD_ID
         - name: OWNER_ID
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: OWNER_ID
         - name: INVITE_LINK
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: INVITE_LINK
         - name: LOGGER_URL
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: LOGGER_URL
         - name: LOG_LEVEL
           valueFrom:
             secretKeyRef:
-              name: Aqukin-secret
+              name: aqukin-secret
               key: LOG_LEVEL
         volumeMounts:
-        - name: Aqukin-secret-volume
+        - name: aqukin-secret-volume
           mountPath: /usr/src/app/aqukin
           readOnly: true
       volumes:
-      - name: Aqukin-secret-volume
+      - name: aqukin-secret-volume
         secret:
-          secretName: Aqukin-secret
+          secretName: aqukin-secret
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -89,10 +89,10 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: Aqukin-secret
-  namespace: Aqukin
+  name: aqukin-secret
+  namespace: aqukin
   labels:
-    app: Aqukin
+    app: aqukin
 type: Opaque
 stringData:
   BOT_TOKEN: '{{ bot_token }}'
