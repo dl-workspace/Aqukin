@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: Aqukin-deployment
-        image: dealoux/something:latest
+        image: dealoux/aqukin:latest
         ports:
         - containerPort: 80
         resources:
@@ -26,11 +26,51 @@ spec:
           requests:
             memory: 500Mi
         env:
-        - name: TOKEN
+        - name: BOT_TOKEN
           valueFrom:
             secretKeyRef:
               name: Aqukin-secret
-              key: token
+              key: BOT_TOKEN
+        - name: PUBLIC_KEY
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: PUBLIC_KEY
+        - name: APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: APP_ID
+        - name: REDIS_URI
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: REDIS_URI
+        - name: GUILD_ID
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: GUILD_ID
+        - name: OWNER_ID
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: OWNER_ID
+        - name: INVITE_LINK
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: INVITE_LINK
+        - name: LOGGER_URL
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: LOGGER_URL
+        - name: LOG_LEVEL
+          valueFrom:
+            secretKeyRef:
+              name: Aqukin-secret
+              key: LOG_LEVEL
         volumeMounts:
         - name: Aqukin-secret-volume
           mountPath: /usr/src/app/aqukin
@@ -55,4 +95,12 @@ metadata:
     app: Aqukin
 type: Opaque
 stringData:
-  token: '{{ token }}'
+  BOT_TOKEN: '{{ bot_token }}'
+  PUBLIC_KEY: '{{ public_key }}'
+  APP_ID: '{{ app_id }}'
+  REDIS_URI: '{{ redis_uri }}'
+  GUILD_ID: '{{ guild_id }}'
+  OWNER_ID: '{{ owner_id }}'
+  INVITE_LINK: '{{ invite_link }}'
+  LOGGER_URL: '{{ logger_url }}'
+  LOG_LEVEL: '{{ log_level }}'

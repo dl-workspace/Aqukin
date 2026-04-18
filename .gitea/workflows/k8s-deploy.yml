@@ -22,4 +22,4 @@ jobs:
     secrets:
       ssh_username: ${{ secrets.K8S_MASTER_SSH_USERNAME }}
       ssh_password: ${{ secrets.K8S_MASTER_SSH_PASSWORD }}
-      secrets_replace: '{{ token }}=${{ secrets.BOT_TOKEN }}
+      secrets_replace: '{{ bot_token }}=${{ secrets.BOT_TOKEN }},{{ public_key }}=${{ secrets.PUBLIC_KEY }},{{ app_id }}=${{ secrets.APP_ID }},{{ redis_uri }}=${{ secrets.REDIS_URI }},{{ guild_id }}=${{ secrets.GUILD_ID }},{{ owner_id }}=${{ secrets.OWNER_ID }},{{ invite_link }}=${{ secrets.INVITE_LINK }},{{ logger_url }}=${{ secrets.LOGGER_URL }},{{ log_level }}=${{ secrets.LOG_LEVEL }}'
