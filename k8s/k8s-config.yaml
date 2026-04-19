@@ -25,55 +25,10 @@ spec:
             memory: 2Gi
           requests:
             memory: 500Mi
-        env:
-        - name: BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: BOT_TOKEN
-        - name: PUBLIC_KEY
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: PUBLIC_KEY
-        - name: APP_ID
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: APP_ID
-        - name: REDIS_URI
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: REDIS_URI
-        - name: GUILD_ID
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: GUILD_ID
-        - name: OWNER_ID
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: OWNER_ID
-        - name: INVITE_LINK
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: INVITE_LINK
-        - name: LOGGER_URL
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: LOGGER_URL
-        - name: LOG_LEVEL
-          valueFrom:
-            secretKeyRef:
-              name: aqukin-secret
-              key: LOG_LEVEL
         volumeMounts:
         - name: aqukin-secret-volume
-          mountPath: /usr/src/app/aqukin
+          mountPath: /usr/src/app/aqukin/.env
+          subPath: .env
           readOnly: true
       volumes:
       - name: aqukin-secret-volume
@@ -84,7 +39,6 @@ spec:
     rollingUpdate:
       maxSurge: 25%
       maxUnavailable: 25%
-
 ---
 apiVersion: v1
 kind: Secret
@@ -95,12 +49,13 @@ metadata:
     app: aqukin
 type: Opaque
 stringData:
-  BOT_TOKEN: '{{ bot_token }}'
-  PUBLIC_KEY: '{{ public_key }}'
-  APP_ID: '{{ app_id }}'
-  REDIS_URI: '{{ redis_uri }}'
-  GUILD_ID: '{{ guild_id }}'
-  OWNER_ID: '{{ owner_id }}'
-  INVITE_LINK: '{{ invite_link }}'
-  LOGGER_URL: '{{ logger_url }}'
-  LOG_LEVEL: '{{ log_level }}'
+  .env: |-
+    BOT_TOKEN={{ bot_token }}
+    PUBLIC_KEY={{ public_key }}
+    APP_ID={{ app_id }}
+    REDIS_URI={{ redis_uri }}
+    GUILD_ID={{ guild_id }}
+    OWNER_ID={{ owner_id }}
+    INVITE_LINK={{ invite_link }}
+    LOGGER_URL={{ logger_url }}
+    LOG_LEVEL={{ log_level }}
