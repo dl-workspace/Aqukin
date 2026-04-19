@@ -11,12 +11,18 @@ const transports: TransportStream[] = [
 const graylogUrl = process.env.LOGGER_URL;
 
 if (graylogUrl) {
-  transports.push(
-    new GraylogHTTPTransport({
-      graylogUrl,
-      hostName: "aqukin",
-    })
-  );
+  try {
+    transports.push(
+      new GraylogHTTPTransport({
+        graylogUrl,
+        hostName: "aqukin",
+      })
+    );
+  } catch (error) {
+    console.warn(
+      `Graylog transport failed to initialize: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 } else {
   console.warn(
     "LOGGER_URL is not configured; Graylog transport will be skipped."

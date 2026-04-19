@@ -21,6 +21,14 @@ class GraylogHTTPTransport extends TransportStream {
 
   constructor(options: GraylogTransportOptions) {
     super(options);
+    // Validate URL format to prevent invalid URL errors
+    try {
+      new URL(options.graylogUrl);
+    } catch {
+      throw new Error(
+        `Invalid Graylog URL provided: "${options.graylogUrl}". Ensure LOGGER_URL is a valid absolute URL.`
+      );
+    }
     this.graylogUrl = options.graylogUrl;
     this.hostName = options.hostName || "aqukin";
     this.axiosInstance = axios.create({
