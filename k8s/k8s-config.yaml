@@ -27,7 +27,8 @@ spec:
             memory: 500Mi
         volumeMounts:
         - name: aqukin-secret-volume
-          mountPath: /usr/src/app/aqukin
+          mountPath: /usr/src/app/aqukin/.env
+          subPath: .env
           readOnly: true
       volumes:
       - name: aqukin-secret-volume
