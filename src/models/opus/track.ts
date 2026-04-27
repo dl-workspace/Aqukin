@@ -118,18 +118,21 @@ export class Track implements ITrackData {
       this.requester.guildId,
       this.requester.id
     );
-    return getUserNameMaster(member);
+    return member ? getUserNameMaster(member) : "Unknown requester";
   }
 
   remainingTime() {
+    if (!this.resource) {
+      return 0;
+    }
     return this.resource.playbackDuration - this.resource.silenceRemaining;
   }
 
   getVolume() {
-    return this.resource?.volume.volume;
+    return this.resource?.volume?.volume;
   }
 
   setVolume(value: number) {
-    this.resource?.volume.setVolume(value);
+    this.resource?.volume?.setVolume(value);
   }
 }

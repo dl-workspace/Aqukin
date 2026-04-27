@@ -2,11 +2,12 @@ import { EmbedBuilder, GuildMember } from "discord.js";
 import { client } from "..";
 
 export function baseEmbed() {
+  const avatarUrl = client.user?.displayAvatarURL();
   return new EmbedBuilder()
     .setColor(client.media.embedColour.random())
     .setFooter({
       text: "FREEDOM SMILE (^)o(^)b",
-      iconURL: client.user.displayAvatarURL(),
+      ...(avatarUrl ? { iconURL: avatarUrl } : {}),
     });
 }
 
@@ -64,31 +65,33 @@ export function formatDuration(value: number) {
  * @returns converted number in millisecs or 0
  */
 export function convertInput(value: string) {
-  let total: number;
+  if (!value) return null;
+
+  const token = value.trim().split(":");
+  if (token.length < 1 || token.length > 3) return null;
+  if (!token.every((part) => /^\d+$/.test(part))) return null;
+
   let hours = 0;
   let minutes = 0;
   let seconds = 0;
 
-  if (value) {
-    let token = value.trim().split(":");
-
-    switch (token.length) {
-      case 3:
-        hours = Number(token[0]) * 3600;
-        minutes = Number(token[1]) * 60;
-        seconds = Number(token[2]);
-        break;
-      case 2:
-        minutes = Number(token[0]) * 60;
-        seconds = Number(token[1]);
-        break;
-      case 1:
-        seconds = Number(token[0]);
-        break;
-    }
+  switch (token.length) {
+    case 3:
+      hours = Number(token[0]);
+      minutes = Number(token[1]);
+      seconds = Number(token[2]);
+      if (minutes > 59 || seconds > 59) return null;
+      break;
+    case 2:
+      minutes = Number(token[0]);
+      seconds = Number(token[1]);
+      if (seconds > 59) return null;
+      break;
+    case 1:
+      seconds = Number(token[0]);
+      break;
   }
 
-  total = (hours + minutes + seconds) * 1000;
-  total = total < 0 || isNaN(total) ? 0 : total;
-  return total;
+  const total = (hours * 3600 + minutes * 60 + seconds) * 1000;
+  return total < 0 || isNaN(total) ? null : total;
 }

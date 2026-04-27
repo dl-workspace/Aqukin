@@ -18,6 +18,15 @@ export default new Command({
   ],
 
   execute: async ({ client, interaction, args, mPlayer }) => {
+    if (!mPlayer) {
+      return interaction.followUp({
+        content: client.replyMsgErrorAuthor(
+          interaction.member,
+          `no active player session was found`
+        ),
+      });
+    }
+
     if (mPlayer.queue[0] == undefined) {
       return interaction.followUp({
         content: client.replyMsgErrorAuthor(
@@ -27,7 +36,17 @@ export default new Command({
       });
     }
 
-    const timestamp = convertInput(args.get("timestamp")?.value as string);
+    const rawTimestamp = args.get("timestamp")?.value as string;
+    const timestamp = convertInput(rawTimestamp);
+
+    if (timestamp === null) {
+      return interaction.followUp({
+        content: client.replyMsgErrorAuthor(
+          interaction.member,
+          `please provide a valid timestamp in \`hh:mm:ss\`, \`mm:ss\`, or \`ss\` format`
+        ),
+      });
+    }
 
     if (timestamp >= mPlayer.queue[0].duration) {
       interaction.followUp({
@@ -40,7 +59,8 @@ export default new Command({
       });
     } else {
       mPlayer.queue[0].seek = timestamp;
-      mPlayer.playFromQueue(client);
+      await mPlayer.saveToCache();
+      await mPlayer.playFromQueue(client);
       interaction.followUp({
         content: client.replyMsgAuthor(
           interaction.member,

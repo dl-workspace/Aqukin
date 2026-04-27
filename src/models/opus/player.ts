@@ -34,7 +34,7 @@ export class OpusPlayer implements IGuildPlayer {
   volume: number;
 
   textChannel: GuildTextBasedChannel;
-  subscription: PlayerSubscription;
+  subscription!: PlayerSubscription;
   currQueuePage: Collection<string, number>;
   statusMsg?: Message;
   disconnectTimer?: NodeJS.Timeout;
@@ -44,8 +44,12 @@ export class OpusPlayer implements IGuildPlayer {
     { client, interaction, args }: ExecuteOptions,
     playerOptions?: CreateAudioPlayerOptions
   ) {
+    if (!interaction.guildId || !interaction.channel) {
+      throw new Error("Music player can only be created in a guild text channel");
+    }
+
     this.guildId = interaction.guildId;
-    this.textChannel = interaction.channel;
+    this.textChannel = interaction.channel as GuildTextBasedChannel;
     this.queue = [];
     this.loopQueue = [];
     this.trackLoopTimes = 0;
@@ -107,12 +111,18 @@ export class OpusPlayer implements IGuildPlayer {
     this.trackLoopTimes = doc.trackLoopTimes;
     this.queueLoopTimes = doc.queueLoopTimes;
     this.volume = doc.volume;
-    this.queue = doc.queue.map(
-      (t) => new Track(t.id, t.url, t.title, t.duration, t.requester)
-    );
-    this.loopQueue = doc.loopQueue.map(
-      (t) => new Track(t.id, t.url, t.title, t.duration, t.requester)
-    );
+    this.queue = doc.queue.map((t) => {
+      const track = new Track(t.id, t.url, t.title, t.duration, t.requester);
+      track.seek = t.seek;
+      track.retries = t.retries ?? 0;
+      return track;
+    });
+    this.loopQueue = doc.loopQueue.map((t) => {
+      const track = new Track(t.id, t.url, t.title, t.duration, t.requester);
+      track.seek = t.seek;
+      track.retries = t.retries ?? 0;
+      return track;
+    });
   }
 
   private async initialize(
@@ -121,6 +131,7 @@ export class OpusPlayer implements IGuildPlayer {
     playerOptions?: CreateAudioPlayerOptions
   ) {
     try {
+      const botName = client.user?.username ?? "bot";
       const { member } = interaction;
       const connection = joinVoiceChannel({
         channelId: member.voice.channelId,
@@ -196,7 +207,7 @@ export class OpusPlayer implements IGuildPlayer {
               this.textChannel.send({
                 content:
                   String(err) +
-                  `. ${client.user.username} will restart the current track (attempt ${currentTrack.retries}/${MAX_RETRIES})`,
+                    `. ${botName} will restart the current track (attempt ${currentTrack.retries}/${MAX_RETRIES})`,
               });
             } else {
               this.textChannel.send({
@@ -216,15 +227,23 @@ export class OpusPlayer implements IGuildPlayer {
         .on(AudioPlayerStatus.Playing, async (oldState, newState) => {
           if (!this.queue[0]) return;
           clearTimeout(this.disconnectTimer);
-          if (oldState.status === AudioPlayerStatus.Buffering) {
-            if (this.queue[0].seek !== undefined) {
-              this.queue[0].seek = undefined;
-            } else {
-              this.statusMsg = await this.textChannel.send({
-                content: `${client.user.username} is now playing`,
-                embeds: [await this.playingStatusEmbed()],
-              });
+
+          const wasSeeking = this.queue[0].seek !== undefined;
+          if (wasSeeking) {
+            this.queue[0].seek = undefined;
+            await this.saveToCache();
+          }
+
+          if (oldState.status === AudioPlayerStatus.Buffering && !wasSeeking) {
+            const playingEmbed = await this.playingStatusEmbed();
+            if (!playingEmbed) {
+              return;
             }
+
+            this.statusMsg = await this.textChannel.send({
+              content: `${botName} is now playing`,
+              embeds: [playingEmbed],
+            });
           }
         })
         .on(AudioPlayerStatus.Idle, async (oldState, newState) => {
@@ -248,7 +267,11 @@ export class OpusPlayer implements IGuildPlayer {
           }
         });
 
-      this.subscription = connection.subscribe(player);
+      const subscription = connection.subscribe(player);
+      if (!subscription) {
+        throw new Error("Failed to subscribe audio player to voice connection");
+      }
+      this.subscription = subscription;
       client.music.set(this.guildId, this);
     } catch (error) {
       logger.error(`Error during initialization: ${error}`);
@@ -280,18 +303,22 @@ export class OpusPlayer implements IGuildPlayer {
       this.subscription.connection.joinConfig.channelId = channelId;
     }
     const result = this.subscription.connection.rejoin();
-    this.subscription = this.subscription.connection.subscribe(
+    const subscription = this.subscription.connection.subscribe(
       this.subscription.player
     );
+    if (subscription) {
+      this.subscription = subscription;
+    }
     return result;
   }
 
   async timeOut(client: ExtendedClient) {
+    const botName = client.user?.username ?? "bot";
     clearTimeout(this.disconnectTimer);
     this.disconnectTimer = setTimeout(() => {
       if (this.subscription.player.state.status === AudioPlayerStatus.Idle) {
         this.textChannel.send({
-          content: `Since no track has been played for the past 5 minutes, ${client.user.username} will now leave`,
+          content: `Since no track has been played for the past 5 minutes, ${botName} will now leave`,
         });
         this.disconnect();
       }
@@ -330,12 +357,17 @@ export class OpusPlayer implements IGuildPlayer {
 
   async playFromQueue(client: ExtendedClient) {
     try {
-      const newVolume = this.queue[0].resource
-        ? this.queue[0].resource.volume.volume
+      const track = this.queue[0];
+      if (!track) {
+        return;
+      }
+
+      const newVolume = track.resource?.volume
+        ? track.resource.volume.volume
         : this.volume;
-      this.queue[0].resource = await this.queue[0].createAudioResource();
-      this.queue[0].resource.volume.setVolume(newVolume);
-      this.subscription.player.play(this.queue[0].resource);
+      track.resource = await track.createAudioResource();
+      track.resource.volume?.setVolume(newVolume);
+      this.subscription.player.play(track.resource);
     } catch (err) {
       logger.error(err);
       const errorMsg = String(err);

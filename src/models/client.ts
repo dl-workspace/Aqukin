@@ -1,11 +1,11 @@
 import {
   ApplicationCommandDataResolvable,
+  ChannelType,
   Client,
   ClientEvents,
   Collection,
   Guild,
   GuildMember,
-  VoiceChannel,
 } from "discord.js";
 import { CommandType } from "./command";
 import { glob } from "glob";
@@ -131,10 +131,22 @@ export class ExtendedClient extends Client {
       client.music.forEach(async (mPlayer, guildId) => {
         const { connection } = mPlayer.subscription;
         const channelId = connection.joinConfig.channelId;
+
+        if (!channelId) {
+          logger.error(`No voice channel id in join config for guild ${guildId}`);
+          return;
+        }
         
         client.channels
           .fetch(channelId)
-          .then(async (voiceChannel: VoiceChannel) => {
+          .then(async (voiceChannel) => {
+            if (
+              !voiceChannel ||
+              voiceChannel.type !== ChannelType.GuildVoice
+            ) {
+              return;
+            }
+
             const memberList = voiceChannel.members.filter(
               (mem) => !mem.user.bot
             );
@@ -231,7 +243,9 @@ export class ExtendedClient extends Client {
       const member = await guild.members.fetch(userId);
       return member;
     } catch (error) {
-      console.error(`Error fetching member: ${error.message}`);
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      console.error(`Error fetching member: ${errorMessage}`);
       return null;
     }
   }

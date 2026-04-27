@@ -131,8 +131,20 @@ async function processQuery(
   index: number
 ) {
   const { member } = interaction;
+  const botName = client.user?.username ?? "bot";
   const requester = new TrackRequester(member.id, member.guild.id);
-  const query = args.get(PLAY_OPTIONS.query).value as string;
+  const query = args.get(PLAY_OPTIONS.query)?.value as string | undefined;
+  if (!query) {
+    await interaction
+      .followUp({
+        content: client.replyMsgErrorAuthor(
+          member,
+          `please provide a valid url or search query`
+        ),
+      })
+      .catch(() => {});
+    return [];
+  }
   let result: Track[] = [];
 
   // Check for playlist FIRST (before single video check)
@@ -229,7 +241,7 @@ async function processQuery(
           interaction.followUp({
             content: client.replyMsgErrorAuthor(
               member,
-              `${client.user.username} couldn't find any tracks with the given keywords`
+              `${botName} couldn't find any tracks with the given keywords`
             ),
           });
           return;
@@ -374,9 +386,10 @@ function statusReply(
   requester: GuildMember,
   index: number
 ) {
+  const botName = client.user?.username ?? "bot";
   return client.replyMsgAuthor(
     requester,
-    `${client.user.username} has inserted to position \`${index + 1}\``
+    `${botName} has inserted to position \`${index + 1}\``
   );
 }
 

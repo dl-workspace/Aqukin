@@ -24,8 +24,13 @@ import { TrackRequester } from "../models/opus/trackRequester";
 import logger from "../middlewares/logger/logger";
 
 export default new Event("interactionCreate", async (interaction) => {
+  if (!interaction.inGuild()) {
+    return;
+  }
+
   const member = interaction.member as GuildMember;
-  let mPlayer: OpusPlayer;
+  const botName = client.user?.username ?? "bot";
+  let mPlayer: OpusPlayer | undefined;
 
   if (interaction.isChatInputCommand()) {
     const command = client.commands.get(interaction.commandName);
@@ -37,13 +42,16 @@ export default new Event("interactionCreate", async (interaction) => {
       // if(COMMAND_TAGS.owner && interaction.user.id !== process.env.OWNER_ID) { return; }
 
       // user permission check
-      if (!interaction.memberPermissions.has(command.userPermissions)) {
+      if (
+        command.userPermissions &&
+        !interaction.memberPermissions?.has(command.userPermissions)
+      ) {
         // app owner check
         if (member.id !== process.env.OWNER_ID) {
           return interaction.reply({
             content: client.replyMsgErrorAuthor(
               member,
-              `${client.user.username} sees that you don't have the permission to use this command`
+              `${botName} sees that you don't have the permission to use this command`
             ),
             flags: MessageFlags.Ephemeral,
           });
@@ -59,7 +67,8 @@ export default new Event("interactionCreate", async (interaction) => {
           // Check for admin force disconnect - bypasses all voice channel checks
           const isForceDisconnect = command.name === COMMANDS.disconnect && 
             interaction.options.getBoolean("force") === true &&
-            interaction.memberPermissions.has(PermissionFlagsBits.Administrator);
+            interaction.memberPermissions?.has(PermissionFlagsBits.Administrator) ===
+              true;
 
           if (!channel && !isForceDisconnect) {
             return interaction.reply({
@@ -101,7 +110,7 @@ export default new Event("interactionCreate", async (interaction) => {
                   return interaction.reply({
                     content: client.replyMsgErrorAuthor(
                       member,
-                      `you need to be in the same voice channel with ${client.user.username} to use this command`
+                      `you need to be in the same voice channel with ${botName} to use this command`
                     ),
                     flags: MessageFlags.Ephemeral,
                   });
@@ -109,7 +118,7 @@ export default new Event("interactionCreate", async (interaction) => {
                   if (command.name != COMMANDS.play && !isForceDisconnect) {
                     if (channel && channel.members.size > 2) {
                       if (
-                        !interaction.memberPermissions.has(
+                        !interaction.memberPermissions?.has(
                           PermissionFlagsBits.Administrator
                         )
                       ) {
@@ -121,7 +130,7 @@ export default new Event("interactionCreate", async (interaction) => {
                           return interaction.reply({
                             content: client.replyMsgErrorAuthor(
                               member,
-                              `${client.user.username} would require others permission to execute this command`
+                              `${botName} would require others permission to execute this command`
                             ),
                             flags: MessageFlags.Ephemeral,
                           });
@@ -145,7 +154,7 @@ export default new Event("interactionCreate", async (interaction) => {
               return interaction.reply({
                 content: client.replyMsgErrorAuthor(
                   member,
-                  `${client.user.username} is not currently streaming any audio`
+                  `${botName} is not currently streaming any audio`
                 ),
                 flags: MessageFlags.Ephemeral,
               });
@@ -169,7 +178,7 @@ export default new Event("interactionCreate", async (interaction) => {
         .editReply({
           content: client.replyMsgErrorAuthor(
             member,
-            `${client.user.username} has encounted an error\n${err}`
+            `${botName} has encounted an error\n${err}`
           ),
           embeds: [],
           components: [],
@@ -211,8 +220,8 @@ export default new Event("interactionCreate", async (interaction) => {
             return await interaction.deleteReply().catch((err) => {});
           }
           const requester = new TrackRequester(
-            interaction.member.user.id,
-            interaction.guildId
+            member.id,
+            member.guild.id
           );
           handleSelectTrackInteraction(
             client as ExtendedClient,
@@ -220,7 +229,7 @@ export default new Event("interactionCreate", async (interaction) => {
             member,
             requester,
             interaction,
-            Number(interactionData[2])
+            Number(interactionData[2] || 0)
           );
           break;
       }
@@ -230,7 +239,7 @@ export default new Event("interactionCreate", async (interaction) => {
         .editReply({
           content: client.replyMsgErrorAuthor(
             member,
-            `${client.user.username} has encounted an error\n${err}`
+            `${botName} has encounted an error\n${err}`
           ),
           embeds: [],
           components: [],
@@ -277,26 +286,30 @@ export default new Event("interactionCreate", async (interaction) => {
           break;
 
         case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.start) == 0: {
-          let currPage = mPlayer.currQueuePage.get(member.id);
+          let currPage = mPlayer.currQueuePage.get(member.id) ?? 0;
 
           if (currPage > 0) {
             mPlayer.currQueuePage.set(member.id, 0);
           }
 
+          const embed = await generateQueueEmbed(
+            mPlayer.currQueuePage.get(member.id) ?? 0,
+            mPlayer.queue,
+            client
+          );
+
+          if (!embed) {
+            break;
+          }
+
           interaction.message.edit({
-            embeds: [
-              await generateQueueEmbed(
-                mPlayer.currQueuePage.get(member.id),
-                mPlayer.queue,
-                client
-              ),
-            ],
+            embeds: [embed],
           });
           break;
         }
 
         case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.next) == 0: {
-          let currPage = mPlayer.currQueuePage.get(member.id);
+          let currPage = mPlayer.currQueuePage.get(member.id) ?? 0;
           const ceil =
             Math.ceil((mPlayer.queue.length - 1) / QUEUE_EMBED_PAGE_STEP) - 1;
 
@@ -305,28 +318,38 @@ export default new Event("interactionCreate", async (interaction) => {
             mPlayer.currQueuePage.set(member.id, currPage);
           }
 
+          const embed = await generateQueueEmbed(currPage, mPlayer.queue, client);
+          if (!embed) {
+            break;
+          }
+
           interaction.message.edit({
-            embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)],
+            embeds: [embed],
           });
           break;
         }
 
         case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.back) == 0: {
-          let currPage = mPlayer.currQueuePage.get(member.id);
+          let currPage = mPlayer.currQueuePage.get(member.id) ?? 0;
 
           if (currPage > 0) {
             currPage--;
             mPlayer.currQueuePage.set(member.id, currPage);
           }
 
+          const embed = await generateQueueEmbed(currPage, mPlayer.queue, client);
+          if (!embed) {
+            break;
+          }
+
           interaction.message.edit({
-            embeds: [await generateQueueEmbed(currPage, mPlayer.queue, client)],
+            embeds: [embed],
           });
           break;
         }
 
         case interactionData[1].localeCompare(BUTTON_QUEUE_EMBED.end) == 0: {
-          let currPage = mPlayer.currQueuePage.get(member.id);
+          let currPage = mPlayer.currQueuePage.get(member.id) ?? 0;
           const ceil =
             Math.ceil((mPlayer.queue.length - 1) / QUEUE_EMBED_PAGE_STEP) - 1;
 
@@ -334,8 +357,13 @@ export default new Event("interactionCreate", async (interaction) => {
             mPlayer.currQueuePage.set(member.id, ceil);
           }
 
+          const embed = await generateQueueEmbed(ceil, mPlayer.queue, client);
+          if (!embed) {
+            break;
+          }
+
           interaction.message.edit({
-            embeds: [await generateQueueEmbed(ceil, mPlayer.queue, client)],
+            embeds: [embed],
           });
           break;
         }
@@ -351,7 +379,7 @@ export default new Event("interactionCreate", async (interaction) => {
         .editReply({
           content: client.replyMsgErrorAuthor(
             member,
-            `${client.user.username} has encounted an error\n${err}`
+            `${botName} has encounted an error\n${err}`
           ),
           embeds: [],
           components: [],

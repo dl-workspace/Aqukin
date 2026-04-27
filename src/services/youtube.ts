@@ -27,6 +27,27 @@ class YouTubeService {
     this.ytDlp = new YtDlp();
   }
 
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+  }
+
+  private getVideoIdFromUrl(url: string): string | null {
+    try {
+      const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+      const parsedUrl = new URL(normalizedUrl);
+      const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
+
+      if (hostname === "youtu.be") {
+        const shortId = parsedUrl.pathname.replace(/^\/+/, "").split("/")[0];
+        return shortId || null;
+      }
+
+      return parsedUrl.searchParams.get("v");
+    } catch {
+      return null;
+    }
+  }
+
   /**
    * Get singleton instance
    */
@@ -54,14 +75,10 @@ class YouTubeService {
    */
   async getBasicInfo(url: string): Promise<YouTubeVideoInfo> {
     try {
-      let cleanUrl = url;
-      try {
-        const parsedUrl = new URL(url.startsWith('http') ? url : `https://${url}`);
-        if (parsedUrl.searchParams.has('v')) {
-          const videoId = parsedUrl.searchParams.get('v');
-          cleanUrl = `https://www.youtube.com/watch?v=${videoId}`;
-        }
-      } catch {}
+      const videoId = this.getVideoIdFromUrl(url);
+      const cleanUrl = videoId
+        ? `https://www.youtube.com/watch?v=${videoId}`
+        : url;
 
       const info = await this.ytDlp.getInfoAsync(cleanUrl);
 
@@ -80,7 +97,9 @@ class YouTubeService {
       };
     } catch (error) {
       logger.error(`Failed to get YouTube video info: ${error}`);
-      throw new Error(`Could not extract video information: ${error.message}`);
+      throw new Error(
+        `Could not extract video information: ${this.getErrorMessage(error)}`
+      );
     }
   }
 
@@ -137,7 +156,9 @@ class YouTubeService {
       return streamBuilder.getStream() as Readable;
     } catch (error) {
       logger.error(`Failed to create audio stream: ${error}`);
-      throw new Error(`Could not create audio stream: ${error.message}`);
+      throw new Error(
+        `Could not create audio stream: ${this.getErrorMessage(error)}`
+      );
     }
   }
 
@@ -176,7 +197,9 @@ class YouTubeService {
       return [];
     } catch (error) {
       logger.error(`Failed to search YouTube: ${error}`);
-      throw new Error(`Could not search YouTube: ${error.message}`);
+      throw new Error(
+        `Could not search YouTube: ${this.getErrorMessage(error)}`
+      );
     }
   }
 
@@ -221,7 +244,9 @@ class YouTubeService {
       };
     } catch (error) {
       logger.error(`Failed to get playlist info: ${error}`);
-      throw new Error(`Could not get playlist information: ${error.message}`);
+      throw new Error(
+        `Could not get playlist information: ${this.getErrorMessage(error)}`
+      );
     }
   }
 

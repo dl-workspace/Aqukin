@@ -74,6 +74,16 @@ export default new Command({
   ],
 
   execute: async ({ client, interaction, args, mPlayer }) => {
+    if (!mPlayer) {
+      return interaction.followUp({
+        content: client.replyMsgErrorAuthor(
+          interaction.member,
+          `no active player session was found`
+        ),
+      });
+    }
+
+    const botName = client.user?.username ?? "bot";
     let reply = `**${getUserName(interaction.member)}**-sama, `;
     const times = (args.get(LOOP_OPTIONS.times)?.value as number) || -1;
 
@@ -108,7 +118,7 @@ export default new Command({
             );
 
           await interaction.followUp({
-            content: `${reply} \`to loop the current track\`, ${client.user.username} would need your permission on \`stop looping the current queue\``,
+            content: `${reply} \`to loop the current track\`, ${botName} would need your permission on \`stop looping the current queue\``,
             embeds: [embed],
             components: [actionRow],
           });
@@ -155,7 +165,7 @@ export default new Command({
             );
 
           await interaction.followUp({
-            content: `${reply} \`to loop the current queue\`, ${client.user.username} would need your permission on \`stop looping the current track\``,
+            content: `${reply} \`to loop the current queue\`, ${botName} would need your permission on \`stop looping the current track\``,
             embeds: [embed],
             components: [actionRow],
           });
@@ -180,12 +190,13 @@ export async function stopLoopTrack(
   mPlayer: OpusPlayer,
   interaction: ButtonInteraction | ExtendedInteraction
 ) {
+  const botName = client.user?.username ?? "bot";
   mPlayer.disableTrackRepeat();
   mPlayer.updatePlayingStatusMsg();
   await interaction.editReply({
     content: client.replyMsgAuthor(
       interaction.member as GuildMember,
-      `${client.user.username} will now \`stop looping\` the current \`track\``
+      `${botName} will now \`stop looping\` the current \`track\``
     ),
     embeds: [],
     components: [],
@@ -198,12 +209,13 @@ export async function loopTrack(
   interaction: ButtonInteraction | ExtendedInteraction,
   times: number
 ) {
+  const botName = client.user?.username ?? "bot";
   mPlayer.enableTrackRepeat(times);
   mPlayer.updatePlayingStatusMsg();
   await interaction.editReply({
     content: client.replyMsgAuthor(
       interaction.member as GuildMember,
-      `${client.user.username} will now \`loop\` the current \`track\` ${
+      `${botName} will now \`loop\` the current \`track\` ${
         times == -1 ? "`indefinitely`" : `\`${times} time(s)\``
       }`
     ),
@@ -217,12 +229,13 @@ export async function stopLoopQueue(
   mPlayer: OpusPlayer,
   interaction: ButtonInteraction | ExtendedInteraction
 ) {
+  const botName = client.user?.username ?? "bot";
   mPlayer.disableQueueRepeat();
   mPlayer.updatePlayingStatusMsg();
   await interaction.editReply({
     content: client.replyMsgAuthor(
       interaction.member as GuildMember,
-      `${client.user.username} will now \`stop looping\` the current \`queue\``
+      `${botName} will now \`stop looping\` the current \`queue\``
     ),
     embeds: [],
     components: [],
@@ -235,12 +248,13 @@ export async function loopQueue(
   interaction: ButtonInteraction | ExtendedInteraction,
   times: number
 ) {
+  const botName = client.user?.username ?? "bot";
   mPlayer.enableQueueRepeat(times);
   mPlayer.updatePlayingStatusMsg();
   await interaction.editReply({
     content: client.replyMsgAuthor(
       interaction.member as GuildMember,
-      `${client.user.username} will now \`loop\` the current \`queue\` ${
+      `${botName} will now \`loop\` the current \`queue\` ${
         times == -1 ? "`indefinitely`" : `\`${times} time(s)\``
       }`
     ),
