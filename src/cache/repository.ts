@@ -13,7 +13,7 @@ export async function findPlayer(
   }
   const data = await redis.get(redisKey(guildId));
   if (!data) return null;
-  const serialized = typeof data === "string" ? data : data.toString("utf8");
+  const serialized = typeof data === "string" ? data : data.toString();
   return JSON.parse(serialized) as IGuildPlayer;
 }
 
